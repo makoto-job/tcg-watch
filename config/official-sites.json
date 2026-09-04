@@ -1,0 +1,345 @@
+{
+  "version": 1,
+  "_readme": [
+    "区画F: 公式サイト直接監視の設定ファイル。",
+    "サイトのHTML構造は予告なく変わるので、取得ロジックは全てここに外出ししている。",
+    "取得0件になったサイトは console.warn される（構造変更の早期発見用）。その時はここの正規表現を直す。",
+    "",
+    "type の種類:",
+    "  html         : itemPattern で1件ずつ切り出し、その中から link/title/date を取る（大半のサイト）",
+    "  html-grouped : 日付が見出し側にまとまっているサイト用。itemPattern=日付グループ、entryPattern=その中の各記事",
+    "  json         : バンダイ系の article_list.php のようなJSON API",
+    "  rss          : RSSがあるサイト。src/rss.js の fetchFeed をそのまま使う",
+    "",
+    "パターンの約束:",
+    "  itemPattern  : グローバルで走査する。キャプチャグループがあれば group1、無ければマッチ全体を1件分の断片とする",
+    "  linkPattern  : 断片の中から group1 = href。相対URLは baseUrl で絶対化する",
+    "  titlePattern : 断片の中から group1 = タイトル（タグ除去・エンティティ復号は official.js 側でやる）",
+    "  datePattern  : group1=年 group2=月 group3=日（任意で group4=時 group5=分）。JSTとして解釈する",
+    "  titleFilter  : このパターンにマッチするタイトルだけ採用（雑貨まで流れてくる通販サイト用）",
+    "  charset      : Shift_JIS など UTF-8 以外のサイトで指定"
+  ],
+  "defaults": {
+    "userAgent": "Mozilla/5.0 (compatible; TCGNewsBot/1.0)",
+    "timeoutMs": 15000,
+    "weight": 1.4,
+    "maxItemsPerSite": 40,
+    "retry": 1
+  },
+  "sites": [
+    {
+      "id": "pokemon-card-official",
+      "name": "ポケモンカード公式",
+      "url": "https://www.pokemon-card.com/info/",
+      "baseUrl": "https://www.pokemon-card.com",
+      "ips": [
+        "pokemon"
+      ],
+      "weight": 1.4,
+      "enabled": true,
+      "type": "html",
+      "itemPattern": "<li class=\"List_item\">([\\s\\S]*?)</li>",
+      "linkPattern": "href=\"([^\"]+)\"",
+      "titlePattern": "<div class=\"Calendar_Label[^\"]*\">[^<]*</div>\\s*([\\s\\S]*?)<span class=\"Date",
+      "datePattern": "<span class=\"Date[^\"]*\">\\s*(\\d{4})[./-](\\d{1,2})[./-](\\d{1,2})",
+      "note": "お知らせ一覧 /info/ 。<li class=\"List_item\"> が1件。タイトルは Calendar_Label（カテゴリ）の直後の地の文で、その後ろに <span class=\"Date\">2026.8.21</span> が来る。カテゴリタブごとに同じ記事が重複して出力されるページなので、official.js 側でURL重複を除去している。"
+    },
+    {
+      "id": "onepiece-cardgame-official",
+      "name": "ONE PIECEカードゲーム公式",
+      "url": "https://www.onepiece-cardgame.com/common/templates/api/article_list.php?start=0&limit=30&data=%7B%22category%22%3A%22INFORMATION%22%2C%22subcategory%22%3A%5B%22%22%5D%2C%22is_history%22%3Atrue%7D",
+      "pageUrl": "https://www.onepiece-cardgame.com/news/",
+      "baseUrl": "https://www.onepiece-cardgame.com",
+      "ips": [
+        "onepiece"
+      ],
+      "weight": 1.4,
+      "enabled": true,
+      "type": "json",
+      "listKey": "data.article_list",
+      "titleKey": "title",
+      "dateKey": "dspdate",
+      "pathKey": "path",
+      "linkTemplate": "https://www.onepiece-cardgame.com/news/{path}.html",
+      "datePattern": "(\\d{4})/(\\d{1,2})/(\\d{1,2})(?:\\s+(\\d{1,2}):(\\d{2}))?",
+      "note": "お知らせ一覧はVueで描画されるためHTMLには記事が入っていない。ページ内の news_async.js が叩いている /common/templates/api/article_list.php をそのまま利用する。dspdate は 'YYYY/MM/DD HH:MM'（JST）、path は '01_459' でURLは /news/01_459.html。"
+    },
+    {
+      "id": "yugioh-ocg-official",
+      "name": "遊戯王OCG公式",
+      "url": "https://www.yugioh-card.com/japan/",
+      "baseUrl": "https://www.yugioh-card.com/japan/",
+      "ips": [
+        "yugioh"
+      ],
+      "weight": 1.4,
+      "enabled": true,
+      "type": "html-grouped",
+      "itemPattern": "<div class=\"update\">([\\s\\S]*?)</div>",
+      "datePattern": "<time>\\s*(\\d{4})/(\\d{1,2})/(\\d{1,2})",
+      "entryPattern": "<li class=\"[^\"]*\"><a href=\"([^\"]+)\"[^>]*>([\\s\\S]*?)</a></li>",
+      "note": "トップページの「更新情報」。<div class=\"update\"><time>2026/8/21</time><ul><li><a>…</a></li>…</div> という形で、日付が見出し側にまとまっているため html-grouped を使う。/japan/news/ にも「おしらせ」一覧があるが更新が数か月単位で遅いので、鮮度が高いトップページ側を採る。相対リンクが 'products/imph/' 形式なので baseUrl は /japan/ まで含める。"
+    },
+    {
+      "id": "yugioh-ocg-news",
+      "name": "遊戯王OCG公式",
+      "url": "https://www.yugioh-card.com/japan/news/",
+      "baseUrl": "https://www.yugioh-card.com",
+      "ips": [
+        "yugioh"
+      ],
+      "weight": 1.4,
+      "enabled": true,
+      "type": "html",
+      "itemPattern": "<li class=\"(?:information|notice|campaign)\">(<a[\\s\\S]*?</a>)</li>",
+      "linkPattern": "href=\"([^\"]+)\"",
+      "titlePattern": "\">([\\s\\S]*?)<time>",
+      "datePattern": "<time>\\s*(\\d{4})/(\\d{1,2})/(\\d{1,2})",
+      "note": "おしらせ / 重要なおしらせ / キャンペーン の3リスト。1件は <li class=\"information\"><a href=\"…\" class=\"news marker \">タイトル<time>2026/6/22</time></a></li>。更新頻度は低い（数か月に一度）ので0件warnが出ても異常ではない。revision（テキスト変更）は件数が多くノイズになるので対象外にしている。"
+    },
+    {
+      "id": "duelmasters-official",
+      "name": "デュエル・マスターズ公式",
+      "url": "https://dm.takaratomy.co.jp/news/",
+      "baseUrl": "https://dm.takaratomy.co.jp",
+      "ips": [
+        "duelmasters"
+      ],
+      "weight": 1.4,
+      "enabled": true,
+      "type": "html",
+      "itemPattern": "<a class=\"\\w+Category imgOverBigWrap\"[\\s\\S]*?</a>",
+      "linkPattern": "href=\"([^\"]+)\"",
+      "titlePattern": "<p class=\"tit01\">([\\s\\S]*?)</p>",
+      "datePattern": "<p class=\"day01\">\\s*(\\d{4})[./-](\\d{1,2})[./-](\\d{1,2})",
+      "note": "WordPressサイトで https://dm.takaratomy.co.jp/feed/ にRSSはあるが、<channel>だけで<item>が0件（投稿がフィードに載らない設定）だったのでHTMLを剥がす。1件は <a class=\"eventCategory imgOverBigWrap\" href=\"/eventextra/…/\"> … <p class=\"day01\">2026.08.24</p><p class=\"tit01\">タイトル</p></a>。カテゴリ名がclassの接頭辞（event/products/special/anime…）なので \\w+Category で受ける。"
+    },
+    {
+      "id": "mtg-jp-official",
+      "name": "MTG日本公式",
+      "url": "https://mtg-jp.com/reading/topics/",
+      "baseUrl": "https://mtg-jp.com",
+      "ips": [
+        "mtg"
+      ],
+      "weight": 1.35,
+      "enabled": true,
+      "type": "html",
+      "itemPattern": "<li>(<a href=\"https://mtg-jp\\.com/reading/[\\s\\S]*?</a>)",
+      "linkPattern": "href=\"([^\"]+)\"",
+      "titlePattern": "<span class=\"category[^\"]*\">[^<]*</span></p>\\s*<p>([\\s\\S]*?)</p>",
+      "datePattern": "<span class=\"date\">\\s*(\\d{4})\\.(\\d{1,2})\\.(\\d{1,2})",
+      "note": "mtg-jp.com/news/ と /rss.xml と /feed/ は全てトップページに落ちるソフト404だった（HTMLが返るのでHTTP200に見えるが中身は NOT FOUND ページ）。実在する一覧は「読み物一覧」/reading/topics/ 。1件は <li><a href=\"…\"><div><p><span class=\"date\">2026.8.24</span><span ／【追記】/reading/topics/ はコラム・読み物が大半で、製品ニュースは少数混在。mtg-jp.com には取得可能な製品ニュース一覧が存在しない（/reading/information/ と /reading/publicity/ の一覧はJS描画で記事リンクが取れず、/products/ は発売日の無いカタログ）。そのため titleExclude で連載コラムを除外し、製品告知だけを拾う方針にした。MTGはGoogleニュース検索側でもカバーしているので、ここが0件でも問題ない。",
+      "titleExclude": "岩SHOW|クロタカ|原根健太|石村信太朗|佐藤レイ|市川ユウキ|デイリー・デッキ|Making Magic|マジック開発秘話|Cool Deck|スタンダード・アナライズ|リミテッド講座|リミテッドの極意|参戦記|カバレージ|とことん|統率者ピックアップ|プレイテスト|デッキ）|第\\d+回"
+    },
+    {
+      "id": "gundam-gcg-official",
+      "name": "ガンダムカードゲーム公式",
+      "url": "https://www.gundam-gcg.com/jp/news/",
+      "baseUrl": "https://www.gundam-gcg.com",
+      "ips": [
+        "gundam"
+      ],
+      "weight": 1.4,
+      "enabled": true,
+      "type": "html",
+      "itemPattern": "<div class=\"newsDetail\\b[\\s\\S]*?</a>",
+      "linkPattern": "href=\"([^\"]+)\"",
+      "titlePattern": "<dd class=\"cardLead\">([\\s\\S]*?)</dd>",
+      "datePattern": "<dt class=\"cardDate\">\\s*(\\d{4})[./-](\\d{1,2})[./-](\\d{1,2})",
+      "note": "CONTRACTにあった https://www.gundam-gcg.com/ja/ は404。正しくは言語コードが 'jp' で、ニュース一覧は https://www.gundam-gcg.com/jp/news/ （トップのグローバルナビの「ニュース」から確認）。1件は <div class=\"newsDetail is-pickup\" data-tags=\"event\"><a href=\"…\">…<dt class=\"cardDate\">2026.08.21</dt><dd class=\"cardLead\">タイトル</dd>…</a>。itemPatternはキャプチャなしで </a> までを1件とする。"
+    },
+    {
+      "id": "dragonball-fw-official",
+      "name": "ドラゴンボール フュージョンワールド公式",
+      "url": "https://www.dbs-cardgame.com/fw/jp/",
+      "baseUrl": "https://www.dbs-cardgame.com",
+      "ips": [
+        "dragonball"
+      ],
+      "weight": 1.4,
+      "enabled": true,
+      "type": "html",
+      "itemPattern": "<li class=\"newsItem\">([\\s\\S]*?)</li>",
+      "linkPattern": "href=\"([^\"]+)\"",
+      "titlePattern": "<h3 class=\"newsText\">([\\s\\S]*?)</h3>",
+      "datePattern": "datetime=\"(\\d{4})-(\\d{1,2})-(\\d{1,2})\"",
+      "note": "CONTRACTにあった https://www.dbs-cardgame.com/fw/ja/ は404。/fw/ が言語選択ページで、日本語版は https://www.dbs-cardgame.com/fw/jp/ 。ニュース専用の一覧URL（/fw/jp/news/ や /fw/jp/news/archive/）は404で、日本語トップにそのまま <ul class=\"newsList\"> が入っているのでトップを見る。1件は <li class=\"newsItem\"> … <a href=\"…\" class=\"newsLink\"></a> … <time class=\"newsDate\" datetime=\"2026-08-22\">2026.08.22</time> … <h3 class=\"newsText\">タイトル</h3></li>。"
+    },
+    {
+      "id": "hololive-news",
+      "name": "ホロライブプロダクション",
+      "url": "https://hololivepro.com/news/feed/",
+      "baseUrl": "https://hololivepro.com",
+      "ips": [
+        "hololive"
+      ],
+      "weight": 1.3,
+      "enabled": true,
+      "type": "rss",
+      "note": "WordPressのRSS（CONTRACT記載どおり実在・RSS2.0）。fetchFeed をそのまま使う。ホロライブ全体のニュースなのでカードゲーム以外も混ざる（親側のIPキーワードで絞られる想定）。"
+    },
+    {
+      "id": "p-bandai-lotterysales",
+      "name": "プレミアムバンダイ 抽選販売",
+      "url": "https://p-bandai.jp/hobby/lotterysales/",
+      "baseUrl": "https://p-bandai.jp",
+      "ips": [
+        "lottery"
+      ],
+      "weight": 1.45,
+      "enabled": true,
+      "type": "html",
+      "charset": "shift_jis",
+      "itemPattern": "<div class=\"article_area\">([\\s\\S]*?)<!-- / article_area -->",
+      "linkPattern": "<p class=\"article_title\"><a href=\"([^\"]+)\"",
+      "titlePattern": "<p class=\"article_title\"><a[^>]*>([\\s\\S]*?)</a>",
+      "note": "抽選販売の一次情報そのもの。/lottery/ や /lotterysales/ は404で、正しくはジャンル配下の https://p-bandai.jp/hobby/lotterysales/ （ホビーオンラインショップ＞抽選販売）。/chara/lotterysales/ も200だがバナーだけで商品リストが無い。1件は <div class=\"article_area\"> … <ul class=\"icon\"><li><img alt=\"抽選販売\"></li></ul> … <p class=\"article_title\"><a href=\"/item/item-1000224338/\">【抽選販売】…</a></p>。ページに日付が無いので pubDate は空（呼び出し側が現在時刻を入れる）。文字コードは Shift_JIS（Content-Type ヘッダが charset=Shift_JIS。metaタグは UTF-8 と書いてあるが嘘）。",
+      "titleFilter": "カードゲーム|カードダス|トレーディングカード|トレカ|カードコレクション|カードパック|カードバインダー|バトルスピリッツ|バトスピ|デジモンカード|アイカツ|遊戯王|ポケモンカード|ワンピースカード|フュージョンワールド|TCG|カードスリーブ|カードローダー|プレミアムカード"
+    },
+    {
+      "id": "p-bandai-new",
+      "name": "プレミアムバンダイ 新着商品",
+      "url": "https://p-bandai.jp/new_itemlist/",
+      "baseUrl": "https://p-bandai.jp",
+      "ips": [
+        "lottery"
+      ],
+      "weight": 1.45,
+      "enabled": true,
+      "type": "html",
+      "charset": "shift_jis",
+      "itemPattern": "<li class=\"heightLine-group2[^\"]*\">([\\s\\S]*?)</li>",
+      "linkPattern": "href=\"([^\"]+)\"",
+      "titlePattern": "<p class=\"itemslist_name\">[\\s\\S]*?<span>([\\s\\S]*?)</span>",
+      "titleFilter": "カードゲーム|カードダス|トレーディングカード|トレカ|カードコレクション|カードパック|カードバインダー|バトルスピリッツ|バトスピ|デジモンカード|アイカツ|遊戯王|ポケモンカード|ワンピースカード|フュージョンワールド|TCG|カードスリーブ|カードローダー|プレミアムカード",
+      "note": "受注・抽選の受付開始はここに一番早く出る（記事より速い）。全ジャンルの新着が1日300件ほど流れてくるので titleFilter でカード系だけに絞っている。商品名は一覧上で20字ほどに切られる（'…' が付く）のでタイトルは途中までしか取れない。ページ内の絞り込みはPOSTフォームなのでカテゴリ指定URLは作れない（検索の search.p-bandai.jp はJSチャレンジでbotブロック）。日付は「開始：8/24 8時」形式で年が無いため採らない。"
+    },
+    {
+      "id": "p-bandai-deadline",
+      "name": "プレミアムバンダイ 締切間近",
+      "url": "https://p-bandai.jp/deadline_itemlist/",
+      "baseUrl": "https://p-bandai.jp",
+      "ips": [
+        "lottery"
+      ],
+      "weight": 1.45,
+      "enabled": true,
+      "type": "html",
+      "charset": "shift_jis",
+      "itemPattern": "<li class=\"heightLine-group2[^\"]*\">([\\s\\S]*?)</li>",
+      "linkPattern": "href=\"([^\"]+)\"",
+      "titlePattern": "<p class=\"itemslist_name\">[\\s\\S]*?<span>([\\s\\S]*?)</span>",
+      "titleFilter": "カードゲーム|カードダス|トレーディングカード|トレカ|カードコレクション|カードパック|カードバインダー|バトルスピリッツ|バトスピ|デジモンカード|アイカツ|遊戯王|ポケモンカード|ワンピースカード|フュージョンワールド|TCG|カードスリーブ|カードローダー|プレミアムカード",
+      "note": "締切間近の受注/抽選一覧。「間に合わせる」目的に直結する。構造は new_itemlist と同じで、締切は <input class=\"TimerEnd\" value=\"2026/08/24 23:59:59\"> に入っている（deadline への転記は区画Gの担当なのでここでは取らない）。"
+    },
+    {
+      "id": "pokemoncenter-online",
+      "name": "ポケモンセンターオンライン",
+      "url": "https://www.pokemoncenter-online.com/",
+      "baseUrl": "https://www.pokemoncenter-online.com",
+      "ips": [
+        "pokemon",
+        "lottery"
+      ],
+      "weight": 1.45,
+      "enabled": false,
+      "type": "html",
+      "itemPattern": "<li class=\"item\">([\\s\\S]*?)</li>",
+      "linkPattern": "href=\"([^\"]+)\"",
+      "titlePattern": "<p class=\"name\">([\\s\\S]*?)</p>",
+      "note": "【enabled:false の理由】botブロック。素のfetch/curlは302で振り分けられた先でJavaScriptチャレンジ（Bot Manager）が返り、商品HTMLが取得できない。CONTRACTの指示どおり回避は試みない。ヘッドレスブラウザやUA偽装は規約・負荷の両面で避けるべきなので、ポケセン系の抽選はニュース記事側（区画A）とプレミアムバンダイ側で拾う。itemPattern等は将来公式APIやRSSが用意された時のための仮置きで、未検証。"
+    },
+    {
+      "id": "digimon-card-official",
+      "name": "デジモンカードゲーム公式",
+      "url": "https://digimoncard.com/",
+      "baseUrl": "https://digimoncard.com",
+      "ips": [
+        "digimon"
+      ],
+      "weight": 1.4,
+      "enabled": true,
+      "type": "html",
+      "charset": "utf-8",
+      "itemPattern": "<li class=\"[^\"]*\">\\s*<a href=\"[^\"]*\"[^>]*>\\s*<dl>[\\s\\S]*?</dl>\\s*</a>\\s*</li>",
+      "linkPattern": "<a href=\"([^\"]+)\"",
+      "titlePattern": "<dd>\\s*<p>([\\s\\S]*?)</p>",
+      "datePattern": "<span>(\\d{4})\\.(\\d{1,2})\\.(\\d{1,2})</span>",
+      "note": "トップページの infoCol topics がニュース一覧。/news/ は個別記事へリダイレクトするので使えない。RSSなし。"
+    },
+    {
+      "id": "battlespirits-official",
+      "name": "バトルスピリッツ公式",
+      "url": "https://www.battlespirits.com/news/",
+      "baseUrl": "https://www.battlespirits.com",
+      "ips": [
+        "battlespirits"
+      ],
+      "weight": 1.4,
+      "enabled": true,
+      "type": "html",
+      "charset": "utf-8",
+      "itemPattern": "<li class=\"newsListItem[^\"]*\"[^>]*>\\s*<a href=\"[^\"]+\"[\\s\\S]*?</dl>\\s*</a>\\s*</li>",
+      "linkPattern": "<a href=\"([^\"]+)\"",
+      "titlePattern": "<dd class=\"title\"><span[^>]*>([\\s\\S]*?)</span>",
+      "datePattern": "<dt class=\"date\">(\\d{4})\\.(\\d{1,2})\\.(\\d{1,2})</dt>",
+      "note": "ニュース一覧は /news/。トップページはナビの抜粋2件しか出ないので使えない。RSSなし。"
+    },
+    {
+      "id": "unionarena-official",
+      "name": "ユニオンアリーナ公式",
+      "url": "https://www.unionarena-tcg.com/jp/news/",
+      "baseUrl": "https://www.unionarena-tcg.com",
+      "ips": [
+        "unionarena"
+      ],
+      "weight": 1.4,
+      "enabled": true,
+      "type": "html",
+      "charset": "utf-8",
+      "itemPattern": "<li class=\"newsDetail[^\"]*\"[^>]*>([\\s\\S]*?)</li>",
+      "linkPattern": "href=\"([^\"]+)\"",
+      "titlePattern": "<span class=\"js_newsTit\">([\\s\\S]*?)</span>",
+      "datePattern": "<dd class=\"newsDate\">\\s*(\\d{4})\\.(\\d{1,2})\\.(\\d{1,2})",
+      "titleExclude": "ギャラリー|Q&A|大会入賞デッキ|タイトル別おすすめデッキ|交流会|メタロビ|ユニチケゲットバトル|マッチングバトル|物販情報|記念品交換|\\[終了\\]|ユニオンレア争奪バトル|3on3|ONE BATTLE CUP|カードリスト|パラレルカード",
+      "note": "バンダイのクロスIP TCG『UNION ARENA』。ハンターハンター・ジョジョ・ウマ娘等がここに参戦しているのに、当botはIPキーが無く丸ごと取りこぼしていた。ニュース一覧 /jp/news/ は全履歴1402件が1枚のHTMLに入っている（約900KB）。1件は <li class=\"newsDetail\" data-tags=\"products,BLC\"><a href=\"…\"><dt class=\"newsTit\"><span class=\"js_newsTit\">タイトル</span></dt>…<dd class=\"newsDate\">2026.08.28</dd></li>。日付降順に並んでおり、下の方に同じ構造の <li class=\"newsDetail swiper-slide\">（ピックアップの再掲）が301件混ざるが maxItemsPerSite=40 の手前には出てこない。/common/templates/api/article_list.php（ワンピカードで使っているバンダイ共通API）は404でこのサイトには無い。titleExclude は毎週出る定型イベント告知・ギャラリー更新・Q&A更新を落とすため（これを入れないと商品情報が埋もれる）。robots.txt は404＝制限なし。"
+    },
+    {
+      "id": "hololive-ocg-official",
+      "name": "ホロライブOCG公式",
+      "url": "https://hololive-official-cardgame.com/news/",
+      "baseUrl": "https://hololive-official-cardgame.com",
+      "ips": [
+        "hololive"
+      ],
+      "weight": 1.4,
+      "enabled": true,
+      "type": "html",
+      "charset": "utf-8",
+      "itemPattern": "<li >(\\s*<a href=\"[^\"]+\"[\\s\\S]*?)</li>",
+      "linkPattern": "href=\"([^\"]+)\"",
+      "titlePattern": "<p class=\"text\">([\\s\\S]*?)</p>",
+      "datePattern": "<time>\\s*(\\d{4})\\.(\\d{1,2})\\.(\\d{1,2})",
+      "note": "ホロライブOCG（ホロカ）専用の公式サイト。既存の hololive-news は hololivepro.com のプロダクション全体RSSでカードゲーム以外が大半なので、カード専用のこちらを足した。WordPressだが /feed/ は <item> 0件（デュエマ公式と同じ、投稿がフィードに載らない設定）なのでHTMLを剥がす。1件は <li ><a href=\"…\"><time>2026.08.25</time>…<p class=\"text\">タイトル</p></a></li>。一覧は8件前後と少ない。robots.txt は /wp-admin/ のみ Disallow で /news/ は許可。"
+    },
+    {
+      "id": "naruto-cardgame-official",
+      "name": "NARUTOカードゲーム公式",
+      "url": "https://www.naruto-cardgame.com/jp/news/",
+      "baseUrl": "https://www.naruto-cardgame.com",
+      "ips": [
+        "newtcg"
+      ],
+      "weight": 1.4,
+      "enabled": true,
+      "type": "html",
+      "charset": "utf-8",
+      "itemPattern": "<li class=\"newsListItem[^\"]*\">([\\s\\S]*?)</li>",
+      "linkPattern": "href=\"([^\"]+)\"",
+      "titlePattern": "<dt class=\"cardTitle\">([\\s\\S]*?)</dt>",
+      "datePattern": "<time class=\"date\" datetime=\"(\\d{4})-(\\d{1,2})-(\\d{1,2})\"",
+      "note": "バンダイの新作TCG『NARUTOカードゲーム』。carddass.com の BANDAI CARD GAMES ポータル（https://www.carddass.com/bcg/jp/）のタイトル一覧から発見した。まさに『第1弾がこれから出る新規タイトル』で、当botが拾いたかった対象そのもの。/jp/news/ は /jp/news/article-list.php にリダイレクトされる（curl -L で追える）。1件は <li class=\"newsListItem card\"><a class=\"cardBox\" href=\"…\"><dt class=\"cardTitle\">タイトル</dt>…<time class=\"date\" datetime=\"2026-07-29\">…</time></li>。2026-09時点で記事4件と少なく、maxAgeHours内は0件になることが多い（0件warnは異常ではない）。robots.txt は404＝制限なし。"
+    }
+  ]
+}

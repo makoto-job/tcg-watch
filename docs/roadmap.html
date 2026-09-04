@@ -1,0 +1,444 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TCGウォッチ ロードマップ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --paper:#FAF9F6; --surface:#FFFFFF; --sunk:#F2F0EA;
+  --ink:#1A1A17; --ink-soft:#5C5B54; --ink-faint:#8C8A80;
+  --rule:#E4E1D8;
+  --accent:#0F6E62; --accent-soft:#E3F0ED;
+  --money:#A05C0A; --money-soft:#FBF0DE;
+  --warn:#A3271F; --warn-soft:#FBE9E7;
+  --on-accent:#FFFFFF;
+  --p1:#0F6E62; --p2:#1E5F94; --p3:#5B4A9E; --p4:#A05C0A; --p5:#8A3A6B;
+  --shadow:0 1px 2px rgba(26,26,23,.05), 0 10px 28px rgba(26,26,23,.06);
+  --disp:"Zen Maru Gothic","Hiragino Maru Gothic ProN",-apple-system,sans-serif;
+  --sans:"Noto Sans JP",-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#131412; --surface:#1D1E1A; --sunk:#242520;
+    --ink:#EDEBE3; --ink-soft:#A8A69C; --ink-faint:#7C7A71;
+    --rule:#31322C;
+    --accent:#4FBFAE; --accent-soft:#17302C;
+    --money:#E0A44A; --money-soft:#302514;
+    --warn:#F08379; --warn-soft:#331A18;
+    --on-accent:#10221F;
+    --p1:#4FBFAE; --p2:#63A6E0; --p3:#A192E8; --p4:#E0A44A; --p5:#DB8ABB;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 28px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131412; --surface:#1D1E1A; --sunk:#242520;
+  --ink:#EDEBE3; --ink-soft:#A8A69C; --ink-faint:#7C7A71;
+  --rule:#31322C;
+  --accent:#4FBFAE; --accent-soft:#17302C;
+  --money:#E0A44A; --money-soft:#302514;
+  --warn:#F08379; --warn-soft:#331A18;
+  --on-accent:#10221F;
+  --p1:#4FBFAE; --p2:#63A6E0; --p3:#A192E8; --p4:#E0A44A; --p5:#DB8ABB;
+  --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 28px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.wrap{max-width:880px;margin:0 auto;padding:56px 20px 110px;display:flex;flex-direction:column;gap:64px}
+h1,h2,h3{font-family:var(--disp);letter-spacing:.005em}
+a{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+
+/* 見出し */
+.top{display:flex;flex-direction:column;gap:16px}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint)}
+h1{margin:0;font-size:clamp(30px,6vw,46px);font-weight:700;line-height:1.3;text-wrap:balance}
+.lede{margin:0;font-size:17px;color:var(--ink-soft);max-width:60ch}
+
+/* 結論ボックス */
+.verdict{background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:26px 28px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow)}
+.verdict h2{margin:0;font-size:20px;color:var(--accent)}
+.verdict p{margin:0}
+.verdict .big{font-size:19px;font-weight:700;line-height:1.7}
+
+section{display:flex;flex-direction:column;gap:22px}
+.sec-h{display:flex;align-items:baseline;gap:14px;border-bottom:2px solid var(--rule);padding-bottom:12px}
+.sec-h h2{margin:0;font-size:23px;font-weight:700}
+.sec-h .sub{font-size:13px;color:var(--ink-faint);font-family:var(--mono)}
+p{margin:0}
+.body-p{max-width:62ch}
+
+/* 表 */
+.tw{overflow-x:auto;border:1px solid var(--rule);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:440px}
+th,td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--rule);font-size:15px}
+th{background:var(--sunk);font-weight:700;font-size:13px;letter-spacing:.03em;color:var(--ink-soft);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.yen{color:var(--money);font-weight:600}
+.hl td{background:var(--money-soft)}
+
+/* フェーズ */
+.phases{display:flex;flex-direction:column;gap:0}
+.ph{display:grid;grid-template-columns:56px 1fr;gap:20px;position:relative;padding-bottom:30px}
+.ph:last-child{padding-bottom:0}
+.ph::before{content:"";position:absolute;left:27px;top:52px;bottom:0;width:2px;background:var(--rule)}
+.ph:last-child::before{display:none}
+.ph__n{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:19px;font-weight:600;color:var(--on-accent);position:relative;z-index:1}
+.ph--1 .ph__n{background:var(--p1)} .ph--2 .ph__n{background:var(--p2)} .ph--3 .ph__n{background:var(--p3)}
+.ph--4 .ph__n{background:var(--p4)} .ph--5 .ph__n{background:var(--p5)}
+.ph__card{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:22px 24px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow);min-width:0}
+.ph__head{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.ph__title{margin:0;font-size:20px;font-weight:700}
+.ph__when{font-family:var(--mono);font-size:12.5px;color:var(--ink-faint);white-space:nowrap}
+.ph__goal{font-size:15px;color:var(--ink-soft)}
+ul{margin:0;padding-left:1.25em;display:flex;flex-direction:column;gap:7px}
+li{font-size:15.5px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.fact{background:var(--sunk);padding:12px 14px;display:flex;flex-direction:column;gap:1px}
+.fact dt{font-size:11.5px;color:var(--ink-faint)}
+.fact dd{margin:0;font-family:var(--mono);font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.fact dd.money{color:var(--money)}
+
+/* 注記 */
+.note{border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0;padding:16px 20px;font-size:15px}
+.note strong{color:var(--accent)}
+.caution{border-left:4px solid var(--warn);background:var(--warn-soft);border-radius:0 8px 8px 0;padding:16px 20px;font-size:15px}
+.caution strong{color:var(--warn)}
+.pill{display:inline-block;font-size:12px;font-family:var(--mono);padding:2px 9px;border-radius:20px;background:var(--accent);color:var(--on-accent);vertical-align:middle}
+
+/* 例え */
+.analogy{background:var(--sunk);border-radius:10px;padding:18px 22px;font-size:15.5px;color:var(--ink-soft)}
+.analogy b{color:var(--ink)}
+
+.foot{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);text-align:center;border-top:1px solid var(--rule);padding-top:22px}
+@media (max-width:560px){
+  .ph{grid-template-columns:42px 1fr;gap:14px}
+  .ph::before{left:20px;top:44px}
+  .ph__n{width:42px;height:42px;font-size:16px}
+  .ph__card{padding:18px}
+}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <span class="kicker">Roadmap</span>
+  <h1>カードゲーム抽選アプリを、<br>どう育てて、いくら稼ぐか</h1>
+  <p class="lede">お金・時間・順番を、正直な数字で整理しました。盛っていません。うまくいかない可能性も書いています。</p>
+</header>
+
+<div class="verdict">
+  <h2>さいしょに結論</h2>
+  <p class="big">これは「1年で月5〜6万円」を目指す仕事です。<br>いきなり大きく儲かる話ではありません。</p>
+  <p>ただし<b>元手がほぼゼロ</b>（月70円〜）なので、失敗しても失うのはお金ではなく時間だけです。そして本当のチャンスは、同じ仕組みを<b>スニーカーやフィギュアの抽選にも横展開</b>できるところにあります。そこまで行けば桁が変わります。</p>
+</div>
+
+<section>
+  <div class="sec-h"><h2>そもそも、どうやってお金になるの？</h2><span class="sub">how it earns</span></div>
+
+  <div class="analogy">
+    <b>たとえるなら「お店の案内係」です。</b><br>
+    あなたはカードを売りません。「あの店で今、抽選やってるよ」と教えてあげます。教えてもらった人がその店で買うと、<b>お店から少しだけお礼のお金がもらえます</b>。これがアフィリエイトです。
+  </div>
+
+  <div class="tw"><table>
+    <thead><tr><th>お金の入り方</th><th>しくみ</th><th class="num">1件あたり</th></tr></thead>
+    <tbody>
+      <tr><td><b>アフィリエイト</b><br><span style="color:var(--ink-soft);font-size:13.5px">いちばん本命</span></td><td>アプリのリンクから買ってもらうとお礼がもらえる</td><td class="num yen">150〜600円</td></tr>
+      <tr><td>広告</td><td>アプリに広告を置く</td><td class="num yen">1000回見られて200円</td></tr>
+      <tr><td>有料の早出し通知</td><td>「抽選が始まる前に教える」を月額にする</td><td class="num yen">300円/月・人</td></tr>
+      <tr><td>お店とのタイアップ</td><td>カードショップに宣伝してもらう</td><td class="num">規模が出てから</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="caution">
+    <strong>ここは要注意。</strong> 抽選は「応募」であって「買った」ではありません。<b>当選して、実際に買われて、はじめてお礼のお金が発生します。</b> だから「応募数」ではなく「当選して買った人の数」が売上になります。予約や通常販売のほうが、実はお金になりやすいです。
+  </div>
+
+  <h3 style="margin:14px 0 0;font-size:19px">では「月20万円」の中身は？</h3>
+  <p class="body-p">フェーズ5（フォロワー2〜3万・アプリ利用者5,000人）を分解すると、こうなります。</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>収入源</th><th class="num">月額</th><th class="num">割合</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td><b>アフィリエイト</b></td><td class="num yen">約8.6万円</td><td class="num">45%</td></tr>
+      <tr class="hl"><td><b>有料プラン（月額課金）</b></td><td class="num yen">4.5〜7.5万円</td><td class="num">30%</td></tr>
+      <tr><td>タイアップ広告</td><td class="num yen">約3万円</td><td class="num">15%</td></tr>
+      <tr><td>広告（AdSense）</td><td class="num yen">約8千円</td><td class="num">5%</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="caution">
+    <strong>広告では稼げません。ここは誤解しやすいところです。</strong><br>
+    日本のディスプレイ広告は<b>1,000回見られて約200円</b>。利用者5,000人×月8ページ＝4万PVでも<b>8,000円</b>にしかなりません。広告で20万円稼ぐには<b>月100万PV</b>が必要で、この規模では届きません。<br>
+    <b>Xのインプレッション収益も同様に期待できません</b>（直近3ヶ月で数百万インプレッションという条件があり、桁が足りません）。
+  </div>
+
+  <div class="note">
+    <strong>本当の主力は、アフィリエイトと月額課金です。</strong><br>
+    つまりこれは「広告で稼ぐメディア」ではなく、<b>「買いたい人を店につなぐ案内所＋月額サービス」</b>です。<br>
+    だから大事なのは<b>PV数ではなく「買う気がある人が何人いるか」</b>。1万人の暇つぶし読者より、500人の「今すぐ買いたい人」のほうが稼ぎます。
+  </div>
+
+  <div class="analogy">
+    <b>アフィリエイトの計算根拠</b><br>
+    利用者5,000人 → クリック8,000回 → 実際に買う人3%＝240件 → 平均単価12,000円 × 報酬率3% ＝ <b>86,400円/月</b><br><br>
+    横展開で伸びるのはここです。TCGのBOXは5,000〜20,000円ですが、<b>スニーカーは15,000〜30,000円、フィギュアも1万円超</b>。同じクリック数でも売上が跳ねます。
+  </div>
+
+  <div class="caution">
+    <strong>法律上の必須事項。</strong> 2023年10月からステマ規制（景品表示法）が施行されており、アフィリエイトリンクには<b>「広告」「PR」の表示が義務</b>です。表示が無いと法令違反になります。実装時に必ず入れます。
+  </div>
+</section>
+
+<section>
+  <div class="sec-h"><h2>どれくらいの規模になりそう？</h2><span class="sub">honest numbers</span></div>
+  <p class="body-p">フォロワーが増えると、アプリを使う人が増え、買う人が増えます。仮の数字ですが、こんなイメージです。</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>時期</th><th class="num">フォロワー</th><th class="num">アプリ利用者</th><th class="num">月の売上</th></tr></thead>
+    <tbody>
+      <tr><td>3ヶ月後</td><td class="num">300〜1,000</td><td class="num">50〜100人</td><td class="num yen">ほぼ0円</td></tr>
+      <tr><td>6ヶ月後</td><td class="num">1,000〜3,000</td><td class="num">200〜300人</td><td class="num yen">約1万円</td></tr>
+      <tr class="hl"><td><b>1年後</b></td><td class="num">5,000〜10,000</td><td class="num">1,000〜1,500人</td><td class="num yen"><b>約6.5万円</b></td></tr>
+      <tr><td>2年後（横展開すれば）</td><td class="num">2〜3万</td><td class="num">5,000人〜</td><td class="num yen">20万円〜</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="caution">
+    <strong>正直に言うと、これは「うまくいった場合」です。</strong> 同じことをやっている人はすでにいます（実際、今日集めたニュースの中に「ポケカ抽選ナビ」という競合サービスの開店告知が入っていました）。<b>勝てなければフォロワー数百人で止まります。</b> 勝負どころは1つだけ、<b>「誰よりも早いこと」</b>です。
+  </div>
+</section>
+
+<section>
+  <div class="sec-h"><h2>かかるお金</h2><span class="sub">cost</span></div>
+
+  <div class="tw"><table>
+    <thead><tr><th>項目</th><th>内容</th><th class="num">月あたり</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td><b>X（Twitter）の利用料</b></td><td>アプリ誘導モード（1日1投稿・リンクなし）</td><td class="num yen"><b>約70円</b></td></tr>
+      <tr><td>（参考）今の設計のまま</td><td>1日4投稿・うち3つにリンクあり</td><td class="num yen">約2,800円</td></tr>
+      <tr><td>アプリの置き場所</td><td>GitHub Pages</td><td class="num">0円</td></tr>
+      <tr><td>情報あつめ</td><td>公式サイト・ニュースの巡回</td><td class="num">0円</td></tr>
+      <tr><td>独自ドメイン（任意）</td><td>覚えやすい名前にしたい場合</td><td class="num yen">約125円</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note">
+    <strong>リンクを貼ると13倍高くなります。</strong> Xは2026年2月から「1投稿15円、ただしリンクを含むと200円」という料金になりました。だから<b>Xには結論だけ書いて、リンクはアプリに置く</b>のが正解です。月2,800円が月70円になります。
+  </div>
+
+  <div class="analogy">
+    <b>本当のコストはお金ではなく「時間」です。</b><br>
+    毎月2〜5時間くらい。何をするかというと、<b>公式サイトの作りが変わったときの直し</b>です。相手の都合で急に情報が取れなくなるので、そこだけは人の手が要ります。
+  </div>
+</section>
+
+<section>
+  <div class="sec-h"><h2>どうやって届けるか</h2><span class="sub">the install problem</span></div>
+
+  <p class="body-p">「ストアを通さないアプリを入れてもらえるのか？」という問題があります。<b>結論から言うと、入れてもらえません。</b>だから<b>インストールを要らなくします。</b></p>
+
+  <div class="tw"><table>
+    <thead><tr><th>　</th><th>Android</th><th>iPhone</th></tr></thead>
+    <tbody>
+      <tr><td>インストールのボタン</td><td>ちゃんと出る</td><td class="yen"><b>出ない</b></td></tr>
+      <tr><td>手順</td><td>1タップ</td><td>Safariで開く→共有→ホーム画面に追加</td></tr>
+      <tr><td>他のブラウザ</td><td>—</td><td class="yen"><b>Chromeでは不可能</b></td></tr>
+    </tbody>
+  </table></div>
+
+  <p class="body-p">Appleは意図的にこの導線を目立たせていません。<b>日本はiPhone比率が高い</b>ので、他の国より深刻です。</p>
+
+  <div class="note">
+    <strong>そもそも、何のためにインストールが必要なのでしょう？</strong><br>
+    答えは1つだけ、<b>通知を送るため</b>です。それ以外は、ただのWebページで全く同じことができます。<br>
+    つまり目的は「インストールさせること」ではなく<b>「締切を知らせること」</b>。だったら、みんながすでに持っているアプリを使えばいい。
+  </div>
+
+  <h3 style="margin:14px 0 0;font-size:19px">インストールを要求しない4層構造</h3>
+
+  <div class="tw"><table>
+    <thead><tr><th class="num">層</th><th>手段</th><th>インストール</th><th>届く相手</th></tr></thead>
+    <tbody>
+      <tr><td class="num">0</td><td>Xの投稿</td><td>不要</td><td>フォロワー全員</td></tr>
+      <tr><td class="num">1</td><td>Webページ</td><td>不要</td><td>リンクを押した人全員</td></tr>
+      <tr class="hl"><td class="num">2</td><td><b>LINE公式アカウント</b></td><td><b>不要</b></td><td>友だち追加した人</td></tr>
+      <tr><td class="num">3</td><td>ホーム画面に追加</td><td>必要</td><td>ヘビーユーザーのみ</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="analogy">
+    <b>鍵は層2のLINEです。</b><br>
+    日本人のほぼ全員がLINEを持っています。<b>友だち追加はワンタップ、インストール不要で、プッシュ通知が届きます。</b> iPhoneのホーム画面追加問題を丸ごと回避できます。
+  </div>
+
+  <div class="tw"><table>
+    <thead><tr><th>LINEのプラン</th><th class="num">送れる数</th><th class="num">月額</th></tr></thead>
+    <tbody>
+      <tr><td>無料プラン</td><td class="num">200通</td><td class="num">0円</td></tr>
+      <tr><td>ライトプラン</td><td class="num">5,000通</td><td class="num">数千円</td></tr>
+      <tr><td>スタンダードプラン</td><td class="num">従量課金あり</td><td class="num yen">15,000円</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="caution">
+    <strong>LINEは使い方を間違えると破産します。</strong> <b>1,000人に一斉送信すると1,000通</b>消費します。毎日の情報をLINEで流してはいけません。<br><br>
+    <b>正しい使い分け</b><br>
+    ・毎日の情報 → X と Web（無料）<br>
+    ・<b>締切が迫った緊急のものだけ</b> → LINE<br>
+    ・さらに<b>セグメント配信</b>で「ポケカ希望の人だけ」に送れば通数を大幅に減らせます
+  </div>
+
+  <div class="note">
+    <strong>いちばん大事な実装ルール：インストールを最初に頼まないこと。</strong><br><br>
+    ❌ 開いた瞬間に「ホーム画面に追加してください」<br>
+    　　→ まだ何の価値も受け取っていないので、怪しいと思われる<br><br>
+    ⭕ まず普通にWebページとして使ってもらう → 実際に抽選ページへ飛べて役に立った → <b>そのタイミングで初めて</b>「締切を通知します。LINEで受け取りますか？」<br><br>
+    言葉選びも大事です。「アプリをダウンロード」と言うと警戒されます。実際にはダウンロードではなく<b>ブックマークを置くだけ</b>なので、<b>「ホーム画面に置く」</b>と言うだけで抵抗感が変わります。
+  </div>
+
+  <div class="caution">
+    <strong>ストアアプリを今つくらない理由。</strong><br>
+    ① Appleの審査ガイドライン<b>4.2（Minimum Functionality）</b>は、Webサイトを包んだだけのアプリを明確に却下します。ニュースまとめ系は典型的なリジェクト対象です。<br>
+    ② Apple Developer Program は<b>年15,000円</b>、審査は数日〜数週間、落ちたらやり直し。<br>
+    ③ <b>ストアに出しても誰も見つけません。</b>流入はどのみちXからです。<br><br>
+    ストアアプリはフェーズ4〜5、<b>「通知を求める人が確実にいる」と分かってから</b>で十分です。
+  </div>
+</section>
+
+<section>
+  <div class="sec-h"><h2>順番（ロードマップ）</h2><span class="sub">5 phases</span></div>
+
+  <div class="phases">
+
+    <div class="ph ph--1">
+      <div class="ph__n">1</div>
+      <div class="ph__card">
+        <div class="ph__head"><h3 class="ph__title">まず動かす</h3><span class="ph__when">今すぐ 〜 1週間</span></div>
+        <p class="ph__goal">毎日ほうっておいても情報が集まって、勝手に投稿される状態にする。</p>
+        <ul>
+          <li>Xの開発者登録とお支払い設定（あなたの作業・1〜2時間）</li>
+          <li>GitHubに置いて公開する（あなたの作業・1〜2時間）</li>
+          <li>アプリ誘導モードに切り替える（私の作業）</li>
+        </ul>
+        <dl class="facts">
+          <div class="fact"><dt>あなたの時間</dt><dd>3〜5時間</dd></div>
+          <div class="fact"><dt>費用</dt><dd class="money">70円/月</dd></div>
+          <div class="fact"><dt>売上</dt><dd>0円</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="ph ph--2">
+      <div class="ph__n">2</div>
+      <div class="ph__card">
+        <div class="ph__head"><h3 class="ph__title">「ここが一番早い」と言われる</h3><span class="ph__when">1 〜 2ヶ月目</span></div>
+        <p class="ph__goal">速さと使いやすさで、まず300人に「使える」と思ってもらう。<b>ここが全部の土台です。</b></p>
+        <ul>
+          <li><b>LINE公式アカウント</b> — <b>インストール不要で通知が届く</b>。iPhoneのホーム画面追加問題を回避できる、この段階の最重要施策</li>
+          <li><b>締切リマインダー通知</b> — 「あと3時間で締切」を知らせる。緊急のものだけLINEへ、それ以外はXとWebへ</li>
+          <li><b>検索機能</b> — 見たいカードゲームをすぐ探せる</li>
+          <li><b>推しのピン留め</b> — 好きなTCGを一番上に固定（お金も設備も不要）</li>
+          <li><b>ゼロ件検索の記録</b> — 「探されたのに情報が無かった」を記録して次に足す</li>
+        </ul>
+        <dl class="facts">
+          <div class="fact"><dt>目標フォロワー</dt><dd>300</dd></div>
+          <div class="fact"><dt>LINE友だち</dt><dd>100〜200</dd></div>
+          <div class="fact"><dt>費用</dt><dd class="money">70円〜/月</dd></div>
+          <div class="fact"><dt>売上</dt><dd>0円</dd></div>
+        </dl>
+        <p style="font-size:14px;color:var(--ink-soft);margin:0">※ LINEは友だちが増えると有料プラン（月数千円〜15,000円）が必要になります。緊急通知だけに絞れば当面は無料枠でも回せます。</p>
+      </div>
+    </div>
+
+    <div class="ph ph--3">
+      <div class="ph__n">3</div>
+      <div class="ph__card">
+        <div class="ph__head"><h3 class="ph__title">お金が入り始める</h3><span class="ph__when">3 〜 6ヶ月目</span></div>
+        <p class="ph__goal">アフィリエイトを入れて、はじめての売上をつくる。</p>
+        <ul>
+          <li>アフィリエイト登録（もしも・バリューコマース・Amazon・楽天）</li>
+          <li>今あるリンクをアフィリエイトリンクに置き換える（作業自体はすぐ終わります）</li>
+          <li><b>当選報告アンケート</b> — 「当たった人いる？」で盛り上げつつ、<b>当選率という他が持っていないデータ</b>を貯める</li>
+        </ul>
+        <dl class="facts">
+          <div class="fact"><dt>目標フォロワー</dt><dd>1,000〜3,000</dd></div>
+          <div class="fact"><dt>費用</dt><dd class="money">70円/月</dd></div>
+          <div class="fact"><dt>売上</dt><dd class="money">約1万円/月</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="ph ph--4">
+      <div class="ph__n">4</div>
+      <div class="ph__card">
+        <div class="ph__head"><h3 class="ph__title">他が真似できない武器を持つ</h3><span class="ph__when">6 〜 12ヶ月目</span></div>
+        <p class="ph__goal">貯めた当選率データを武器にする。ここで<b>投票機能を入れます</b>。</p>
+        <ul>
+          <li><b><span class="pill">投票機能はここ</span></b> — 人が集まったこのタイミングなら、票が意味を持ちます。100人が投票する表なら価値がありますが、5票で1位が決まる表は逆効果です</li>
+          <li>当選率データの公開（「この抽選は倍率◯倍でした」）</li>
+          <li>有料の早出し通知プラン（月300円）</li>
+        </ul>
+        <dl class="facts">
+          <div class="fact"><dt>目標フォロワー</dt><dd>5,000〜10,000</dd></div>
+          <div class="fact"><dt>費用</dt><dd class="money">数百円/月</dd></div>
+          <div class="fact"><dt>売上</dt><dd class="money">約6.5万円/月</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="ph ph--5">
+      <div class="ph__n">5</div>
+      <div class="ph__card">
+        <div class="ph__head"><h3 class="ph__title">横に広げる（ここが本命）</h3><span class="ph__when">1年目以降</span></div>
+        <p class="ph__goal">同じ仕組みは、カード以外の抽選にもそのまま使えます。</p>
+        <ul>
+          <li>スニーカー、フィギュア、ゲーム機、限定グッズ…<b>「抽選で買えないもの」全部</b></li>
+          <li>作り直しは不要。<b>キーワードと見に行くサイトを足すだけ</b>です</li>
+          <li>実際、テスト中にアークテリクス（アウトドア）の抽選情報が勝手に混ざってきました。仕組みが効いている証拠です</li>
+        </ul>
+        <dl class="facts">
+          <div class="fact"><dt>目標フォロワー</dt><dd>2〜3万</dd></div>
+          <div class="fact"><dt>費用</dt><dd class="money">数千円/月</dd></div>
+          <div class="fact"><dt>売上</dt><dd class="money">20万円〜/月</dd></div>
+        </dl>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <div class="sec-h"><h2>いちばん大事なこと</h2><span class="sub">the one thing</span></div>
+  <div class="note">
+    <strong>勝負は「速さ」だけです。</strong><br>
+    デザインでも機能の多さでもありません。<b>「あのアカウントを見ていたから抽選に間に合った」</b>という体験を1回でも作れれば、その人は一生フォローを外しません。逆に、いくら機能が多くても遅ければ意味がありません。<br><br>
+    だから<b>フェーズ2の締切通知</b>が、このロードマップで一番重要な項目です。
+  </div>
+  <div class="caution">
+    <strong>やめたほうがいいこと。</strong> 自分の投稿をニュースに紛れ込ませるのは避けてください。抽選情報のアカウントは<b>信頼が全て</b>です。載せるなら「自分の投稿」と分かる表示を付けてください。
+  </div>
+</section>
+
+<section>
+  <div class="sec-h"><h2>次の一歩</h2><span class="sub">next</span></div>
+  <div class="tw"><table>
+    <thead><tr><th class="num">#</th><th>やること</th><th>担当</th><th class="num">目安</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td>Xの開発者登録・お支払い設定</td><td>あなた</td><td class="num">1〜2時間</td></tr>
+      <tr><td class="num">2</td><td>GitHubに置いて公開</td><td>あなた</td><td class="num">1〜2時間</td></tr>
+      <tr class="hl"><td class="num">3</td><td><b>アプリ誘導モードに切り替え</b>（月2,800円→70円）</td><td>私</td><td class="num">すぐ</td></tr>
+      <tr><td class="num">4</td><td>LINE公式アカウントの開設（無料プランでOK）</td><td>あなた</td><td class="num">30分</td></tr>
+      <tr class="hl"><td class="num">5</td><td><b>LINE通知の組み込み＋締切リマインダー</b></td><td>私</td><td class="num">次に着手</td></tr>
+      <tr><td class="num">6</td><td>検索・推しピン留め・ゼロ件記録</td><td>私</td><td class="num">その次</td></tr>
+    </tbody>
+  </table></div>
+  <p class="body-p" style="color:var(--ink-soft)">投票機能はフェーズ4（6〜12ヶ月目）がベストタイミングです。<b>フォロワーが3,000を超えたら私から声をかけます。</b></p>
+</section>
+
+<p class="foot">数字は仮定に基づく概算です。実績ではありません。</p>
+
+</div>

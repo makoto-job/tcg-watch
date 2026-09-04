@@ -1,0 +1,133 @@
+# ─────────────────────────────────────────────────────────────
+# TCGニュースbot: 毎日の自動投稿 + フィードの定期更新
+#
+#  job: post  … 毎日 JST 12:00（UTC 03:00）にXへ投稿し、feed.json も更新
+#  job: feed  … 抽選情報の見逃しを防ぐため高頻度で feed.json を更新（投稿はしない）
+#               JST 08:00-24:00 は30分ごと / 深夜は1時間ごと
+#
+# 抽選は告知から締切までが短いことがあるため、更新間隔がそのまま
+# 「気づくまでの遅れ」になる。日中の30分間隔はその上限を決めている。
+#
+# npm依存パッケージが無いので `npm install` は不要。
+# ─────────────────────────────────────────────────────────────
+name: TCG bot daily
+
+on:
+  schedule:
+    # JST 12:00 = UTC 03:00 に投稿
+    - cron: '0 3 * * *'
+    # feed.json のみ更新。JST 08:00-24:00（UTC 23:00-14:59）は30分ごと
+    - cron: '*/30 23,0-14 * * *'
+    # 深夜帯（JST 00:00-08:00 = UTC 15:00-22:59）は1時間ごと
+    - cron: '0 15-22 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: '実行内容を選択'
+        type: choice
+        required: true
+        default: feed
+        options:
+          - post
+          - feed
+
+permissions:
+  contents: write
+
+# 同じリポジトリへ push するジョブ同士がぶつからないように直列化する
+concurrency:
+  group: tcg-bot-commit
+  cancel-in-progress: false
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  # ───────────────────────────────────────────────
+  # 毎日 JST 12:00: Xへ投稿 + feed.json 更新
+  # ───────────────────────────────────────────────
+  post:
+    if: >-
+      github.event.schedule == '0 3 * * *' ||
+      (github.event_name == 'workflow_dispatch' && inputs.mode == 'post')
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリを取得
+        uses: actions/checkout@v4
+
+      - name: Node.js 20 をセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 依存パッケージゼロなので npm install は不要
+      - name: Xへ投稿（失敗してもフィード更新まで進む）
+        id: post
+        continue-on-error: true
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+        run: node src/index.js --post --verbose
+
+      - name: 投稿に失敗した場合はフィードだけ更新
+        if: always() && steps.post.outcome != 'success'
+        continue-on-error: true
+        run: node src/index.js --dry-run --verbose
+
+      - name: 変更をコミット＆プッシュ
+        if: always()
+        run: |
+          git config user.name  "tcg-bot"
+          git config user.email "tcg-bot@users.noreply.github.com"
+          # data/posted.json は .gitignore 対象なので -f で強制的に追加する
+          git add -f data/posted.json public/feed.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "変更なし。コミットをスキップします。"
+            exit 0
+          fi
+          git commit -m "chore: 投稿記録とフィードを更新 [skip ci]"
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: 投稿ステップが失敗していたらジョブを失敗扱いにする
+        if: always() && steps.post.outcome != 'success'
+        run: |
+          echo "::error::Xへの投稿に失敗しました。Secrets（X_API_KEY 等）とアプリ権限（Read and write）を確認してください。"
+          exit 1
+
+  # ───────────────────────────────────────────────
+  # 2時間ごと: feed.json だけ更新（投稿はしない）
+  # ───────────────────────────────────────────────
+  feed:
+    if: >-
+      github.event.schedule == '*/30 23,0-14 * * *' ||
+      github.event.schedule == '0 15-22 * * *' ||
+      (github.event_name == 'workflow_dispatch' && inputs.mode == 'feed')
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリを取得
+        uses: actions/checkout@v4
+
+      - name: Node.js 20 をセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: フィードのみ更新（投稿なし）
+        run: node src/index.js --dry-run --no-post --verbose
+
+      - name: 変更をコミット＆プッシュ
+        if: always()
+        run: |
+          git config user.name  "tcg-bot"
+          git config user.email "tcg-bot@users.noreply.github.com"
+          git add -f public/feed.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "変更なし。コミットをスキップします。"
+            exit 0
+          fi
+          git commit -m "chore: フィードを更新 [skip ci]"
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

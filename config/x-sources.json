@@ -1,0 +1,57 @@
+{
+  "_readme": [
+    "X(Twitter)からの読み取り設定。既定は無効。",
+    "有効化するには .env に X_READ_ENABLED=true と X_BEARER_TOKEN=... を設定する。",
+    "※ X API の無料枠では読み取り(search/recent・lists/tweets)は利用できない。Basic($200/月〜)以上が必要。",
+    "lists[].id は https://x.com/i/lists/<ここの数字> の数字部分。",
+    "searches[].query は X API v2 の検索クエリ構文。日本語可。-is:retweet で公式RTを除外している。",
+    "各エントリの ips は config/sources.json の IPキーから選ぶ（最低1つ）。"
+  ],
+
+  "enabled": false,
+
+  "maxResultsPerQuery": 25,
+
+  "lists": [
+    {
+      "id": "0000000000000000000",
+      "name": "TCG公式アカウント",
+      "ips": ["newtcg"],
+      "weight": 1.2,
+      "_comment": "サンプル値。実際のリストIDに差し替えること。差し替えるまで enabled:false のままにする。"
+    }
+  ],
+
+  "searches": [
+    {
+      "id": "x-pokemon-lottery",
+      "query": "(ポケモンカード OR ポケカ) (抽選 OR 予約) -is:retweet -is:reply lang:ja",
+      "ips": ["pokemon", "lottery"],
+      "weight": 1.1
+    },
+    {
+      "id": "x-onepiece-lottery",
+      "query": "(ワンピースカード OR ワンピカード) (抽選 OR 予約) -is:retweet -is:reply lang:ja",
+      "ips": ["onepiece", "lottery"],
+      "weight": 1.05
+    },
+    {
+      "id": "x-fusionworld",
+      "query": "フュージョンワールド (抽選 OR 予約 OR 新弾) -is:retweet -is:reply lang:ja",
+      "ips": ["dragonball", "lottery"],
+      "weight": 1.0
+    },
+    {
+      "id": "x-gundam-gcg",
+      "query": "ガンダムカードゲーム -is:retweet -is:reply lang:ja",
+      "ips": ["gundam"],
+      "weight": 1.0
+    },
+    {
+      "id": "x-hololive-card",
+      "query": "(ホロライブ カード) (抽選 OR 予約) -is:retweet -is:reply lang:ja",
+      "ips": ["hololive", "lottery"],
+      "weight": 1.0
+    }
+  ]
+}

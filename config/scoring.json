@@ -1,0 +1,175 @@
+{
+  "weights": {
+    "recency": 40,
+    "intent": 30,
+    "ip": 15,
+    "source": 10,
+    "cluster": 5
+  },
+  "recency": {
+    "halfLifeHours": 12,
+    "maxAgeHours": 168
+  },
+  "intent": {
+    "rawMax": 15,
+    "secondaryFactor": 0.3
+  },
+  "intentKeywords": {
+    "抽選": {
+      "score": 10,
+      "tag": "抽選",
+      "patterns": [
+        "抽選販売",
+        "抽選予約",
+        "抽選受付",
+        "抽選"
+      ]
+    },
+    "予約": {
+      "score": 9,
+      "tag": "予約",
+      "patterns": [
+        "予約受付",
+        "予約開始",
+        "予約解禁",
+        "予約"
+      ]
+    },
+    "再販": {
+      "score": 8,
+      "tag": "再販",
+      "patterns": [
+        "再販",
+        "再入荷",
+        "再受注",
+        "再出荷"
+      ]
+    },
+    "新弾": {
+      "score": 8,
+      "tag": "新弾",
+      "patterns": [
+        "新弾",
+        "新セット",
+        "新シリーズ",
+        "新商品",
+        "新パック",
+        "拡張パック"
+      ]
+    },
+    "発売日": {
+      "score": 7,
+      "tag": "発売",
+      "patterns": [
+        "発売日",
+        "発売決定",
+        "発売開始",
+        "本日発売"
+      ]
+    },
+    "受付": {
+      "score": 7,
+      "tag": "受付",
+      "patterns": [
+        "受注",
+        "応募受付",
+        "受付開始",
+        "エントリー"
+      ]
+    },
+    "当選": {
+      "score": 6,
+      "tag": "当選",
+      "patterns": [
+        "当選発表",
+        "当選者",
+        "当落"
+      ]
+    },
+    "収録": {
+      "score": 5,
+      "tag": "収録",
+      "patterns": [
+        "収録カード",
+        "収録内容",
+        "カードリスト",
+        "新規カード"
+      ]
+    },
+    "コラボ": {
+      "score": 5,
+      "tag": "コラボ",
+      "patterns": [
+        "コラボ",
+        "タイアップ",
+        "限定"
+      ]
+    },
+    "相場": {
+      "score": 4,
+      "tag": "相場",
+      "patterns": [
+        "高額",
+        "買取",
+        "相場",
+        "値上がり"
+      ]
+    },
+    "大会": {
+      "score": 3,
+      "tag": "大会",
+      "patterns": [
+        "大会",
+        "チャンピオンシップ",
+        "世界大会",
+        "公式大会"
+      ]
+    }
+  },
+  "negativeKeywords": {
+    "patterns": [
+      "詐欺",
+      "転売ヤー 逮捕",
+      "まとめ",
+      "5ch",
+      "なんJ",
+      "アフィリエイト",
+      "PR:",
+      "正式オープン",
+      "サイトオープン",
+      "サービス開始",
+      "サービスを開始",
+      "β版",
+      "ベータ版",
+      "事前登録開始",
+      "提供を開始しました"
+    ],
+    "penalty": 15
+  },
+  "ipWeightRange": {
+    "min": 0.9,
+    "max": 1.3
+  },
+  "sourceWeightRange": {
+    "min": 0.5,
+    "max": 1.5
+  },
+  "clusterThreshold": 0.55,
+  "clusterBonusPerSource": 2,
+  "clusterBonusMax": 10,
+  "selection": {
+    "maxPerIp": 2
+  },
+  "domainPenalties": {
+    "snkrdunk.com": 25,
+    "fril.jp": 20,
+    "mercari.com": 20,
+    "aucfan.com": 20,
+    "page.auctions.yahoo.co.jp": 20,
+    "pr-free.jp": 30,
+    "prtimes.jp": 8,
+    "atpress.ne.jp": 25,
+    "value-press.com": 25
+  },
+  "feedMinScore": 10
+}

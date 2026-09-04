@@ -1,0 +1,1377 @@
+{
+  "ips": {
+    "pokemon": {
+      "label": "ポケカ",
+      "weight": 1.25,
+      "keywords": [
+        "ポケモンカード",
+        "ポケカ",
+        "ポケモンTCG",
+        "スカーレット&バイオレット",
+        "ハイクラスパック",
+        "強化拡張パック",
+        "メガシンカex",
+        "ポケモンセンターオンライン",
+        "ポケモン 拡張パック",
+        "ポケモン スタートデッキ",
+        "ポケモン ブースターパック"
+      ],
+      "hashtag": "#ポケカ"
+    },
+    "onepiece": {
+      "label": "ワンピカード",
+      "weight": 1.2,
+      "keywords": [
+        "ワンピースカード",
+        "ONE PIECEカードゲーム",
+        "ワンピカード",
+        "OPCG",
+        "ONE PIECE CARD GAME",
+        "ワンピース カードゲーム",
+        "ワンピース ブースターパック",
+        "ワンピース スタートデッキ",
+        "ワンピース プレミアムブースター"
+      ],
+      "hashtag": "#ワンピカード"
+    },
+    "dragonball": {
+      "label": "DBカード",
+      "weight": 1.05,
+      "keywords": [
+        "ドラゴンボールカード",
+        "フュージョンワールド",
+        "FUSION WORLD",
+        "ドラゴンボールスーパーカードゲーム",
+        "DBSCG",
+        "DBFW",
+        "ドラゴンボールヒーローズ",
+        "SDBH",
+        "ドラゴンボール カードゲーム",
+        "ドラゴンボール TCG",
+        "ドラゴンボール ブースターパック",
+        "ドラゴンボール スタートデッキ",
+        "ドラゴンボール デッキ",
+        "ドラゴンボール 拡張パック"
+      ],
+      "hashtag": "#フュージョンワールド"
+    },
+    "gundam": {
+      "label": "ガンダムカード",
+      "weight": 1.1,
+      "keywords": [
+        "ガンダムカードゲーム",
+        "GUNDAM CARD GAME",
+        "ガンダムGCG",
+        "ガンダムアーセナルベース",
+        "ガンダムカード",
+        "ガンダム カードゲーム",
+        "ガンダム TCG",
+        "ガンダム ブースターパック",
+        "ガンダム スタートデッキ",
+        "GCG カード"
+      ],
+      "hashtag": "#ガンダムカードゲーム"
+    },
+    "hololive": {
+      "label": "ホロライブ",
+      "weight": 1.1,
+      "keywords": [
+        "ホロライブ",
+        "hololive",
+        "ホロカ",
+        "ホロライブオフィシャルカードゲーム",
+        "ホロライブプロダクション",
+        "ホロライブTCG"
+      ],
+      "hashtag": "#ホロライブ"
+    },
+    "yugioh": {
+      "label": "遊戯王",
+      "weight": 1.15,
+      "keywords": [
+        "遊戯王",
+        "遊戯王OCG",
+        "ラッシュデュエル",
+        "デュエルモンスターズ",
+        "RUSH DUEL",
+        "レアリティコレクション",
+        "クォーターセンチュリー",
+        "クオーターセンチュリー",
+        "QUARTER CENTURY",
+        "ストラクチャーデッキ",
+        "デュエリストパック",
+        "アニメーションクロニクル",
+        "ワールドプレミアパック"
+      ],
+      "hashtag": "#遊戯王"
+    },
+    "duelmasters": {
+      "label": "デュエマ",
+      "weight": 1,
+      "keywords": [
+        "デュエル・マスターズ",
+        "デュエマ",
+        "デュエルマスターズ",
+        "デュエキング",
+        "アビス・レボリューション",
+        "クロニクルデッキ",
+        "スタートWINデッキ",
+        "DMGP",
+        "王来篇",
+        "逆札篇"
+      ],
+      "hashtag": "#デュエマ"
+    },
+    "mtg": {
+      "label": "MTG",
+      "weight": 1.05,
+      "keywords": [
+        "マジック：ザ・ギャザリング",
+        "マジック・ザ・ギャザリング",
+        "MTG",
+        "Magic: The Gathering",
+        "ギャザ",
+        "EDH",
+        "統率者デッキ",
+        "統率者戦",
+        "プレインズウォーカー",
+        "ファウンデーションズ",
+        "モダンホライゾン",
+        "ストリクスヘイヴン"
+      ],
+      "hashtag": "#MTG"
+    },
+    "newtcg": {
+      "label": "新作TCG",
+      "weight": 0.95,
+      "keywords": [
+        "新作カードゲーム",
+        "トレーディングカードゲーム 始動",
+        "TCG 新作 発表",
+        "新TCG",
+        "新カードゲーム",
+        "TCG 参入",
+        "トレーディングカードゲーム 新作",
+        "ビルディバイド",
+        "BUILD DIVIDE",
+        "ウルトラマンカードゲーム",
+        "ゴジラカードゲーム",
+        "ホロビートカードゲーム",
+        "ホロビート",
+        "鳴潮",
+        "Xross Stars",
+        "クロススターズ",
+        "Lycee",
+        "リセ・オーバーチュア",
+        "DIVINE CROSS",
+        "ディヴァインクロス",
+        "Reバース",
+        "ラブライブ カードゲーム",
+        "シャドウバース エボルヴ",
+        "シャドバ エボルヴ",
+        "NARUTOカードゲーム",
+        "NARUTO CARD GAME",
+        "ナルトカードゲーム",
+        "バンダイ 新作 カードゲーム",
+        "コナミ 新作 カードゲーム",
+        "タカラトミー 新作 カードゲーム",
+        "スクウェア・エニックス カードゲーム 新作",
+        "カードゲーム 新規タイトル",
+        "パルワールド カードゲーム",
+        "パルワールド OCG",
+        "ハリー・ポッター カードゲーム",
+        "マイリトルポニー TCG",
+        "女神転生 トレーディングカード",
+        "カードコネクト",
+        "新カードゲーム 参入",
+        "カードゲーム事業 参入"
+      ],
+      "hashtag": "#新作TCG"
+    },
+    "digimon": {
+      "label": "デジモン",
+      "weight": 1,
+      "keywords": [
+        "デジモンカードゲーム",
+        "DIGIMON CARD GAME",
+        "デジモンカード",
+        "デジモン カードゲーム",
+        "デジモン TCG",
+        "デジモン ブースターパック",
+        "デジモン スタートデッキ",
+        "デジモン トレカ"
+      ],
+      "hashtag": "#デジモンカードゲーム"
+    },
+    "battlespirits": {
+      "label": "バトスピ",
+      "weight": 0.95,
+      "keywords": [
+        "バトルスピリッツ",
+        "バトスピ",
+        "BATTLE SPIRITS",
+        "オールキラブースター",
+        "バトルスピリッツサーガ",
+        "コラボブースター"
+      ],
+      "hashtag": "#バトスピ"
+    },
+    "aikatsu": {
+      "label": "アイカツ",
+      "weight": 0.95,
+      "keywords": [
+        "アイカツ",
+        "アイカツアカデミー",
+        "アイカツスタイル",
+        "アイカツプラネット",
+        "アイカツフレンズ"
+      ],
+      "hashtag": "#アイカツ"
+    },
+    "carddass": {
+      "label": "カードダス",
+      "weight": 0.95,
+      "keywords": [
+        "データカードダス",
+        "カードダス",
+        "カードダスオンライン",
+        "カードダスステーション"
+      ],
+      "hashtag": "#カードダス"
+    },
+    "vanguard": {
+      "label": "ヴァンガード",
+      "weight": 0.95,
+      "keywords": [
+        "カードファイト!! ヴァンガード",
+        "カードファイト ヴァンガード",
+        "ヴァンガード",
+        "ヴァンガードDivinez",
+        "VANGUARD"
+      ],
+      "hashtag": "#ヴァンガード"
+    },
+    "weiss": {
+      "label": "ヴァイス",
+      "weight": 0.95,
+      "keywords": [
+        "ヴァイスシュヴァルツ",
+        "ヴァイシュヴァルツ",
+        "Weiß Schwarz",
+        "ヴァイス ブラウ"
+      ],
+      "hashtag": "#ヴァイスシュヴァルツ"
+    },
+    "unionarena": {
+      "label": "ユニオンアリーナ",
+      "weight": 1.05,
+      "keywords": [
+        "ユニオンアリーナ",
+        "UNION ARENA",
+        "UNIONARENA",
+        "ユニアリ"
+      ],
+      "hashtag": "#ユニオンアリーナ"
+    },
+    "lottery": {
+      "label": "抽選",
+      "weight": 1.3,
+      "keywords": [
+        "抽選販売",
+        "抽選予約",
+        "受注生産",
+        "再販",
+        "予約受付",
+        "応募受付",
+        "当選発表",
+        "抽選受付",
+        "予約開始",
+        "受注受付",
+        "再入荷"
+      ],
+      "hashtag": "#抽選販売"
+    }
+  },
+  "feeds": [
+    {
+      "id": "4gamer",
+      "name": "4Gamer",
+      "url": "https://www.4gamer.net/rss/index.xml",
+      "weight": 1,
+      "type": "rss",
+      "kind": "news"
+    },
+    {
+      "id": "denfami",
+      "name": "電ファミニコゲーマー",
+      "url": "https://news.denfaminicogamer.jp/feed",
+      "weight": 1,
+      "type": "rss",
+      "kind": "news"
+    },
+    {
+      "id": "gamewatch",
+      "name": "GAME Watch",
+      "url": "https://game.watch.impress.co.jp/data/rss/1.0/gmw/feed.rdf",
+      "weight": 1,
+      "type": "rss",
+      "kind": "news"
+    },
+    {
+      "id": "hobbywatch",
+      "name": "HOBBY Watch",
+      "url": "https://hobby.watch.impress.co.jp/data/rss/1.0/hbw/feed.rdf",
+      "weight": 1.1,
+      "type": "rss",
+      "kind": "news"
+    },
+    {
+      "id": "dengekihobby",
+      "name": "電撃ホビーウェブ",
+      "url": "https://hobby.dengeki.com/feed/",
+      "weight": 1.1,
+      "type": "rss",
+      "kind": "news"
+    },
+    {
+      "id": "inside",
+      "name": "INSIDE",
+      "url": "https://www.inside-games.jp/rss/index.rdf",
+      "weight": 0.95,
+      "type": "rss",
+      "kind": "news"
+    },
+    {
+      "id": "animeanime",
+      "name": "アニメ！アニメ！",
+      "url": "https://animeanime.jp/rss/index.rdf",
+      "weight": 0.85,
+      "type": "rss",
+      "kind": "news"
+    },
+    {
+      "id": "prtimes",
+      "name": "PR TIMES",
+      "url": "https://prtimes.jp/index.rdf",
+      "weight": 1,
+      "type": "rss",
+      "kind": "official"
+    }
+  ],
+  "googleNews": {
+    "enabled": true,
+    "urlTemplate": "https://news.google.com/rss/search?q={query}&hl=ja&gl=JP&ceid=JP:ja",
+    "queries": [
+      {
+        "id": "gn-pokemon-lottery",
+        "query": "ポケモンカード 抽選",
+        "ips": [
+          "pokemon",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-pokemon-preorder",
+        "query": "ポケモンカード 予約 開始",
+        "ips": [
+          "pokemon",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-pokemon-newset",
+        "query": "ポケカ 新弾",
+        "ips": [
+          "pokemon"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-pokemon-release",
+        "query": "ポケモンカード 発売日",
+        "ips": [
+          "pokemon"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-pokemon-restock",
+        "query": "ポケモンカード 再販",
+        "ips": [
+          "pokemon",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-pokemon-rakuten",
+        "query": "ポケモンカード 楽天ブックス 抽選",
+        "ips": [
+          "pokemon",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-onepiece-newset",
+        "query": "ワンピースカード 新弾",
+        "ips": [
+          "onepiece"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-onepiece-lottery",
+        "query": "ワンピースカード 抽選販売",
+        "ips": [
+          "onepiece",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-onepiece-preorder",
+        "query": "ONE PIECEカードゲーム 予約",
+        "ips": [
+          "onepiece",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-onepiece-release",
+        "query": "ワンピースカード 発売日",
+        "ips": [
+          "onepiece"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-onepiece-restock",
+        "query": "ワンピースカード 再販",
+        "ips": [
+          "onepiece",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-onepiece-rakuten",
+        "query": "ワンピースカード 楽天ブックス 予約",
+        "ips": [
+          "onepiece",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-db-preorder",
+        "query": "フュージョンワールド 予約",
+        "ips": [
+          "dragonball",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-db-newset",
+        "query": "ドラゴンボールカード 新弾",
+        "ips": [
+          "dragonball"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-db-lottery",
+        "query": "フュージョンワールド 抽選",
+        "ips": [
+          "dragonball",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-db-release",
+        "query": "フュージョンワールド 発売日",
+        "ips": [
+          "dragonball"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-db-restock",
+        "query": "ドラゴンボールスーパーカードゲーム 再販",
+        "ips": [
+          "dragonball",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-db-sdbh",
+        "query": "スーパードラゴンボールヒーローズ 新弾",
+        "ips": [
+          "dragonball"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-db-scg",
+        "query": "ドラゴンボールスーパーカードゲーム 抽選販売",
+        "ips": [
+          "dragonball",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-db-yodobashi",
+        "query": "フュージョンワールド 楽天ブックス 予約",
+        "ips": [
+          "dragonball",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-yugioh-lottery",
+        "query": "遊戯王 抽選販売",
+        "ips": [
+          "yugioh",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-yugioh-preorder",
+        "query": "遊戯王 新商品 予約",
+        "ips": [
+          "yugioh",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-yugioh-newset",
+        "query": "遊戯王OCG 新弾",
+        "ips": [
+          "yugioh"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-yugioh-release",
+        "query": "遊戯王 カード 発売日",
+        "ips": [
+          "yugioh"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-yugioh-restock",
+        "query": "遊戯王 再販",
+        "ips": [
+          "yugioh",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-yugioh-rush",
+        "query": "ラッシュデュエル 新商品",
+        "ips": [
+          "yugioh"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-yugioh-rarity",
+        "query": "遊戯王 レアリティコレクション 予約",
+        "ips": [
+          "yugioh",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-yugioh-quarter",
+        "query": "遊戯王 クォーターセンチュリー",
+        "ips": [
+          "yugioh"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-yugioh-amazon",
+        "query": "遊戯王 Amazon 予約",
+        "ips": [
+          "yugioh",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-duelmasters-newset",
+        "query": "デュエル・マスターズ 新弾",
+        "ips": [
+          "duelmasters"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-duelmasters-lottery",
+        "query": "デュエマ 抽選販売",
+        "ips": [
+          "duelmasters",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-duelmasters-preorder",
+        "query": "デュエル・マスターズ 予約",
+        "ips": [
+          "duelmasters",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-duelmasters-release",
+        "query": "デュエマ 発売日",
+        "ips": [
+          "duelmasters"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-duelmasters-restock",
+        "query": "デュエル・マスターズ 再販",
+        "ips": [
+          "duelmasters",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-duelmasters-deck",
+        "query": "デュエマ 新商品 デッキ",
+        "ips": [
+          "duelmasters"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-duelmasters-dueking",
+        "query": "デュエキング 予約",
+        "ips": [
+          "duelmasters",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-duelmasters-amazon",
+        "query": "デュエマ Amazon 予約",
+        "ips": [
+          "duelmasters",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-mtg-newset",
+        "query": "マジック：ザ・ギャザリング 新セット",
+        "ips": [
+          "mtg"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-mtg-preorder",
+        "query": "マジック：ザ・ギャザリング 予約",
+        "ips": [
+          "mtg",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-mtg-lottery",
+        "query": "MTG カード 抽選販売",
+        "ips": [
+          "mtg",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-mtg-release",
+        "query": "マジック：ザ・ギャザリング 新弾 発売",
+        "ips": [
+          "mtg"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-mtg-commander",
+        "query": "統率者デッキ 発売",
+        "ips": [
+          "mtg"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-mtg-restock",
+        "query": "マジック：ザ・ギャザリング 再販",
+        "ips": [
+          "mtg",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-mtg-amazon",
+        "query": "マジック：ザ・ギャザリング Amazon 予約",
+        "ips": [
+          "mtg",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-mtg-japanese",
+        "query": "MTG 日本語版 発売",
+        "ips": [
+          "mtg"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-gundam-release",
+        "query": "ガンダムカードゲーム 発売",
+        "ips": [
+          "gundam"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-gundam-lottery",
+        "query": "ガンダムカードゲーム 抽選",
+        "ips": [
+          "gundam",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-gundam-preorder",
+        "query": "ガンダムカードゲーム 予約",
+        "ips": [
+          "gundam",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-gundam-newset",
+        "query": "ガンダムカードゲーム 新弾",
+        "ips": [
+          "gundam"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-gundam-restock",
+        "query": "ガンダムカードゲーム 再販",
+        "ips": [
+          "gundam",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-hololive-lottery",
+        "query": "ホロライブオフィシャルカードゲーム 抽選",
+        "ips": [
+          "hololive",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-hololive-preorder",
+        "query": "ホロライブ カードゲーム 予約",
+        "ips": [
+          "hololive",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-hololive-newset",
+        "query": "ホロライブ オフィシャルカードゲーム 新弾",
+        "ips": [
+          "hololive"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-hololive-release",
+        "query": "ホロカ 発売日",
+        "ips": [
+          "hololive"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-hololive-goods",
+        "query": "ホロライブ グッズ 受注",
+        "ips": [
+          "hololive",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-digimon-newset",
+        "query": "デジモンカードゲーム 新弾",
+        "ips": [
+          "digimon"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-digimon-lottery",
+        "query": "デジモンカード 抽選販売",
+        "ips": [
+          "digimon",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-digimon-preorder",
+        "query": "デジモンカードゲーム 予約",
+        "ips": [
+          "digimon",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-digimon-release",
+        "query": "デジモンカードゲーム 発売日",
+        "ips": [
+          "digimon"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-digimon-restock",
+        "query": "デジモンカード 再販",
+        "ips": [
+          "digimon",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-digimon-booster",
+        "query": "デジモンカードゲーム ブースターパック",
+        "ips": [
+          "digimon"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-digimon-deck",
+        "query": "デジモンカードゲーム スタートデッキ",
+        "ips": [
+          "digimon"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-digimon-pbandai",
+        "query": "デジモンカード プレミアムバンダイ 予約",
+        "ips": [
+          "digimon",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-bs-newset",
+        "query": "バトルスピリッツ 新弾",
+        "ips": [
+          "battlespirits"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-bs-lottery",
+        "query": "バトスピ 抽選販売",
+        "ips": [
+          "battlespirits",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-bs-preorder",
+        "query": "バトルスピリッツ 予約",
+        "ips": [
+          "battlespirits",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-bs-release",
+        "query": "バトルスピリッツ 発売日",
+        "ips": [
+          "battlespirits"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-bs-restock",
+        "query": "バトルスピリッツ 再販",
+        "ips": [
+          "battlespirits",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-bs-booster",
+        "query": "バトルスピリッツ ブースターパック",
+        "ips": [
+          "battlespirits"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-bs-deck",
+        "query": "バトスピ デッキ 新商品",
+        "ips": [
+          "battlespirits"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-bs-pbandai",
+        "query": "バトルスピリッツ プレミアムバンダイ 予約",
+        "ips": [
+          "battlespirits",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-newtcg",
+        "query": "新作 カードゲーム 発表",
+        "ips": [
+          "newtcg"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-newtcg-start",
+        "query": "トレーディングカードゲーム 始動",
+        "ips": [
+          "newtcg"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-newtcg-entry",
+        "query": "カードゲーム 新規参入",
+        "ips": [
+          "newtcg"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-newtcg-preorder",
+        "query": "新作TCG 予約 開始",
+        "ips": [
+          "newtcg",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-newtcg-release",
+        "query": "新カードゲーム 発売決定",
+        "ips": [
+          "newtcg"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-aikatsu-newset",
+        "query": "アイカツ カード 新弾",
+        "ips": [
+          "aikatsu"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-aikatsu-lottery",
+        "query": "アイカツ カード 抽選販売",
+        "ips": [
+          "aikatsu",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-aikatsu-preorder",
+        "query": "アイカツアカデミー 予約",
+        "ips": [
+          "aikatsu",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-aikatsu-release",
+        "query": "アイカツ カード 発売日",
+        "ips": [
+          "aikatsu"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-aikatsu-restock",
+        "query": "アイカツ グッズ 再販",
+        "ips": [
+          "aikatsu",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-carddass-lottery",
+        "query": "カードダス 抽選販売",
+        "ips": [
+          "carddass",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-carddass-preorder",
+        "query": "データカードダス 予約",
+        "ips": [
+          "carddass",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-carddass-release",
+        "query": "カードダス 発売日",
+        "ips": [
+          "carddass"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-carddass-restock",
+        "query": "カードダス 再販",
+        "ips": [
+          "carddass",
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-carddass-new",
+        "query": "カードダス 新商品",
+        "ips": [
+          "carddass"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-toreka-lottery",
+        "query": "トレカ 抽選販売",
+        "ips": [
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-card-restock",
+        "query": "カードゲーム 再販 予約",
+        "ips": [
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-toreka-rakuten",
+        "query": "トレーディングカード 楽天ブックス 抽選",
+        "ips": [
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-pbandai-card",
+        "query": "プレミアムバンダイ カード 抽選販売",
+        "ips": [
+          "lottery"
+        ],
+        "weight": 1
+      },
+      {
+        "id": "gn-vanguard-lottery",
+        "query": "ヴァンガード カードゲーム 抽選",
+        "ips": [
+          "vanguard",
+          "lottery"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-vanguard-preorder",
+        "query": "カードファイト ヴァンガード 予約",
+        "ips": [
+          "vanguard",
+          "lottery"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-vanguard-newset",
+        "query": "カードファイト ヴァンガード 新弾",
+        "ips": [
+          "vanguard"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-vanguard-release",
+        "query": "ヴァンガード ブースターパック 発売",
+        "ips": [
+          "vanguard"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-vanguard-restock",
+        "query": "カードファイト ヴァンガード 再販",
+        "ips": [
+          "vanguard",
+          "lottery"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-weiss-lottery",
+        "query": "ヴァイスシュヴァルツ 抽選",
+        "ips": [
+          "weiss",
+          "lottery"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-weiss-preorder",
+        "query": "ヴァイスシュヴァルツ 予約",
+        "ips": [
+          "weiss",
+          "lottery"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-weiss-newset",
+        "query": "ヴァイスシュヴァルツ 新弾",
+        "ips": [
+          "weiss"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-weiss-release",
+        "query": "ヴァイスシュヴァルツ ブースターパック 発売",
+        "ips": [
+          "weiss"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-weiss-restock",
+        "query": "ヴァイスシュヴァルツ 再販",
+        "ips": [
+          "weiss",
+          "lottery"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-unionarena-newset",
+        "query": "ユニオンアリーナ 新弾",
+        "ips": [
+          "unionarena"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-unionarena-preorder",
+        "query": "ユニオンアリーナ 予約",
+        "ips": [
+          "unionarena",
+          "lottery"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-unionarena-lottery",
+        "query": "ユニオンアリーナ 抽選販売",
+        "ips": [
+          "unionarena",
+          "lottery"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-unionarena-release",
+        "query": "ユニオンアリーナ 発売日",
+        "ips": [
+          "unionarena"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-unionarena-hunter",
+        "query": "ユニオンアリーナ ハンターハンター",
+        "ips": [
+          "unionarena"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-unionarena-join",
+        "query": "ユニオンアリーナ 参戦決定",
+        "ips": [
+          "unionarena"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-unionarena-restock",
+        "query": "ユニオンアリーナ 再販",
+        "ips": [
+          "unionarena",
+          "lottery"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-unionarena-booster",
+        "query": "UNION ARENA ブースターパック",
+        "ips": [
+          "unionarena"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-bandai-newtcg",
+        "query": "バンダイ 新作 カードゲーム",
+        "ips": [
+          "newtcg"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-konami-newtcg",
+        "query": "コナミ 新作 カードゲーム",
+        "ips": [
+          "newtcg"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-takaratomy-newtcg",
+        "query": "タカラトミー 新作 カードゲーム",
+        "ips": [
+          "newtcg"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-newtcg-firstset",
+        "query": "カードゲーム 第1弾 予約開始",
+        "ips": [
+          "newtcg",
+          "lottery"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-newtcg-announce",
+        "query": "TCG 新作 発表",
+        "ips": [
+          "newtcg"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-newtcg-firstwave",
+        "query": "新作TCG 第1弾 発売",
+        "ips": [
+          "newtcg"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-newtcg-naruto",
+        "query": "NARUTOカードゲーム 発売",
+        "ips": [
+          "newtcg"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-newtcg-join",
+        "query": "カードゲーム 参戦決定 タイトル",
+        "ips": [
+          "newtcg"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-preorder-start",
+        "query": "トレーディングカード 予約開始",
+        "ips": [
+          "lottery"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-release-upcoming",
+        "query": "カードゲーム 発売予定 新商品",
+        "ips": [
+          "lottery"
+        ],
+        "weight": 1.0
+      },
+      {
+        "id": "gn-secondset",
+        "query": "カードゲーム 第2弾 発売決定",
+        "ips": [
+          "newtcg"
+        ],
+        "weight": 1.0
+      }
+    ]
+  }
+}

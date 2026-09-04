@@ -1,0 +1,96 @@
+# ─────────────────────────────────────────────────────────────
+# GitHub Pages へ公開する
+#
+#   app/               -> /            （PWA本体）
+#   public/feed.json   -> /feed.json   （アプリが読むフィードAPI）
+#
+# 公開URLの例:
+#   https://<user>.github.io/<repo>/
+#   https://<user>.github.io/<repo>/feed.json
+# ─────────────────────────────────────────────────────────────
+name: Deploy Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'public/**'
+      - '.github/workflows/pages.yml'
+  # daily ワークフローが feed.json を更新したあとに再デプロイする
+  # （bot のコミットは [skip ci] 付きなので push トリガーでは起動しないため）
+  workflow_run:
+    workflows: ['TCG bot daily']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 進行中のデプロイはキャンセルせず、順番に流す
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリを取得
+        uses: actions/checkout@v4
+        with:
+          # workflow_run 経由の場合も最新の main を取る
+          ref: main
+
+      - name: 公開用ディレクトリを組み立てる
+        run: |
+          set -e
+          rm -rf _site
+          mkdir -p _site
+
+          # PWA を / 直下に配置
+          if [ -d app ]; then
+            cp -R app/. _site/
+          else
+            echo "::warning::app/ がまだありません。フィードのみ公開します。"
+          fi
+
+          # feed.json を /feed.json に配置
+          if [ -f public/feed.json ]; then
+            cp public/feed.json _site/feed.json
+          else
+            echo "::warning::public/feed.json がまだありません。空のフィードを置きます。"
+            printf '%s\n' '{"version":1,"generatedAt":null,"ranking":{"date":null,"tweetUrl":null,"top":[]},"items":[]}' > _site/feed.json
+          fi
+
+          # public/ の他のファイルもそのまま公開（画像など）
+          if [ -d public ]; then
+            cp -R public/. _site/
+          fi
+
+          # Jekyll の処理を無効化（_ で始まるファイルが消えないように）
+          touch _site/.nojekyll
+
+          echo "--- 公開されるファイル ---"
+          find _site -type f | sort
+
+      - name: Pages の設定を読み込む
+        uses: actions/configure-pages@v5
+
+      - name: 成果物をアップロード
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: GitHub Pages へデプロイ
+        id: deployment
+        uses: actions/deploy-pages@v4

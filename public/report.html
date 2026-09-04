@@ -1,0 +1,1749 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TCGデイリーランキング</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root {
+  --paper: #F7F8FB;
+  --surface: #FFFFFF;
+  --ink: #12172B;
+  --ink-soft: #5A6076;
+  --ink-faint: #8B92A8;
+  --rule: #E2E6F0;
+  --accent: #3D3AE0;
+  --hot: #C6284B;
+  --warm: #A85A14;
+  --calm: #1F7A5A;
+  --urgent: #B3102F;
+  --warn-strong: #8A4A10;
+  --on-accent: #FFFFFF;
+  --shadow: 0 1px 2px rgba(18, 23, 43, .05), 0 8px 24px rgba(18, 23, 43, .05);
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: "Zen Kaku Gothic New", -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E1120;
+    --surface: #161B2E;
+    --ink: #E8EAF4;
+    --ink-soft: #A2A9C0;
+    --ink-faint: #767D96;
+    --rule: #262C46;
+    --accent: #8A87FF;
+    --hot: #FF7391;
+    --warm: #E0A050;
+    --calm: #55C99C;
+    --urgent: #FF8FA3;
+    --warn-strong: #E0A050;
+    --on-accent: #0E1120;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .28);
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0E1120;
+  --surface: #161B2E;
+  --ink: #E8EAF4;
+  --ink-soft: #A2A9C0;
+  --ink-faint: #767D96;
+  --rule: #262C46;
+  --accent: #8A87FF;
+  --hot: #FF7391;
+  --warm: #E0A050;
+  --calm: #55C99C;
+  --urgent: #FF8FA3;
+  --warn-strong: #E0A050;
+  --on-accent: #0E1120;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .28);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 48px 20px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+a { color: inherit; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+a:hover { text-decoration-color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+/* --- 見出し。箔（ホロ）の帯はここ1か所だけ --- */
+.masthead { display: flex; flex-direction: column; gap: 14px; }
+.masthead__eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.masthead__title {
+  margin: 0;
+  font-size: clamp(28px, 5vw, 40px);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+.masthead__date { margin: 0; color: var(--ink-soft); font-size: 15px; }
+.foil {
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #3D3AE0, #7B4BE0, #C43FA8, #E06A3F, #C9A227, #2FA36B, #2E7BE0);
+  background-size: 220% 100%;
+  animation: shift 14s linear infinite;
+}
+@keyframes shift { to { background-position: 220% 0; } }
+@media (prefers-reduced-motion: reduce) { .foil { animation: none; } }
+
+/* --- 統計 --- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.stat { background: var(--surface); padding: 18px 20px; display: flex; flex-direction: column; gap: 2px; }
+.stat__label { font-size: 12px; color: var(--ink-faint); letter-spacing: .04em; }
+.stat__value { font-family: var(--mono); font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.stat__unit { font-size: 13px; color: var(--ink-faint); font-family: var(--sans); margin-left: 2px; }
+
+/* --- セクション --- */
+section { display: flex; flex-direction: column; gap: 20px; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--rule); padding-bottom: 10px; }
+.sec-head h2 { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: .01em; }
+.sec-head .note { font-size: 13px; color: var(--ink-faint); font-family: var(--mono); }
+
+/* --- ランキング --- */
+.ranks { display: flex; flex-direction: column; gap: 14px; }
+.rank {
+  display: grid;
+  grid-template-columns: 68px 1fr;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.rank--lead { border-color: color-mix(in srgb, var(--accent) 35%, var(--rule)); }
+.rank__gutter {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  padding: 22px 0; border-right: 1px solid var(--rule);
+}
+.rank__medal { font-size: 22px; line-height: 1; }
+.rank__num { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.rank__body { padding: 18px 22px 20px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.rank__tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.rank__title { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.55; text-wrap: pretty; }
+.rank--lead .rank__title { font-size: 19px; }
+.rank__summary { margin: 0; color: var(--ink-soft); font-size: 14px; line-height: 1.7; }
+.rank__meta { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; font-size: 13px; color: var(--ink-faint); font-family: var(--mono); }
+.rank__meta .sep { opacity: .5; }
+.dup { color: var(--accent); }
+
+/* スコア */
+.score { display: flex; align-items: center; gap: 9px; margin-top: 2px; }
+.score__label { font-size: 11px; color: var(--ink-faint); letter-spacing: .08em; }
+.score__track { flex: 1; height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden; max-width: 260px; }
+.score__fill { display: block; height: 100%; background: var(--accent); }
+.score__value { font-family: var(--mono); font-size: 12px; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+
+/* --- バッジ・チップ --- */
+.ip {
+  font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 4px;
+  color: #fff; background: var(--ink-soft); white-space: nowrap; line-height: 1.5;
+}
+.ip--sm { font-size: 11px; padding: 1px 7px; }
+.ip--pokemon { background: #C79A00; }
+.ip--onepiece { background: #C1272D; }
+.ip--dragonball { background: #D26516; }
+.ip--gundam { background: #2A5CB8; }
+.ip--hololive { background: #1E8FA8; }
+.ip--yugioh { background: #6B3FA0; }
+.ip--duelmasters { background: #1F3E8C; }
+.ip--mtg { background: #7A5230; }
+.ip--newtcg { background: #2E7D53; }
+.ip--digimon { background: #1B6FA8; }
+.ip--battlespirits { background: #B03A2E; }
+.ip--aikatsu { background: #C2417F; }
+.ip--carddass { background: #5E7A1E; }
+.ip--vanguard { background: #C8541E; }
+.ip--weiss { background: #4A4A8C; }
+.ip--lottery { background: #B03060; }
+.chip {
+  font-size: 11.5px; padding: 2px 8px; border-radius: 4px; line-height: 1.6;
+  border: 1px solid currentColor; white-space: nowrap;
+}
+.chip--hot { color: var(--hot); }
+.chip--warm { color: var(--warm); }
+.chip--calm { color: var(--calm); }
+.chip--neutral { color: var(--ink-faint); }
+/* destUrl があるチップは「押せる」= 応募ページへのリンク */
+a.chip--link { text-decoration: none; cursor: pointer; font-weight: 700; }
+a.chip--link:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
+a.chip--link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* --- 応募導線（第2フェーズ） --- */
+/* 応募ボタン: このページで最も目立つ要素 */
+.apply {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 20px; border-radius: 8px;
+  background: var(--accent); color: var(--on-accent);
+  font-size: 15px; font-weight: 700; line-height: 1.4;
+  text-decoration: none; white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(18, 23, 43, .16);
+}
+.apply:hover { filter: brightness(1.08); text-decoration: none; }
+.apply:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.apply__arrow { font-family: var(--mono); }
+.apply--sm { padding: 7px 14px; font-size: 13px; border-radius: 6px; }
+
+.cta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin: 4px 0 2px; }
+.cta--sm { margin: 6px 0 0; }
+.readmore { font-size: 13px; color: var(--ink-soft); text-decoration: underline; text-decoration-color: var(--rule); }
+.readmore:hover { color: var(--accent); }
+
+/* 行き先の明示（黙って別ドメインに飛ばさない） */
+.dest-hint {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-left: 8px; font-size: 12.5px; font-weight: 500;
+  color: var(--accent); font-family: var(--mono); white-space: nowrap;
+}
+.dest-hint__arrow { opacity: .8; }
+.rank__title.has-dest a, .row__title.has-dest a, .offer__title a { text-decoration-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+
+/* 締切バッジ */
+.dl {
+  font-size: 12px; font-weight: 700; line-height: 1.6; white-space: nowrap;
+  padding: 2px 9px; border-radius: 4px; border: 1px solid currentColor;
+}
+.dl--urgent {
+  color: var(--on-accent); background: var(--urgent); border-color: var(--urgent);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+.dl--soon { color: var(--hot); background: color-mix(in srgb, var(--hot) 12%, var(--surface)); }
+.dl--near { color: var(--warn-strong); background: color-mix(in srgb, var(--warn-strong) 10%, var(--surface)); }
+.dl--far { color: var(--ink-soft); background: color-mix(in srgb, var(--rule) 45%, var(--surface)); border-color: var(--rule); }
+.dl--expired { color: var(--ink-soft); background: transparent; border-style: dashed; font-weight: 500; }
+.dl--start { color: var(--calm); background: color-mix(in srgb, var(--calm) 12%, var(--surface)); }
+@keyframes pulse { 50% { opacity: .75; } }
+@media (prefers-reduced-motion: reduce) { .dl--urgent { animation: none; } }
+
+/* 締切切れは淡色に落とす */
+.is-expired { opacity: .62; }
+.is-expired .row__title, .is-expired .rank__title { text-decoration: line-through; text-decoration-thickness: 1px; }
+
+/* いま応募できるもの */
+.offers { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.offer {
+  display: flex; flex-direction: column; gap: 9px;
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 8px;
+  box-shadow: var(--shadow); padding: 16px 18px 18px;
+  border-left: 3px solid var(--accent);
+}
+.offer--urgent { border-left-color: var(--urgent); }
+.offer--soon { border-left-color: var(--hot); }
+.offer--near { border-left-color: var(--warm); }
+.offer__tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.offer__title { margin: 0; font-size: 16px; font-weight: 700; line-height: 1.5; text-wrap: pretty; }
+.offer__title .dest-hint { margin-left: 6px; }
+.offer__when { margin: 0; font-size: 12px; color: var(--ink-faint); font-family: var(--mono); }
+.sec--offers .sec-head h2 { font-size: 21px; }
+
+/* --- ツイートプレビュー --- */
+.tweets { display: flex; flex-direction: column; gap: 12px; }
+.tweet { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.tweet__head {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 10px 16px; border-bottom: 1px solid var(--rule); background: color-mix(in srgb, var(--paper) 55%, var(--surface));
+}
+.tweet__label { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--ink-soft); }
+.meter { display: flex; align-items: center; gap: 8px; }
+.meter__track { width: 84px; height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden; }
+.meter__fill { display: block; height: 100%; background: var(--calm); }
+.meter--near .meter__fill { background: var(--warm); }
+.meter--over .meter__fill { background: var(--hot); }
+.meter__num { font-family: var(--mono); font-size: 12px; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+.meter__max { color: var(--ink-faint); }
+.tweet__text {
+  margin: 0; padding: 18px 20px; font-family: var(--sans); font-size: 15px; line-height: 1.85;
+  white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;
+}
+
+/* --- 最新情報リスト --- */
+.rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.row { display: grid; grid-template-columns: 92px 1fr; gap: 16px; padding: 14px 4px; border-bottom: 1px solid var(--rule); }
+.row:last-child { border-bottom: 0; }
+.row__time { font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint); font-variant-numeric: tabular-nums; padding-top: 3px; }
+.row__main { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.row__title { font-size: 15px; line-height: 1.6; font-weight: 500; }
+.row__meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.row__src { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); }
+
+/* --- 注記 --- */
+.callout {
+  border: 1px solid var(--rule); border-radius: 8px; padding: 16px 20px;
+  background: var(--surface); color: var(--ink-soft); font-size: 14px;
+}
+.callout strong { color: var(--ink); }
+.foot { color: var(--ink-faint); font-size: 12.5px; font-family: var(--mono); text-align: center; }
+
+@media (max-width: 560px) {
+  .rank { grid-template-columns: 52px 1fr; }
+  .rank__body { padding: 16px; }
+  .row { grid-template-columns: 1fr; gap: 6px; }
+  .row__time { padding-top: 0; }
+}
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <span class="masthead__eyebrow">Daily ranking</span>
+    <h1 class="masthead__title">TCG注目ニュース TOP3</h1>
+    <p class="masthead__date">2026年9月2日(水)　未投稿（ドライラン）</p>
+    <div class="foil" aria-hidden="true"></div>
+  </header>
+
+  <div class="stats">
+    <div class="stat">
+      <span class="stat__label">収集した記事</span>
+      <span class="stat__value">354<span class="stat__unit">件</span></span>
+    </div><div class="stat">
+      <span class="stat__label">まとめた話題</span>
+      <span class="stat__value">222<span class="stat__unit">件</span></span>
+    </div><div class="stat">
+      <span class="stat__label">投稿済み除外</span>
+      <span class="stat__value">0<span class="stat__unit">件</span></span>
+    </div><div class="stat">
+      <span class="stat__label">アプリ掲載</span>
+      <span class="stat__value">50<span class="stat__unit">件</span></span>
+    </div>
+  </div>
+
+  <section class="sec--offers">
+    <div class="sec-head">
+      <h2>🎯 いま応募できるもの</h2>
+      <span class="note">締切が近い順 · 37件</span>
+    </div>
+    <div class="offers">
+    <article class="offer offer--near">
+      <div class="offer__tags">
+        <span class="dl dl--near" title="締切 9/5 23:59">あと3日</span>
+        
+        <span class="ip ip--newtcg ip--sm">新作</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/404636" target="_blank" rel="noopener noreferrer" aria-label="※9月5日まで受付※【予約】[新品ボックス]ビルディバイド - ブライト - ブースターパック 『魔法少女まどか☆マギカ Magia Exedra』(1BOX=16パック) [再販/2612] — カードラボの予約ページを開く">予約</a><a class="chip chip--calm chip--link" href="https://www.c-labo-online.jp/product/404636" target="_blank" rel="noopener noreferrer" aria-label="※9月5日まで受付※【予約】[新品ボックス]ビルディバイド - ブライト - ブースターパック 『魔法少女まどか☆マギカ Magia Exedra』(1BOX=16パック) [再販/2612] — カードラボの再販ページを開く">再販</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/404636" target="_blank" rel="noopener noreferrer" aria-label="※9月5日まで受付※【予約】[新品ボックス]ビルディバイド - ブライト - ブースターパック 『魔法少女まどか☆マギカ Magia Exedra』(1BOX=16パック) [再販/2612] — カードラボの応募ページを開く">※9月5日まで受付※【予約】[新品ボックス]ビルディバイド - ブライト - ブースターパック 『魔法少女まどか☆マギカ Magia Exedra』(1BOX=16パック) [再販/2612]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/404636" target="_blank" rel="noopener noreferrer" aria-label="※9月5日まで受付※【予約】[新品ボックス]ビルディバイド - ブライト - ブースターパック 『魔法少女まどか☆マギカ Magia Exedra』(1BOX=16パック) [再販/2612] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/404636" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切 <time datetime="2026-09-05T14:59:00.000Z">9/5 23:59</time></p>
+    </article>
+    <article class="offer offer--far">
+      <div class="offer__tags">
+        <span class="dl dl--far" title="締切 9/12 23:59">9/12まで</span>
+        
+        <span class="ip ip--newtcg ip--sm">新作</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/407097" target="_blank" rel="noopener noreferrer" aria-label="※9月12日まで受付※【予約】[新品ボックス]DIVINE CROSS ディヴァインクロス ブースターパック 『ローゼンメイデン』(1BOX=20パック) [2610/22] — カードラボの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/407097" target="_blank" rel="noopener noreferrer" aria-label="※9月12日まで受付※【予約】[新品ボックス]DIVINE CROSS ディヴァインクロス ブースターパック 『ローゼンメイデン』(1BOX=20パック) [2610/22] — カードラボの応募ページを開く">※9月12日まで受付※【予約】[新品ボックス]DIVINE CROSS ディヴァインクロス ブースターパック 『ローゼンメイデン』(1BOX=20パック) [2610/22]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/407097" target="_blank" rel="noopener noreferrer" aria-label="※9月12日まで受付※【予約】[新品ボックス]DIVINE CROSS ディヴァインクロス ブースターパック 『ローゼンメイデン』(1BOX=20パック) [2610/22] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/407097" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切 <time datetime="2026-09-12T14:59:00.000Z">9/12 23:59</time></p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--duelmasters ip--sm">デュエマ</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/399363" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾 燃えろ禁断！逆転のドギラゴン革命!!【DM26-RP2】(1BOX=30パック) [再販/2608] — カードラボの予約ページを開く">予約</a><a class="chip chip--calm chip--link" href="https://www.c-labo-online.jp/product/399363" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾 燃えろ禁断！逆転のドギラゴン革命!!【DM26-RP2】(1BOX=30パック) [再販/2608] — カードラボの再販ページを開く">再販</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/399363" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾 燃えろ禁断！逆転のドギラゴン革命!!【DM26-RP2】(1BOX=30パック) [再販/2608] — カードラボの応募ページを開く">【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾 燃えろ禁断！逆転のドギラゴン革命!!【DM26-RP2】(1BOX=30パック) [再販/2608]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/399363" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾 燃えろ禁断！逆転のドギラゴン革命!!【DM26-RP2】(1BOX=30パック) [再販/2608] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/399363" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--mtg ip--sm">MTG</span>
+        <a class="chip chip--hot chip--link" href="https://books.rakuten.co.jp/rb/18737983" target="_blank" rel="noopener noreferrer" aria-label="【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】 — 楽天ブックスの抽選ページを開く">抽選</a><a class="chip chip--neutral chip--link" href="https://books.rakuten.co.jp/rb/18737983" target="_blank" rel="noopener noreferrer" aria-label="【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】 — 楽天ブックスのコラボページを開く">コラボ</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://books.rakuten.co.jp/rb/18737983" target="_blank" rel="noopener noreferrer" aria-label="【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】 — 楽天ブックスの応募ページを開く">【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>楽天ブックス</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://books.rakuten.co.jp/rb/18737983" target="_blank" rel="noopener noreferrer" aria-label="【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】 — 楽天ブックスの応募ページを開く">楽天ブックスで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://books.rakuten.co.jp/rb/18737983" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--mtg ip--sm">MTG</span>
+        <a class="chip chip--warm chip--link" href="https://www.mint-mall.net/products/detail.php?product_id=1321835" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆マジック:ザ・ギャザリング MTG スター・トレック 統率者デッキ 英語版 — ミントモールの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.mint-mall.net/products/detail.php?product_id=1321835" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆マジック:ザ・ギャザリング MTG スター・トレック 統率者デッキ 英語版 — ミントモールの応募ページを開く">◆予約◆マジック:ザ・ギャザリング MTG スター・トレック 統率者デッキ 英語版</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>ミントモール</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.mint-mall.net/products/detail.php?product_id=1321835" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆マジック:ザ・ギャザリング MTG スター・トレック 統率者デッキ 英語版 — ミントモールの応募ページを開く">ミントモールで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.mint-mall.net/products/detail.php?product_id=1321835" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--newtcg ip--sm">新作</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/399284" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]ゴジラ カードゲーム 決戦開始！スタートデッキ 赤「ゴジラ」 [2611/06] — カードラボの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/399284" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]ゴジラ カードゲーム 決戦開始！スタートデッキ 赤「ゴジラ」 [2611/06] — カードラボの応募ページを開く">【予約】[新品]ゴジラ カードゲーム 決戦開始！スタートデッキ 赤「ゴジラ」 [2611/06]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/399284" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]ゴジラ カードゲーム 決戦開始！スタートデッキ 赤「ゴジラ」 [2611/06] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/399284" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--duelmasters ip--sm">デュエマ</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/403975" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 王道W 第4弾 終淵 〜LOVE&amp;ABYSS〜【DM25-RP4】(1BOX=30パック) [再販/2609] — カードラボの予約ページを開く">予約</a><a class="chip chip--calm chip--link" href="https://www.c-labo-online.jp/product/403975" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 王道W 第4弾 終淵 〜LOVE&amp;ABYSS〜【DM25-RP4】(1BOX=30パック) [再販/2609] — カードラボの再販ページを開く">再販</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/403975" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 王道W 第4弾 終淵 〜LOVE&amp;ABYSS〜【DM25-RP4】(1BOX=30パック) [再販/2609] — カードラボの応募ページを開く">【予約】[新品ボックス]デュエル・マスターズTCG 王道W 第4弾 終淵 〜LOVE&amp;ABYSS〜【DM25-RP4】(1BOX=30パック) [再販/2609]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/403975" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 王道W 第4弾 終淵 〜LOVE&amp;ABYSS〜【DM25-RP4】(1BOX=30パック) [再販/2609] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/403975" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--duelmasters ip--sm">デュエマ</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/403974" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG エピソード4 パンドラ・ウォーズ【DM25-EX4】(1BOX=16パック) [再販/2609] — カードラボの予約ページを開く">予約</a><a class="chip chip--calm chip--link" href="https://www.c-labo-online.jp/product/403974" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG エピソード4 パンドラ・ウォーズ【DM25-EX4】(1BOX=16パック) [再販/2609] — カードラボの再販ページを開く">再販</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/403974" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG エピソード4 パンドラ・ウォーズ【DM25-EX4】(1BOX=16パック) [再販/2609] — カードラボの応募ページを開く">【予約】[新品ボックス]デュエル・マスターズTCG エピソード4 パンドラ・ウォーズ【DM25-EX4】(1BOX=16パック) [再販/2609]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/403974" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG エピソード4 パンドラ・ウォーズ【DM25-EX4】(1BOX=16パック) [再販/2609] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/403974" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--newtcg ip--sm">新作</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/401010" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ホロビートカードゲーム 拡張パック第一弾 ホロビート【HB-BP01】(1BOX=30パック) [2611/14] — カードラボの予約ページを開く">予約</a><a class="chip chip--calm chip--link" href="https://www.c-labo-online.jp/product/401010" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ホロビートカードゲーム 拡張パック第一弾 ホロビート【HB-BP01】(1BOX=30パック) [2611/14] — カードラボの新弾ページを開く">新弾</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/401010" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ホロビートカードゲーム 拡張パック第一弾 ホロビート【HB-BP01】(1BOX=30パック) [2611/14] — カードラボの応募ページを開く">【予約】[新品ボックス]ホロビートカードゲーム 拡張パック第一弾 ホロビート【HB-BP01】(1BOX=30パック) [2611/14]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/401010" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ホロビートカードゲーム 拡張パック第一弾 ホロビート【HB-BP01】(1BOX=30パック) [2611/14] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/401010" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--aikatsu ip--sm">アイカツ</span>
+        <a class="chip chip--warm chip--link" href="https://p-bandai.jp/item/item-1000257170" target="_blank" rel="noopener noreferrer" aria-label="【予約販売】アイカツ！1st-2nd ... — プレミアムバンダイの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://p-bandai.jp/item/item-1000257170" target="_blank" rel="noopener noreferrer" aria-label="【予約販売】アイカツ！1st-2nd ... — プレミアムバンダイの応募ページを開く">【予約販売】アイカツ！1st-2nd ...</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>プレミアムバンダイ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://p-bandai.jp/item/item-1000257170" target="_blank" rel="noopener noreferrer" aria-label="【予約販売】アイカツ！1st-2nd ... — プレミアムバンダイの応募ページを開く">プレミアムバンダイで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://p-bandai.jp/item/item-1000257170" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--battlespirits ip--sm">バトスピ</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/404543" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]バトルスピリッツ コラボブースター アイカツ！ 新たなる煌めき【26RCB02】(1BOX=16パック) [2612/26] — カードラボの予約ページを開く">予約</a><a class="chip chip--neutral chip--link" href="https://www.c-labo-online.jp/product/404543" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]バトルスピリッツ コラボブースター アイカツ！ 新たなる煌めき【26RCB02】(1BOX=16パック) [2612/26] — カードラボのコラボページを開く">コラボ</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/404543" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]バトルスピリッツ コラボブースター アイカツ！ 新たなる煌めき【26RCB02】(1BOX=16パック) [2612/26] — カードラボの応募ページを開く">【予約】[新品ボックス]バトルスピリッツ コラボブースター アイカツ！ 新たなる煌めき【26RCB02】(1BOX=16パック) [2612/26]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/404543" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]バトルスピリッツ コラボブースター アイカツ！ 新たなる煌めき【26RCB02】(1BOX=16パック) [2612/26] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/404543" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--battlespirits ip--sm">バトスピ</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/404542" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]バトルスピリッツ コラボスターター アイカツ！ スタンダードステージ！【26RSD12】 [2612/26] — カードラボの予約ページを開く">予約</a><a class="chip chip--neutral chip--link" href="https://www.c-labo-online.jp/product/404542" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]バトルスピリッツ コラボスターター アイカツ！ スタンダードステージ！【26RSD12】 [2612/26] — カードラボのコラボページを開く">コラボ</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/404542" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]バトルスピリッツ コラボスターター アイカツ！ スタンダードステージ！【26RSD12】 [2612/26] — カードラボの応募ページを開く">【予約】[新品]バトルスピリッツ コラボスターター アイカツ！ スタンダードステージ！【26RSD12】 [2612/26]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/404542" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]バトルスピリッツ コラボスターター アイカツ！ スタンダードステージ！【26RSD12】 [2612/26] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/404542" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--digimon ip--sm">デジモン</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/403864" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ユキナモン【ST-26】 [2612/05] — カードラボの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/403864" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ユキナモン【ST-26】 [2612/05] — カードラボの応募ページを開く">【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ユキナモン【ST-26】 [2612/05]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/403864" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ユキナモン【ST-26】 [2612/05] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/403864" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--weiss ip--sm">ヴァイス</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/403398" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]ヴァイスシュヴァルツ トライアルデッキ 『ガールズ＆パンツァー 無限軌道杯』[2610/30] — カードラボの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/403398" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]ヴァイスシュヴァルツ トライアルデッキ 『ガールズ＆パンツァー 無限軌道杯』[2610/30] — カードラボの応募ページを開く">【予約】[新品]ヴァイスシュヴァルツ トライアルデッキ 『ガールズ＆パンツァー 無限軌道杯』[2610/30]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/403398" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]ヴァイスシュヴァルツ トライアルデッキ 『ガールズ＆パンツァー 無限軌道杯』[2610/30] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/403398" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--weiss ip--sm">ヴァイス</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/403400" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『ガールズ＆パンツァー』(1BOX=10パック) [2610/30] — カードラボの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/403400" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『ガールズ＆パンツァー』(1BOX=10パック) [2610/30] — カードラボの応募ページを開く">【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『ガールズ＆パンツァー』(1BOX=10パック) [2610/30]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/403400" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『ガールズ＆パンツァー』(1BOX=10パック) [2610/30] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/403400" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--hololive ip--sm">ホロライブ</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/395319" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ホロライブ hololive OFFICIAL CARD GAME ブースターパック第9弾 ボリュームヴォルテックス(1BOX=12パック) [2609/19] — カードラボの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/395319" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ホロライブ hololive OFFICIAL CARD GAME ブースターパック第9弾 ボリュームヴォルテックス(1BOX=12パック) [2609/19] — カードラボの応募ページを開く">【予約】[新品ボックス]ホロライブ hololive OFFICIAL CARD GAME ブースターパック第9弾 ボリュームヴォルテックス(1BOX=12パック) [2609/19]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/395319" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ホロライブ hololive OFFICIAL CARD GAME ブースターパック第9弾 ボリュームヴォルテックス(1BOX=12パック) [2609/19] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/395319" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--weiss ip--sm">ヴァイス</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/407246" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『Persona 30th Anniversary』(1BOX=10パック) [2611/27] — カードラボの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/407246" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『Persona 30th Anniversary』(1BOX=10パック) [2611/27] — カードラボの応募ページを開く">【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『Persona 30th Anniversary』(1BOX=10パック) [2611/27]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/407246" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『Persona 30th Anniversary』(1BOX=10パック) [2611/27] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/407246" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--battlespirits ip--sm">バトスピ</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/404541" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]バトルスピリッツ アニメスターター 蒼風の剣豪【26RSD11】 [2612/19] — カードラボの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/404541" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]バトルスピリッツ アニメスターター 蒼風の剣豪【26RSD11】 [2612/19] — カードラボの応募ページを開く">【予約】[新品]バトルスピリッツ アニメスターター 蒼風の剣豪【26RSD11】 [2612/19]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/404541" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]バトルスピリッツ アニメスターター 蒼風の剣豪【26RSD11】 [2612/19] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/404541" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--digimon ip--sm">デジモン</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/404515" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デジモンカードゲーム ブースターパック IGNITION OF X【BT-27】(1BOX=24パック) [2612/05] — カードラボの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/404515" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デジモンカードゲーム ブースターパック IGNITION OF X【BT-27】(1BOX=24パック) [2612/05] — カードラボの応募ページを開く">【予約】[新品ボックス]デジモンカードゲーム ブースターパック IGNITION OF X【BT-27】(1BOX=24パック) [2612/05]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/404515" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デジモンカードゲーム ブースターパック IGNITION OF X【BT-27】(1BOX=24パック) [2612/05] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/404515" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--weiss ip--sm">ヴァイス</span>
+        <a class="chip chip--warm chip--link" href="https://www.mint-mall.net/products/detail.php?product_id=1310333" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆ヴァイスシュヴァルツ ブースターパック ステラソラ — ミントモールの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.mint-mall.net/products/detail.php?product_id=1310333" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆ヴァイスシュヴァルツ ブースターパック ステラソラ — ミントモールの応募ページを開く">◆予約◆ヴァイスシュヴァルツ ブースターパック ステラソラ</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>ミントモール</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.mint-mall.net/products/detail.php?product_id=1310333" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆ヴァイスシュヴァルツ ブースターパック ステラソラ — ミントモールの応募ページを開く">ミントモールで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.mint-mall.net/products/detail.php?product_id=1310333" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--vanguard ip--sm">ヴァンガード</span>
+        <a class="chip chip--warm chip--link" href="https://www.mint-mall.net/products/detail.php?product_id=1312817" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆カードファイト!!ヴァンガード スペシャルシリーズ Stride Deckset Ahsha(ストライド デッキセット アーシャ) 【VG-DZ-SS21】 — ミントモールの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.mint-mall.net/products/detail.php?product_id=1312817" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆カードファイト!!ヴァンガード スペシャルシリーズ Stride Deckset Ahsha(ストライド デッキセット アーシャ) 【VG-DZ-SS21】 — ミントモールの応募ページを開く">◆予約◆カードファイト!!ヴァンガード スペシャルシリーズ Stride Deckset Ahsha(ストライド デッキセット アーシャ) 【VG-DZ-SS21】</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>ミントモール</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.mint-mall.net/products/detail.php?product_id=1312817" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆カードファイト!!ヴァンガード スペシャルシリーズ Stride Deckset Ahsha(ストライド デッキセット アーシャ) 【VG-DZ-SS21】 — ミントモールの応募ページを開く">ミントモールで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.mint-mall.net/products/detail.php?product_id=1312817" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--pokemon ip--sm">ポケカ</span>
+        <a class="chip chip--calm chip--link" href="https://books.rakuten.co.jp/rb/18537075" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック アビスアイ【30パック】 — 楽天ブックスの新弾ページを開く">新弾</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://books.rakuten.co.jp/rb/18537075" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック アビスアイ【30パック】 — 楽天ブックスの応募ページを開く">ポケモンカードゲーム MEGA 拡張パック アビスアイ【30パック】</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>楽天ブックス</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://books.rakuten.co.jp/rb/18537075" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック アビスアイ【30パック】 — 楽天ブックスの応募ページを開く">楽天ブックスで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://books.rakuten.co.jp/rb/18537075" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--battlespirits ip--sm">バトスピ</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/406935" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]バトルスピリッツ ツインウエハース 絶界の空(1BOX=20パック) [26年12月] — カードラボの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/406935" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]バトルスピリッツ ツインウエハース 絶界の空(1BOX=20パック) [26年12月] — カードラボの応募ページを開く">【予約】[新品ボックス]バトルスピリッツ ツインウエハース 絶界の空(1BOX=20パック) [26年12月]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/406935" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]バトルスピリッツ ツインウエハース 絶界の空(1BOX=20パック) [26年12月] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/406935" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--vanguard ip--sm">ヴァンガード</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/403957" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]カードファイト!! ヴァンガード Divinez リリカルブースター リリカルモナステリオ 伝説のアイドル！【VG-DZ-LBT03】(1BOX=16パック) [2611/06] — カードラボの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/403957" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]カードファイト!! ヴァンガード Divinez リリカルブースター リリカルモナステリオ 伝説のアイドル！【VG-DZ-LBT03】(1BOX=16パック) [2611/06] — カードラボの応募ページを開く">【予約】[新品ボックス]カードファイト!! ヴァンガード Divinez リリカルブースター リリカルモナステリオ 伝説のアイドル！【VG-DZ-LBT03】(1BOX=16パック) [2611/06]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/403957" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]カードファイト!! ヴァンガード Divinez リリカルブースター リリカルモナステリオ 伝説のアイドル！【VG-DZ-LBT03】(1BOX=16パック) [2611/06] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/403957" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--digimon ip--sm">デジモン</span>
+        <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/403865" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ルビウスドラモン【ST-25】 [2612/05] — カードラボの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/403865" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ルビウスドラモン【ST-25】 [2612/05] — カードラボの応募ページを開く">【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ルビウスドラモン【ST-25】 [2612/05]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/403865" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ルビウスドラモン【ST-25】 [2612/05] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/403865" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--vanguard ip--sm">ヴァンガード</span>
+        <a class="chip chip--warm chip--link" href="https://www.mint-mall.net/products/detail.php?product_id=1315249" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆カードファイト!!ヴァンガード リリカルブースター リリカルモナステリオ 伝説のアイドル!【VG-DZ-LBT03】 — ミントモールの予約ページを開く">予約</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.mint-mall.net/products/detail.php?product_id=1315249" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆カードファイト!!ヴァンガード リリカルブースター リリカルモナステリオ 伝説のアイドル!【VG-DZ-LBT03】 — ミントモールの応募ページを開く">◆予約◆カードファイト!!ヴァンガード リリカルブースター リリカルモナステリオ 伝説のアイドル!【VG-DZ-LBT03】</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>ミントモール</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.mint-mall.net/products/detail.php?product_id=1315249" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆カードファイト!!ヴァンガード リリカルブースター リリカルモナステリオ 伝説のアイドル!【VG-DZ-LBT03】 — ミントモールの応募ページを開く">ミントモールで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.mint-mall.net/products/detail.php?product_id=1315249" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--vanguard ip--sm">ヴァンガード</span>
+        <a class="chip chip--calm chip--link" href="https://www.c-labo-online.jp/product/400221" target="_blank" rel="noopener noreferrer" aria-label="[新品ボックス]カードファイト!! ヴァンガード Divinez ブースターパック 『冥淵葬空』【VG-DZ-BT12】(1BOX=16パック) [再販/2608] — カードラボの再販ページを開く">再販</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/400221" target="_blank" rel="noopener noreferrer" aria-label="[新品ボックス]カードファイト!! ヴァンガード Divinez ブースターパック 『冥淵葬空』【VG-DZ-BT12】(1BOX=16パック) [再販/2608] — カードラボの応募ページを開く">[新品ボックス]カードファイト!! ヴァンガード Divinez ブースターパック 『冥淵葬空』【VG-DZ-BT12】(1BOX=16パック) [再販/2608]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/400221" target="_blank" rel="noopener noreferrer" aria-label="[新品ボックス]カードファイト!! ヴァンガード Divinez ブースターパック 『冥淵葬空』【VG-DZ-BT12】(1BOX=16パック) [再販/2608] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/400221" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--pokemon ip--sm">ポケカ</span>
+        <a class="chip chip--calm chip--link" href="https://books.rakuten.co.jp/rb/18537078" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック ストームエメラルダ — 楽天ブックスの新弾ページを開く">新弾</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://books.rakuten.co.jp/rb/18537078" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック ストームエメラルダ — 楽天ブックスの応募ページを開く">ポケモンカードゲーム MEGA 拡張パック ストームエメラルダ</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>楽天ブックス</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://books.rakuten.co.jp/rb/18537078" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック ストームエメラルダ — 楽天ブックスの応募ページを開く">楽天ブックスで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://books.rakuten.co.jp/rb/18537078" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--pokemon ip--sm">ポケカ</span>
+        <a class="chip chip--calm chip--link" href="https://books.rakuten.co.jp/rb/18595282" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック 30th CELEBRATION — 楽天ブックスの新弾ページを開く">新弾</a>
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://books.rakuten.co.jp/rb/18595282" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック 30th CELEBRATION — 楽天ブックスの応募ページを開く">ポケモンカードゲーム MEGA 拡張パック 30th CELEBRATION</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>楽天ブックス</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://books.rakuten.co.jp/rb/18595282" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック 30th CELEBRATION — 楽天ブックスの応募ページを開く">楽天ブックスで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://books.rakuten.co.jp/rb/18595282" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--onepiece ip--sm">ワンピ</span>
+        
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://books.rakuten.co.jp/rb/18669675" target="_blank" rel="noopener noreferrer" aria-label="ONE PIECEカードゲーム ブースターパック 世界最強の戦士【OP-17】 — 楽天ブックスの応募ページを開く">ONE PIECEカードゲーム ブースターパック 世界最強の戦士【OP-17】</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>楽天ブックス</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://books.rakuten.co.jp/rb/18669675" target="_blank" rel="noopener noreferrer" aria-label="ONE PIECEカードゲーム ブースターパック 世界最強の戦士【OP-17】 — 楽天ブックスの応募ページを開く">楽天ブックスで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://books.rakuten.co.jp/rb/18669675" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--pokemon ip--sm">ポケカ</span>
+        
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://books.rakuten.co.jp/rb/18595283" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 30th CELEBRATION プレミアムデッキセット エーフィ・ブラッキー — 楽天ブックスの応募ページを開く">ポケモンカードゲーム MEGA 30th CELEBRATION プレミアムデッキセット エーフィ・ブラッキー</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>楽天ブックス</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://books.rakuten.co.jp/rb/18595283" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 30th CELEBRATION プレミアムデッキセット エーフィ・ブラッキー — 楽天ブックスの応募ページを開く">楽天ブックスで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://books.rakuten.co.jp/rb/18595283" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--aikatsu ip--sm">アイカツ</span>
+        
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://p-bandai.jp/item/item-1000257096" target="_blank" rel="noopener noreferrer" aria-label="LOVELETSアイカツ！2ndシーズン... — プレミアムバンダイの応募ページを開く">LOVELETSアイカツ！2ndシーズン...</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>プレミアムバンダイ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://p-bandai.jp/item/item-1000257096" target="_blank" rel="noopener noreferrer" aria-label="LOVELETSアイカツ！2ndシーズン... — プレミアムバンダイの応募ページを開く">プレミアムバンダイで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://p-bandai.jp/item/item-1000257096" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--digimon ip--sm">デジモン</span>
+        
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://p-bandai.jp/item/item-1000256594" target="_blank" rel="noopener noreferrer" aria-label="デジモンカードゲーム リミテッ... — プレミアムバンダイの応募ページを開く">デジモンカードゲーム リミテッ...</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>プレミアムバンダイ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://p-bandai.jp/item/item-1000256594" target="_blank" rel="noopener noreferrer" aria-label="デジモンカードゲーム リミテッ... — プレミアムバンダイの応募ページを開く">プレミアムバンダイで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://p-bandai.jp/item/item-1000256594" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--dragonball ip--sm">ドラゴンボール</span>
+        
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://books.rakuten.co.jp/rb/18506278" target="_blank" rel="noopener noreferrer" aria-label="ドラゴンボールスーパーカードゲーム フュージョンワールド ブースターパック CROSS FORCE [FB10] — 楽天ブックスの応募ページを開く">ドラゴンボールスーパーカードゲーム フュージョンワールド ブースターパック CROSS FORCE [FB10]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>楽天ブックス</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://books.rakuten.co.jp/rb/18506278" target="_blank" rel="noopener noreferrer" aria-label="ドラゴンボールスーパーカードゲーム フュージョンワールド ブースターパック CROSS FORCE [FB10] — 楽天ブックスの応募ページを開く">楽天ブックスで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://books.rakuten.co.jp/rb/18506278" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--onepiece ip--sm">ワンピ</span>
+        
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/389063" target="_blank" rel="noopener noreferrer" aria-label="[新品]ONE PIECEカードゲーム スタートデッキ 青 クザン【ST-33】 [2607/11] — カードラボの応募ページを開く">[新品]ONE PIECEカードゲーム スタートデッキ 青 クザン【ST-33】 [2607/11]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/389063" target="_blank" rel="noopener noreferrer" aria-label="[新品]ONE PIECEカードゲーム スタートデッキ 青 クザン【ST-33】 [2607/11] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/389063" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--hololive ip--sm">ホロライブ</span>
+        
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/375820" target="_blank" rel="noopener noreferrer" aria-label="[新品]ホロライブ hololive OFFICIAL CARD GAME ライブスタートデッキ「大空スバル」 [2604/24] — カードラボの応募ページを開く">[新品]ホロライブ hololive OFFICIAL CARD GAME ライブスタートデッキ「大空スバル」 [2604/24]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/375820" target="_blank" rel="noopener noreferrer" aria-label="[新品]ホロライブ hololive OFFICIAL CARD GAME ライブスタートデッキ「大空スバル」 [2604/24] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/375820" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article>
+    <article class="offer">
+      <div class="offer__tags">
+        
+        
+        <span class="ip ip--gundam ip--sm">ガンダム</span>
+        
+      </div>
+      <h3 class="offer__title has-dest"><a href="https://www.c-labo-online.jp/product/389059" target="_blank" rel="noopener noreferrer" aria-label="[新品]ガンダムカードゲーム スタートデッキ SDガンダム ジージェネレーション エターナル Generation Pulse【ST10】[特典あり] [2606/27] — カードラボの応募ページを開く">[新品]ガンダムカードゲーム スタートデッキ SDガンダム ジージェネレーション エターナル Generation Pulse【ST10】[特典あり] [2606/27]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+      <div class="cta">
+        <a class="apply" href="https://www.c-labo-online.jp/product/389059" target="_blank" rel="noopener noreferrer" aria-label="[新品]ガンダムカードゲーム スタートデッキ SDガンダム ジージェネレーション エターナル Generation Pulse【ST10】[特典あり] [2606/27] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a>
+        <a class="readmore" href="https://www.c-labo-online.jp/product/389059" target="_blank" rel="noopener noreferrer">記事を読む ↗</a>
+      </div>
+      <p class="offer__when">締切の記載なし — 早めの応募を</p>
+    </article></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>今日のランキング</h2>
+      <span class="note">直近48時間の記事から選出</span>
+    </div>
+    <div class="ranks">
+    <article class="rank rank--lead">
+      <div class="rank__gutter">
+        <span class="rank__medal" aria-hidden="true">🥇</span>
+        <span class="rank__num">1</span>
+      </div>
+      <div class="rank__body">
+        <div class="rank__tags">
+          
+          
+          <span class="ip ip--duelmasters">デュエマ</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/399363" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾 燃えろ禁断！逆転のドギラゴン革命!!【DM26-RP2】(1BOX=30パック) [再販/2608] — カードラボの予約ページを開く">予約</a><a class="chip chip--calm chip--link" href="https://www.c-labo-online.jp/product/399363" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾 燃えろ禁断！逆転のドギラゴン革命!!【DM26-RP2】(1BOX=30パック) [再販/2608] — カードラボの再販ページを開く">再販</a>
+        </div>
+        <h3 class="rank__title has-dest"><a href="https://www.c-labo-online.jp/product/399363" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾 燃えろ禁断！逆転のドギラゴン革命!!【DM26-RP2】(1BOX=30パック) [再販/2608] — カードラボの応募ページを開く">【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾 燃えろ禁断！逆転のドギラゴン革命!!【DM26-RP2】(1BOX=30パック) [再販/2608]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></h3>
+        
+        <div class="cta"><a class="apply" href="https://www.c-labo-online.jp/product/399363" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾 燃えろ禁断！逆転のドギラゴン革命!!【DM26-RP2】(1BOX=30パック) [再販/2608] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/399363" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+        <div class="rank__meta">
+          <span>カードラボ 新作予約</span>
+          <span class="sep" aria-hidden="true">·</span>
+          <time datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+          <span class="sep" aria-hidden="true">·</span><span class="dup">他1媒体が報道</span>
+        </div>
+        <div class="score" title="スコア 87.10 / 100">
+          <span class="score__label">スコア</span>
+          <span class="score__track"><span class="score__fill" style="width:87.1%"></span></span>
+          <span class="score__value">87.1</span>
+        </div>
+      </div>
+    </article>
+    <article class="rank">
+      <div class="rank__gutter">
+        <span class="rank__medal" aria-hidden="true">🥈</span>
+        <span class="rank__num">2</span>
+      </div>
+      <div class="rank__body">
+        <div class="rank__tags">
+          
+          
+          <span class="ip ip--mtg">MTG</span>
+          <a class="chip chip--hot chip--link" href="https://books.rakuten.co.jp/rb/18737983" target="_blank" rel="noopener noreferrer" aria-label="【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】 — 楽天ブックスの抽選ページを開く">抽選</a><a class="chip chip--neutral chip--link" href="https://books.rakuten.co.jp/rb/18737983" target="_blank" rel="noopener noreferrer" aria-label="【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】 — 楽天ブックスのコラボページを開く">コラボ</a>
+        </div>
+        <h3 class="rank__title has-dest"><a href="https://books.rakuten.co.jp/rb/18737983" target="_blank" rel="noopener noreferrer" aria-label="【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】 — 楽天ブックスの応募ページを開く">【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>楽天ブックス</span></h3>
+        <p class="rank__summary">発売予定 2026年10月頃</p>
+        <div class="cta"><a class="apply" href="https://books.rakuten.co.jp/rb/18737983" target="_blank" rel="noopener noreferrer" aria-label="【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】 — 楽天ブックスの応募ページを開く">楽天ブックスで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://books.rakuten.co.jp/rb/18737983" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+        <div class="rank__meta">
+          <span>楽天ブックス 抽選販売</span>
+          <span class="sep" aria-hidden="true">·</span>
+          <time datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+          
+        </div>
+        <div class="score" title="スコア 86.80 / 100">
+          <span class="score__label">スコア</span>
+          <span class="score__track"><span class="score__fill" style="width:86.8%"></span></span>
+          <span class="score__value">86.8</span>
+        </div>
+      </div>
+    </article>
+    <article class="rank">
+      <div class="rank__gutter">
+        <span class="rank__medal" aria-hidden="true">🥉</span>
+        <span class="rank__num">3</span>
+      </div>
+      <div class="rank__body">
+        <div class="rank__tags">
+          
+          
+          <span class="ip ip--mtg">MTG</span>
+          <a class="chip chip--warm chip--link" href="https://www.mint-mall.net/products/detail.php?product_id=1321835" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆マジック:ザ・ギャザリング MTG スター・トレック 統率者デッキ 英語版 — ミントモールの予約ページを開く">予約</a>
+        </div>
+        <h3 class="rank__title has-dest"><a href="https://www.mint-mall.net/products/detail.php?product_id=1321835" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆マジック:ザ・ギャザリング MTG スター・トレック 統率者デッキ 英語版 — ミントモールの応募ページを開く">◆予約◆マジック:ザ・ギャザリング MTG スター・トレック 統率者デッキ 英語版</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>ミントモール</span></h3>
+        
+        <div class="cta"><a class="apply" href="https://www.mint-mall.net/products/detail.php?product_id=1321835" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆マジック:ザ・ギャザリング MTG スター・トレック 統率者デッキ 英語版 — ミントモールの応募ページを開く">ミントモールで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.mint-mall.net/products/detail.php?product_id=1321835" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+        <div class="rank__meta">
+          <span>ミントモール カードゲーム新着</span>
+          <span class="sep" aria-hidden="true">·</span>
+          <time datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+          <span class="sep" aria-hidden="true">·</span><span class="dup">他7媒体が報道</span>
+        </div>
+        <div class="score" title="スコア 86.00 / 100">
+          <span class="score__label">スコア</span>
+          <span class="score__track"><span class="score__fill" style="width:86%"></span></span>
+          <span class="score__value">86.0</span>
+        </div>
+      </div>
+    </article></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>投稿される文面</h2>
+      <span class="note">スレッド · 全4本</span>
+    </div>
+    <div class="tweets">
+    <article class="tweet">
+      <header class="tweet__head">
+        <span class="tweet__label">1 / 4 本目</span>
+        <span class="meter meter--near">
+          <span class="meter__track"><span class="meter__fill" style="width:99%"></span></span>
+          <span class="meter__num">276<span class="meter__max">/280</span></span>
+        </span>
+      </header>
+      <pre class="tweet__text">【9/2 TCG注目ニュース TOP3】
+
+🥇 デュエマ【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾…
+🥈 MTG【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Mik…
+🥉 MTG ◆予約◆マジック:ザ・ギャザリング MTG スター・トレック 統率者…
+
+くわしくはリプ欄に👇
+#抽選販売</pre>
+    </article>
+    <article class="tweet">
+      <header class="tweet__head">
+        <span class="tweet__label">2 / 4 本目</span>
+        <span class="meter meter--ok">
+          <span class="meter__track"><span class="meter__fill" style="width:90%"></span></span>
+          <span class="meter__num">251<span class="meter__max">/280</span></span>
+        </span>
+      </header>
+      <pre class="tweet__text">🥇 デュエマ
+【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾 燃えろ禁断！逆転のドギラゴン革命!!【DM26-RP2】(1BOX=30パック) [再販/2608]
+
+🛒 カードラボ
+
+📅 9/2 18:22 ／ カードラボ 新作予約
+🏷 予約 再販
+📰 他1媒体が報道
+
+https://www.c-labo-online.jp/product/399363</pre>
+    </article>
+    <article class="tweet">
+      <header class="tweet__head">
+        <span class="tweet__label">3 / 4 本目</span>
+        <span class="meter meter--ok">
+          <span class="meter__track"><span class="meter__fill" style="width:84%"></span></span>
+          <span class="meter__num">235<span class="meter__max">/280</span></span>
+        </span>
+      </header>
+      <pre class="tweet__text">🥈 MTG
+【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】
+
+発売予定 2026年10月頃
+
+🛒 楽天ブックス
+
+📅 9/2 18:22 ／ 楽天ブックス 抽選販売
+🏷 抽選 コラボ
+
+https://books.rakuten.co.jp/rb/18737983</pre>
+    </article>
+    <article class="tweet">
+      <header class="tweet__head">
+        <span class="tweet__label">4 / 4 本目</span>
+        <span class="meter meter--ok">
+          <span class="meter__track"><span class="meter__fill" style="width:70%"></span></span>
+          <span class="meter__num">195<span class="meter__max">/280</span></span>
+        </span>
+      </header>
+      <pre class="tweet__text">🥉 MTG
+◆予約◆マジック:ザ・ギャザリング MTG スター・トレック 統率者デッキ 英語版
+
+🛒 ミントモール
+
+📅 9/2 18:22 ／ ミントモール カードゲーム新着
+🏷 予約
+📰 他7媒体が報道
+
+https://www.mint-mall.net/products/detail.php?product_id=1321835</pre>
+    </article></div>
+    <p class="callout">数値は<strong>Xの重み付き文字数</strong>です。日本語は1文字=2、URLは長さに関係なく23として数えます。上限280。</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>アプリに載る最新情報</h2>
+      <span class="note">新しい順 · 50件</span>
+    </div>
+    <ul class="rows">
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/399363" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾 燃えろ禁断！逆転のドギラゴン革命!!【DM26-RP2】(1BOX=30パック) [再販/2608] — カードラボの応募ページを開く">【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾 燃えろ禁断！逆転のドギラゴン革命!!【DM26-RP2】(1BOX=30パック) [再販/2608]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--duelmasters ip--sm">デュエマ</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/399363" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾 燃えろ禁断！逆転のドギラゴン革命!!【DM26-RP2】(1BOX=30パック) [再販/2608] — カードラボの予約ページを開く">予約</a><a class="chip chip--calm chip--link" href="https://www.c-labo-online.jp/product/399363" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾 燃えろ禁断！逆転のドギラゴン革命!!【DM26-RP2】(1BOX=30パック) [再販/2608] — カードラボの再販ページを開く">再販</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/399363" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 逆札篇 第2弾 燃えろ禁断！逆転のドギラゴン革命!!【DM26-RP2】(1BOX=30パック) [再販/2608] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/399363" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://books.rakuten.co.jp/rb/18737983" target="_blank" rel="noopener noreferrer" aria-label="【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】 — 楽天ブックスの応募ページを開く">【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>楽天ブックス</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--mtg ip--sm">MTG</span>
+          <a class="chip chip--hot chip--link" href="https://books.rakuten.co.jp/rb/18737983" target="_blank" rel="noopener noreferrer" aria-label="【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】 — 楽天ブックスの抽選ページを開く">抽選</a><a class="chip chip--neutral chip--link" href="https://books.rakuten.co.jp/rb/18737983" target="_blank" rel="noopener noreferrer" aria-label="【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】 — 楽天ブックスのコラボページを開く">コラボ</a>
+          <span class="row__src">楽天ブックス 抽選販売</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://books.rakuten.co.jp/rb/18737983" target="_blank" rel="noopener noreferrer" aria-label="【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】 — 楽天ブックスの応募ページを開く">楽天ブックスで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://books.rakuten.co.jp/rb/18737983" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/407097" target="_blank" rel="noopener noreferrer" aria-label="※9月12日まで受付※【予約】[新品ボックス]DIVINE CROSS ディヴァインクロス ブースターパック 『ローゼンメイデン』(1BOX=20パック) [2610/22] — カードラボの応募ページを開く">※9月12日まで受付※【予約】[新品ボックス]DIVINE CROSS ディヴァインクロス ブースターパック 『ローゼンメイデン』(1BOX=20パック) [2610/22]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          <span class="dl dl--far" title="締切 9/12 23:59">9/12まで</span>
+          
+          <span class="ip ip--newtcg ip--sm">新作</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/407097" target="_blank" rel="noopener noreferrer" aria-label="※9月12日まで受付※【予約】[新品ボックス]DIVINE CROSS ディヴァインクロス ブースターパック 『ローゼンメイデン』(1BOX=20パック) [2610/22] — カードラボの予約ページを開く">予約</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/407097" target="_blank" rel="noopener noreferrer" aria-label="※9月12日まで受付※【予約】[新品ボックス]DIVINE CROSS ディヴァインクロス ブースターパック 『ローゼンメイデン』(1BOX=20パック) [2610/22] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/407097" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/399284" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]ゴジラ カードゲーム 決戦開始！スタートデッキ 赤「ゴジラ」 [2611/06] — カードラボの応募ページを開く">【予約】[新品]ゴジラ カードゲーム 決戦開始！スタートデッキ 赤「ゴジラ」 [2611/06]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--newtcg ip--sm">新作</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/399284" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]ゴジラ カードゲーム 決戦開始！スタートデッキ 赤「ゴジラ」 [2611/06] — カードラボの予約ページを開く">予約</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/399284" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]ゴジラ カードゲーム 決戦開始！スタートデッキ 赤「ゴジラ」 [2611/06] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/399284" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/404636" target="_blank" rel="noopener noreferrer" aria-label="※9月5日まで受付※【予約】[新品ボックス]ビルディバイド - ブライト - ブースターパック 『魔法少女まどか☆マギカ Magia Exedra』(1BOX=16パック) [再販/2612] — カードラボの応募ページを開く">※9月5日まで受付※【予約】[新品ボックス]ビルディバイド - ブライト - ブースターパック 『魔法少女まどか☆マギカ Magia Exedra』(1BOX=16パック) [再販/2612]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          <span class="dl dl--near" title="締切 9/5 23:59">あと3日</span>
+          
+          <span class="ip ip--newtcg ip--sm">新作</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/404636" target="_blank" rel="noopener noreferrer" aria-label="※9月5日まで受付※【予約】[新品ボックス]ビルディバイド - ブライト - ブースターパック 『魔法少女まどか☆マギカ Magia Exedra』(1BOX=16パック) [再販/2612] — カードラボの予約ページを開く">予約</a><a class="chip chip--calm chip--link" href="https://www.c-labo-online.jp/product/404636" target="_blank" rel="noopener noreferrer" aria-label="※9月5日まで受付※【予約】[新品ボックス]ビルディバイド - ブライト - ブースターパック 『魔法少女まどか☆マギカ Magia Exedra』(1BOX=16パック) [再販/2612] — カードラボの再販ページを開く">再販</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/404636" target="_blank" rel="noopener noreferrer" aria-label="※9月5日まで受付※【予約】[新品ボックス]ビルディバイド - ブライト - ブースターパック 『魔法少女まどか☆マギカ Magia Exedra』(1BOX=16パック) [再販/2612] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/404636" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/403975" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 王道W 第4弾 終淵 〜LOVE&amp;ABYSS〜【DM25-RP4】(1BOX=30パック) [再販/2609] — カードラボの応募ページを開く">【予約】[新品ボックス]デュエル・マスターズTCG 王道W 第4弾 終淵 〜LOVE&amp;ABYSS〜【DM25-RP4】(1BOX=30パック) [再販/2609]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--duelmasters ip--sm">デュエマ</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/403975" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 王道W 第4弾 終淵 〜LOVE&amp;ABYSS〜【DM25-RP4】(1BOX=30パック) [再販/2609] — カードラボの予約ページを開く">予約</a><a class="chip chip--calm chip--link" href="https://www.c-labo-online.jp/product/403975" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 王道W 第4弾 終淵 〜LOVE&amp;ABYSS〜【DM25-RP4】(1BOX=30パック) [再販/2609] — カードラボの再販ページを開く">再販</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/403975" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG 王道W 第4弾 終淵 〜LOVE&amp;ABYSS〜【DM25-RP4】(1BOX=30パック) [再販/2609] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/403975" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/403974" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG エピソード4 パンドラ・ウォーズ【DM25-EX4】(1BOX=16パック) [再販/2609] — カードラボの応募ページを開く">【予約】[新品ボックス]デュエル・マスターズTCG エピソード4 パンドラ・ウォーズ【DM25-EX4】(1BOX=16パック) [再販/2609]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--duelmasters ip--sm">デュエマ</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/403974" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG エピソード4 パンドラ・ウォーズ【DM25-EX4】(1BOX=16パック) [再販/2609] — カードラボの予約ページを開く">予約</a><a class="chip chip--calm chip--link" href="https://www.c-labo-online.jp/product/403974" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG エピソード4 パンドラ・ウォーズ【DM25-EX4】(1BOX=16パック) [再販/2609] — カードラボの再販ページを開く">再販</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/403974" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デュエル・マスターズTCG エピソード4 パンドラ・ウォーズ【DM25-EX4】(1BOX=16パック) [再販/2609] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/403974" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/401010" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ホロビートカードゲーム 拡張パック第一弾 ホロビート【HB-BP01】(1BOX=30パック) [2611/14] — カードラボの応募ページを開く">【予約】[新品ボックス]ホロビートカードゲーム 拡張パック第一弾 ホロビート【HB-BP01】(1BOX=30パック) [2611/14]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--newtcg ip--sm">新作</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/401010" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ホロビートカードゲーム 拡張パック第一弾 ホロビート【HB-BP01】(1BOX=30パック) [2611/14] — カードラボの予約ページを開く">予約</a><a class="chip chip--calm chip--link" href="https://www.c-labo-online.jp/product/401010" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ホロビートカードゲーム 拡張パック第一弾 ホロビート【HB-BP01】(1BOX=30パック) [2611/14] — カードラボの新弾ページを開く">新弾</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/401010" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ホロビートカードゲーム 拡張パック第一弾 ホロビート【HB-BP01】(1BOX=30パック) [2611/14] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/401010" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.mint-mall.net/products/detail.php?product_id=1321835" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆マジック:ザ・ギャザリング MTG スター・トレック 統率者デッキ 英語版 — ミントモールの応募ページを開く">◆予約◆マジック:ザ・ギャザリング MTG スター・トレック 統率者デッキ 英語版</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>ミントモール</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--mtg ip--sm">MTG</span>
+          <a class="chip chip--warm chip--link" href="https://www.mint-mall.net/products/detail.php?product_id=1321835" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆マジック:ザ・ギャザリング MTG スター・トレック 統率者デッキ 英語版 — ミントモールの予約ページを開く">予約</a>
+          <span class="row__src">ミントモール カードゲーム新着</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.mint-mall.net/products/detail.php?product_id=1321835" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆マジック:ザ・ギャザリング MTG スター・トレック 統率者デッキ 英語版 — ミントモールの応募ページを開く">ミントモールで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.mint-mall.net/products/detail.php?product_id=1321835" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://p-bandai.jp/item/item-1000257170" target="_blank" rel="noopener noreferrer" aria-label="【予約販売】アイカツ！1st-2nd ... — プレミアムバンダイの応募ページを開く">【予約販売】アイカツ！1st-2nd ...</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>プレミアムバンダイ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--aikatsu ip--sm">アイカツ</span>
+          <a class="chip chip--warm chip--link" href="https://p-bandai.jp/item/item-1000257170" target="_blank" rel="noopener noreferrer" aria-label="【予約販売】アイカツ！1st-2nd ... — プレミアムバンダイの予約ページを開く">予約</a>
+          <span class="row__src">プレミアムバンダイ 新着商品</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://p-bandai.jp/item/item-1000257170" target="_blank" rel="noopener noreferrer" aria-label="【予約販売】アイカツ！1st-2nd ... — プレミアムバンダイの応募ページを開く">プレミアムバンダイで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://p-bandai.jp/item/item-1000257170" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/404543" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]バトルスピリッツ コラボブースター アイカツ！ 新たなる煌めき【26RCB02】(1BOX=16パック) [2612/26] — カードラボの応募ページを開く">【予約】[新品ボックス]バトルスピリッツ コラボブースター アイカツ！ 新たなる煌めき【26RCB02】(1BOX=16パック) [2612/26]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--battlespirits ip--sm">バトスピ</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/404543" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]バトルスピリッツ コラボブースター アイカツ！ 新たなる煌めき【26RCB02】(1BOX=16パック) [2612/26] — カードラボの予約ページを開く">予約</a><a class="chip chip--neutral chip--link" href="https://www.c-labo-online.jp/product/404543" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]バトルスピリッツ コラボブースター アイカツ！ 新たなる煌めき【26RCB02】(1BOX=16パック) [2612/26] — カードラボのコラボページを開く">コラボ</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/404543" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]バトルスピリッツ コラボブースター アイカツ！ 新たなる煌めき【26RCB02】(1BOX=16パック) [2612/26] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/404543" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/404542" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]バトルスピリッツ コラボスターター アイカツ！ スタンダードステージ！【26RSD12】 [2612/26] — カードラボの応募ページを開く">【予約】[新品]バトルスピリッツ コラボスターター アイカツ！ スタンダードステージ！【26RSD12】 [2612/26]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--battlespirits ip--sm">バトスピ</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/404542" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]バトルスピリッツ コラボスターター アイカツ！ スタンダードステージ！【26RSD12】 [2612/26] — カードラボの予約ページを開く">予約</a><a class="chip chip--neutral chip--link" href="https://www.c-labo-online.jp/product/404542" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]バトルスピリッツ コラボスターター アイカツ！ スタンダードステージ！【26RSD12】 [2612/26] — カードラボのコラボページを開く">コラボ</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/404542" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]バトルスピリッツ コラボスターター アイカツ！ スタンダードステージ！【26RSD12】 [2612/26] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/404542" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/403864" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ユキナモン【ST-26】 [2612/05] — カードラボの応募ページを開く">【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ユキナモン【ST-26】 [2612/05]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--digimon ip--sm">デジモン</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/403864" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ユキナモン【ST-26】 [2612/05] — カードラボの予約ページを開く">予約</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/403864" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ユキナモン【ST-26】 [2612/05] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/403864" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/403398" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]ヴァイスシュヴァルツ トライアルデッキ 『ガールズ＆パンツァー 無限軌道杯』[2610/30] — カードラボの応募ページを開く">【予約】[新品]ヴァイスシュヴァルツ トライアルデッキ 『ガールズ＆パンツァー 無限軌道杯』[2610/30]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--weiss ip--sm">ヴァイス</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/403398" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]ヴァイスシュヴァルツ トライアルデッキ 『ガールズ＆パンツァー 無限軌道杯』[2610/30] — カードラボの予約ページを開く">予約</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/403398" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]ヴァイスシュヴァルツ トライアルデッキ 『ガールズ＆パンツァー 無限軌道杯』[2610/30] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/403398" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/403400" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『ガールズ＆パンツァー』(1BOX=10パック) [2610/30] — カードラボの応募ページを開く">【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『ガールズ＆パンツァー』(1BOX=10パック) [2610/30]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--weiss ip--sm">ヴァイス</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/403400" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『ガールズ＆パンツァー』(1BOX=10パック) [2610/30] — カードラボの予約ページを開く">予約</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/403400" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『ガールズ＆パンツァー』(1BOX=10パック) [2610/30] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/403400" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/395319" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ホロライブ hololive OFFICIAL CARD GAME ブースターパック第9弾 ボリュームヴォルテックス(1BOX=12パック) [2609/19] — カードラボの応募ページを開く">【予約】[新品ボックス]ホロライブ hololive OFFICIAL CARD GAME ブースターパック第9弾 ボリュームヴォルテックス(1BOX=12パック) [2609/19]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--hololive ip--sm">ホロライブ</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/395319" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ホロライブ hololive OFFICIAL CARD GAME ブースターパック第9弾 ボリュームヴォルテックス(1BOX=12パック) [2609/19] — カードラボの予約ページを開く">予約</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/395319" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ホロライブ hololive OFFICIAL CARD GAME ブースターパック第9弾 ボリュームヴォルテックス(1BOX=12パック) [2609/19] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/395319" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/407246" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『Persona 30th Anniversary』(1BOX=10パック) [2611/27] — カードラボの応募ページを開く">【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『Persona 30th Anniversary』(1BOX=10パック) [2611/27]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--weiss ip--sm">ヴァイス</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/407246" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『Persona 30th Anniversary』(1BOX=10パック) [2611/27] — カードラボの予約ページを開く">予約</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/407246" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『Persona 30th Anniversary』(1BOX=10パック) [2611/27] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/407246" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/404541" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]バトルスピリッツ アニメスターター 蒼風の剣豪【26RSD11】 [2612/19] — カードラボの応募ページを開く">【予約】[新品]バトルスピリッツ アニメスターター 蒼風の剣豪【26RSD11】 [2612/19]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--battlespirits ip--sm">バトスピ</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/404541" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]バトルスピリッツ アニメスターター 蒼風の剣豪【26RSD11】 [2612/19] — カードラボの予約ページを開く">予約</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/404541" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]バトルスピリッツ アニメスターター 蒼風の剣豪【26RSD11】 [2612/19] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/404541" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/404515" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デジモンカードゲーム ブースターパック IGNITION OF X【BT-27】(1BOX=24パック) [2612/05] — カードラボの応募ページを開く">【予約】[新品ボックス]デジモンカードゲーム ブースターパック IGNITION OF X【BT-27】(1BOX=24パック) [2612/05]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--digimon ip--sm">デジモン</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/404515" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デジモンカードゲーム ブースターパック IGNITION OF X【BT-27】(1BOX=24パック) [2612/05] — カードラボの予約ページを開く">予約</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/404515" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]デジモンカードゲーム ブースターパック IGNITION OF X【BT-27】(1BOX=24パック) [2612/05] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/404515" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.mint-mall.net/products/detail.php?product_id=1310333" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆ヴァイスシュヴァルツ ブースターパック ステラソラ — ミントモールの応募ページを開く">◆予約◆ヴァイスシュヴァルツ ブースターパック ステラソラ</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>ミントモール</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--weiss ip--sm">ヴァイス</span>
+          <a class="chip chip--warm chip--link" href="https://www.mint-mall.net/products/detail.php?product_id=1310333" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆ヴァイスシュヴァルツ ブースターパック ステラソラ — ミントモールの予約ページを開く">予約</a>
+          <span class="row__src">ミントモール カードゲーム新着</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.mint-mall.net/products/detail.php?product_id=1310333" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆ヴァイスシュヴァルツ ブースターパック ステラソラ — ミントモールの応募ページを開く">ミントモールで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.mint-mall.net/products/detail.php?product_id=1310333" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.mint-mall.net/products/detail.php?product_id=1312817" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆カードファイト!!ヴァンガード スペシャルシリーズ Stride Deckset Ahsha(ストライド デッキセット アーシャ) 【VG-DZ-SS21】 — ミントモールの応募ページを開く">◆予約◆カードファイト!!ヴァンガード スペシャルシリーズ Stride Deckset Ahsha(ストライド デッキセット アーシャ) 【VG-DZ-SS21】</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>ミントモール</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--vanguard ip--sm">ヴァンガード</span>
+          <a class="chip chip--warm chip--link" href="https://www.mint-mall.net/products/detail.php?product_id=1312817" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆カードファイト!!ヴァンガード スペシャルシリーズ Stride Deckset Ahsha(ストライド デッキセット アーシャ) 【VG-DZ-SS21】 — ミントモールの予約ページを開く">予約</a>
+          <span class="row__src">ミントモール カードゲーム新着</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.mint-mall.net/products/detail.php?product_id=1312817" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆カードファイト!!ヴァンガード スペシャルシリーズ Stride Deckset Ahsha(ストライド デッキセット アーシャ) 【VG-DZ-SS21】 — ミントモールの応募ページを開く">ミントモールで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.mint-mall.net/products/detail.php?product_id=1312817" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://books.rakuten.co.jp/rb/18537075" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック アビスアイ【30パック】 — 楽天ブックスの応募ページを開く">ポケモンカードゲーム MEGA 拡張パック アビスアイ【30パック】</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>楽天ブックス</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--pokemon ip--sm">ポケカ</span>
+          <a class="chip chip--calm chip--link" href="https://books.rakuten.co.jp/rb/18537075" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック アビスアイ【30パック】 — 楽天ブックスの新弾ページを開く">新弾</a>
+          <span class="row__src">楽天ブックス 抽選販売</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://books.rakuten.co.jp/rb/18537075" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック アビスアイ【30パック】 — 楽天ブックスの応募ページを開く">楽天ブックスで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://books.rakuten.co.jp/rb/18537075" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/406935" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]バトルスピリッツ ツインウエハース 絶界の空(1BOX=20パック) [26年12月] — カードラボの応募ページを開く">【予約】[新品ボックス]バトルスピリッツ ツインウエハース 絶界の空(1BOX=20パック) [26年12月]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--battlespirits ip--sm">バトスピ</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/406935" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]バトルスピリッツ ツインウエハース 絶界の空(1BOX=20パック) [26年12月] — カードラボの予約ページを開く">予約</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/406935" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]バトルスピリッツ ツインウエハース 絶界の空(1BOX=20パック) [26年12月] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/406935" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/403957" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]カードファイト!! ヴァンガード Divinez リリカルブースター リリカルモナステリオ 伝説のアイドル！【VG-DZ-LBT03】(1BOX=16パック) [2611/06] — カードラボの応募ページを開く">【予約】[新品ボックス]カードファイト!! ヴァンガード Divinez リリカルブースター リリカルモナステリオ 伝説のアイドル！【VG-DZ-LBT03】(1BOX=16パック) [2611/06]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--vanguard ip--sm">ヴァンガード</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/403957" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]カードファイト!! ヴァンガード Divinez リリカルブースター リリカルモナステリオ 伝説のアイドル！【VG-DZ-LBT03】(1BOX=16パック) [2611/06] — カードラボの予約ページを開く">予約</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/403957" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品ボックス]カードファイト!! ヴァンガード Divinez リリカルブースター リリカルモナステリオ 伝説のアイドル！【VG-DZ-LBT03】(1BOX=16パック) [2611/06] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/403957" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/403865" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ルビウスドラモン【ST-25】 [2612/05] — カードラボの応募ページを開く">【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ルビウスドラモン【ST-25】 [2612/05]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--digimon ip--sm">デジモン</span>
+          <a class="chip chip--warm chip--link" href="https://www.c-labo-online.jp/product/403865" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ルビウスドラモン【ST-25】 [2612/05] — カードラボの予約ページを開く">予約</a>
+          <span class="row__src">カードラボ 新作予約</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/403865" target="_blank" rel="noopener noreferrer" aria-label="【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ルビウスドラモン【ST-25】 [2612/05] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/403865" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.mint-mall.net/products/detail.php?product_id=1315249" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆カードファイト!!ヴァンガード リリカルブースター リリカルモナステリオ 伝説のアイドル!【VG-DZ-LBT03】 — ミントモールの応募ページを開く">◆予約◆カードファイト!!ヴァンガード リリカルブースター リリカルモナステリオ 伝説のアイドル!【VG-DZ-LBT03】</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>ミントモール</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--vanguard ip--sm">ヴァンガード</span>
+          <a class="chip chip--warm chip--link" href="https://www.mint-mall.net/products/detail.php?product_id=1315249" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆カードファイト!!ヴァンガード リリカルブースター リリカルモナステリオ 伝説のアイドル!【VG-DZ-LBT03】 — ミントモールの予約ページを開く">予約</a>
+          <span class="row__src">ミントモール カードゲーム新着</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.mint-mall.net/products/detail.php?product_id=1315249" target="_blank" rel="noopener noreferrer" aria-label="◆予約◆カードファイト!!ヴァンガード リリカルブースター リリカルモナステリオ 伝説のアイドル!【VG-DZ-LBT03】 — ミントモールの応募ページを開く">ミントモールで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.mint-mall.net/products/detail.php?product_id=1315249" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/400221" target="_blank" rel="noopener noreferrer" aria-label="[新品ボックス]カードファイト!! ヴァンガード Divinez ブースターパック 『冥淵葬空』【VG-DZ-BT12】(1BOX=16パック) [再販/2608] — カードラボの応募ページを開く">[新品ボックス]カードファイト!! ヴァンガード Divinez ブースターパック 『冥淵葬空』【VG-DZ-BT12】(1BOX=16パック) [再販/2608]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--vanguard ip--sm">ヴァンガード</span>
+          <a class="chip chip--calm chip--link" href="https://www.c-labo-online.jp/product/400221" target="_blank" rel="noopener noreferrer" aria-label="[新品ボックス]カードファイト!! ヴァンガード Divinez ブースターパック 『冥淵葬空』【VG-DZ-BT12】(1BOX=16パック) [再販/2608] — カードラボの再販ページを開く">再販</a>
+          <span class="row__src">カードラボ 新着</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/400221" target="_blank" rel="noopener noreferrer" aria-label="[新品ボックス]カードファイト!! ヴァンガード Divinez ブースターパック 『冥淵葬空』【VG-DZ-BT12】(1BOX=16パック) [再販/2608] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/400221" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://books.rakuten.co.jp/rb/18537078" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック ストームエメラルダ — 楽天ブックスの応募ページを開く">ポケモンカードゲーム MEGA 拡張パック ストームエメラルダ</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>楽天ブックス</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--pokemon ip--sm">ポケカ</span>
+          <a class="chip chip--calm chip--link" href="https://books.rakuten.co.jp/rb/18537078" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック ストームエメラルダ — 楽天ブックスの新弾ページを開く">新弾</a>
+          <span class="row__src">楽天ブックス 抽選販売</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://books.rakuten.co.jp/rb/18537078" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック ストームエメラルダ — 楽天ブックスの応募ページを開く">楽天ブックスで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://books.rakuten.co.jp/rb/18537078" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://books.rakuten.co.jp/rb/18595282" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック 30th CELEBRATION — 楽天ブックスの応募ページを開く">ポケモンカードゲーム MEGA 拡張パック 30th CELEBRATION</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>楽天ブックス</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--pokemon ip--sm">ポケカ</span>
+          <a class="chip chip--calm chip--link" href="https://books.rakuten.co.jp/rb/18595282" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック 30th CELEBRATION — 楽天ブックスの新弾ページを開く">新弾</a>
+          <span class="row__src">楽天ブックス 抽選販売</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://books.rakuten.co.jp/rb/18595282" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 拡張パック 30th CELEBRATION — 楽天ブックスの応募ページを開く">楽天ブックスで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://books.rakuten.co.jp/rb/18595282" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://books.rakuten.co.jp/rb/18669675" target="_blank" rel="noopener noreferrer" aria-label="ONE PIECEカードゲーム ブースターパック 世界最強の戦士【OP-17】 — 楽天ブックスの応募ページを開く">ONE PIECEカードゲーム ブースターパック 世界最強の戦士【OP-17】</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>楽天ブックス</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--onepiece ip--sm">ワンピ</span>
+          
+          <span class="row__src">楽天ブックス 抽選販売</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://books.rakuten.co.jp/rb/18669675" target="_blank" rel="noopener noreferrer" aria-label="ONE PIECEカードゲーム ブースターパック 世界最強の戦士【OP-17】 — 楽天ブックスの応募ページを開く">楽天ブックスで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://books.rakuten.co.jp/rb/18669675" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://books.rakuten.co.jp/rb/18595283" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 30th CELEBRATION プレミアムデッキセット エーフィ・ブラッキー — 楽天ブックスの応募ページを開く">ポケモンカードゲーム MEGA 30th CELEBRATION プレミアムデッキセット エーフィ・ブラッキー</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>楽天ブックス</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--pokemon ip--sm">ポケカ</span>
+          
+          <span class="row__src">楽天ブックス 抽選販売</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://books.rakuten.co.jp/rb/18595283" target="_blank" rel="noopener noreferrer" aria-label="ポケモンカードゲーム MEGA 30th CELEBRATION プレミアムデッキセット エーフィ・ブラッキー — 楽天ブックスの応募ページを開く">楽天ブックスで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://books.rakuten.co.jp/rb/18595283" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://p-bandai.jp/item/item-1000257096" target="_blank" rel="noopener noreferrer" aria-label="LOVELETSアイカツ！2ndシーズン... — プレミアムバンダイの応募ページを開く">LOVELETSアイカツ！2ndシーズン...</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>プレミアムバンダイ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--aikatsu ip--sm">アイカツ</span>
+          
+          <span class="row__src">プレミアムバンダイ 新着商品</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://p-bandai.jp/item/item-1000257096" target="_blank" rel="noopener noreferrer" aria-label="LOVELETSアイカツ！2ndシーズン... — プレミアムバンダイの応募ページを開く">プレミアムバンダイで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://p-bandai.jp/item/item-1000257096" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://p-bandai.jp/item/item-1000256594" target="_blank" rel="noopener noreferrer" aria-label="デジモンカードゲーム リミテッ... — プレミアムバンダイの応募ページを開く">デジモンカードゲーム リミテッ...</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>プレミアムバンダイ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--digimon ip--sm">デジモン</span>
+          
+          <span class="row__src">プレミアムバンダイ 新着商品</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://p-bandai.jp/item/item-1000256594" target="_blank" rel="noopener noreferrer" aria-label="デジモンカードゲーム リミテッ... — プレミアムバンダイの応募ページを開く">プレミアムバンダイで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://p-bandai.jp/item/item-1000256594" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://books.rakuten.co.jp/rb/18506278" target="_blank" rel="noopener noreferrer" aria-label="ドラゴンボールスーパーカードゲーム フュージョンワールド ブースターパック CROSS FORCE [FB10] — 楽天ブックスの応募ページを開く">ドラゴンボールスーパーカードゲーム フュージョンワールド ブースターパック CROSS FORCE [FB10]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>楽天ブックス</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--dragonball ip--sm">ドラゴンボール</span>
+          
+          <span class="row__src">楽天ブックス 抽選販売</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://books.rakuten.co.jp/rb/18506278" target="_blank" rel="noopener noreferrer" aria-label="ドラゴンボールスーパーカードゲーム フュージョンワールド ブースターパック CROSS FORCE [FB10] — 楽天ブックスの応募ページを開く">楽天ブックスで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://books.rakuten.co.jp/rb/18506278" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/389063" target="_blank" rel="noopener noreferrer" aria-label="[新品]ONE PIECEカードゲーム スタートデッキ 青 クザン【ST-33】 [2607/11] — カードラボの応募ページを開く">[新品]ONE PIECEカードゲーム スタートデッキ 青 クザン【ST-33】 [2607/11]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--onepiece ip--sm">ワンピ</span>
+          
+          <span class="row__src">カードラボ 新着</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/389063" target="_blank" rel="noopener noreferrer" aria-label="[新品]ONE PIECEカードゲーム スタートデッキ 青 クザン【ST-33】 [2607/11] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/389063" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/375820" target="_blank" rel="noopener noreferrer" aria-label="[新品]ホロライブ hololive OFFICIAL CARD GAME ライブスタートデッキ「大空スバル」 [2604/24] — カードラボの応募ページを開く">[新品]ホロライブ hololive OFFICIAL CARD GAME ライブスタートデッキ「大空スバル」 [2604/24]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--hololive ip--sm">ホロライブ</span>
+          
+          <span class="row__src">カードラボ 新着</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/375820" target="_blank" rel="noopener noreferrer" aria-label="[新品]ホロライブ hololive OFFICIAL CARD GAME ライブスタートデッキ「大空スバル」 [2604/24] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/375820" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title has-dest"><a href="https://www.c-labo-online.jp/product/389059" target="_blank" rel="noopener noreferrer" aria-label="[新品]ガンダムカードゲーム スタートデッキ SDガンダム ジージェネレーション エターナル Generation Pulse【ST10】[特典あり] [2606/27] — カードラボの応募ページを開く">[新品]ガンダムカードゲーム スタートデッキ SDガンダム ジージェネレーション エターナル Generation Pulse【ST10】[特典あり] [2606/27]</a><span class="dest-hint"><span class="dest-hint__arrow" aria-hidden="true">→</span>カードラボ</span></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--gundam ip--sm">ガンダム</span>
+          
+          <span class="row__src">カードラボ 新着</span>
+        </div>
+        <div class="cta cta--sm"><a class="apply apply--sm" href="https://www.c-labo-online.jp/product/389059" target="_blank" rel="noopener noreferrer" aria-label="[新品]ガンダムカードゲーム スタートデッキ SDガンダム ジージェネレーション エターナル Generation Pulse【ST10】[特典あり] [2606/27] — カードラボの応募ページを開く">カードラボで応募<span class="apply__arrow" aria-hidden="true">→</span></a><a class="readmore" href="https://www.c-labo-online.jp/product/389059" target="_blank" rel="noopener noreferrer">記事を読む ↗</a></div>
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title"><a href="https://mtg-jp.com/reading/reading/translated/0039703" target="_blank" rel="noopener noreferrer" aria-label="プレインズウォーカーのための『リアリティ・フラクチャー』案内｜翻訳記事その他 — 記事を開く">プレインズウォーカーのための『リアリティ・フラクチャー』案内｜翻訳記事その他</a></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--mtg ip--sm">MTG</span>
+          
+          <span class="row__src">MTG日本公式</span>
+        </div>
+        
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T09:22:04.895Z">9/2 18:22</time>
+      <div class="row__main">
+        <div class="row__title"><a href="https://mtg-jp.com/reading/reading/special/0039697" target="_blank" rel="noopener noreferrer" aria-label="追悼 梅咲直瑛さん｜企画記事 — 記事を開く">追悼 梅咲直瑛さん｜企画記事</a></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--mtg ip--sm">MTG</span>
+          
+          <span class="row__src">MTG日本公式</span>
+        </div>
+        
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T06:49:43.000Z">9/2 15:49</time>
+      <div class="row__main">
+        <div class="row__title"><a href="https://www.4gamer.net/games/004/G100451/20260902025" target="_blank" rel="noopener noreferrer" aria-label="「にじさんじ遊戯王マスターデュエル祭2026」開催発表会が本日20：00に配信。初のチーム対抗戦を実施 — 記事を開く">「にじさんじ遊戯王マスターデュエル祭2026」開催発表会が本日20：00に配信。初のチーム対抗戦を実施</a></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--yugioh ip--sm">遊戯王</span>
+          
+          <span class="row__src">4Gamer</span>
+        </div>
+        
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T06:26:38.000Z">9/2 15:26</time>
+      <div class="row__main">
+        <div class="row__title"><a href="https://snkrdunk.com/articles/25473" target="_blank" rel="noopener noreferrer" aria-label="【遊戯王OCG】クォーター・センチュリー・アート・コレクションの当たりランキング/買取相場/予約抽選/値段まとめ【2025年2月22日発売】 — 記事を開く">【遊戯王OCG】クォーター・センチュリー・アート・コレクションの当たりランキング/買取相場/予約抽選/値段まとめ【2025年2月22日発売】</a></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--yugioh ip--sm">遊戯王</span>
+          <span class="chip chip--hot">抽選</span><span class="chip chip--warm">予約</span><span class="chip chip--neutral">相場</span>
+          <span class="row__src">SNKRDUNK</span>
+        </div>
+        
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T05:00:00.000Z">9/2 14:00</time>
+      <div class="row__main">
+        <div class="row__title"><a href="https://game.watch.impress.co.jp/docs/kikaku/2136656.html" target="_blank" rel="noopener noreferrer" aria-label="芸術のアゴ……秋！「ホロライブプロダクション ART JAM!!!フェア in animate」オンリーショップ内覧レポートホロライブメンバー手描きの自画像が会場を彩る — 記事を開く">芸術のアゴ……秋！「ホロライブプロダクション ART JAM!!!フェア in animate」オンリーショップ内覧レポートホロライブメンバー手描きの自画像が会場を彩る</a></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--hololive ip--sm">ホロライブ</span>
+          
+          <span class="row__src">柳島雄太</span>
+        </div>
+        
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T01:29:54.000Z">9/2 10:29</time>
+      <div class="row__main">
+        <div class="row__title"><a href="https://uptodate.tokyo/crocs-x-yu-gi-oh" target="_blank" rel="noopener noreferrer" aria-label="Crocs x 遊戯王 / Yu-Gi-Oh! コラボサンダルが国内9月9日より発売［213589-90H / 213591-90H / 213590-90H / 213732-90H］ — 記事を開く">Crocs x 遊戯王 / Yu-Gi-Oh! コラボサンダルが国内9月9日より発売［213589-90H / 213591-90H / 213590-90H / 213732-90H］</a></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--yugioh ip--sm">遊戯王</span>
+          <span class="chip chip--neutral">コラボ</span>
+          <span class="row__src">uptodate.tokyo</span>
+        </div>
+        
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T00:46:46.000Z">9/2 09:46</time>
+      <div class="row__main">
+        <div class="row__title"><a href="https://game.watch.impress.co.jp/docs/news/2137468.html" target="_blank" rel="noopener noreferrer" aria-label="YAGOOが直接情報を届ける公式情報番組「hololiveNext」9月7日配信。10周年に向けての”これから” — 記事を開く">YAGOOが直接情報を届ける公式情報番組「hololiveNext」9月7日配信。10周年に向けての”これから”</a></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--hololive ip--sm">ホロライブ</span>
+          
+          <span class="row__src">柳島雄太</span>
+        </div>
+        
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-02T00:32:53.000Z">9/2 09:32</time>
+      <div class="row__main">
+        <div class="row__title"><a href="https://snkrdunk.com/articles/32599" target="_blank" rel="noopener noreferrer" aria-label="【ワンピースカード】世界最強の戦士の予約・抽選情報まとめ【8/21更新】 — 記事を開く">【ワンピースカード】世界最強の戦士の予約・抽選情報まとめ【8/21更新】</a></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--onepiece ip--sm">ワンピ</span>
+          <span class="chip chip--hot">抽選</span><span class="chip chip--warm">予約</span>
+          <span class="row__src">SNKRDUNK</span>
+        </div>
+        
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-01T15:00:00.000Z">9/2 00:00</time>
+      <div class="row__main">
+        <div class="row__title"><a href="https://www.gundam-gcg.com/jp/events/01_334.html" target="_blank" rel="noopener noreferrer" aria-label="シールド戦 GCG EXPO 2026 in TOKYO — 記事を開く">シールド戦 GCG EXPO 2026 in TOKYO</a></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--gundam ip--sm">ガンダム</span>
+          
+          <span class="row__src">ガンダムカードゲーム公式</span>
+        </div>
+        
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-01T09:45:03.000Z">9/1 18:45</time>
+      <div class="row__main">
+        <div class="row__title"><a href="https://animeanime.jp/article/2026/09/01/102584.html" target="_blank" rel="noopener noreferrer" aria-label="「遊☆戯☆王デュエルモンスターズ」×クロックス初コラボ！闇遊戯、海馬瀬人、青眼の白龍らをイメージした4種が登場 — 記事を開く">「遊☆戯☆王デュエルモンスターズ」×クロックス初コラボ！闇遊戯、海馬瀬人、青眼の白龍らをイメージした4種が登場</a></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--yugioh ip--sm">遊戯王</span>
+          <span class="chip chip--neutral">コラボ</span>
+          <span class="row__src">アニメ！アニメ！</span>
+        </div>
+        
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-01T09:00:00.000Z">9/1 18:00</time>
+      <div class="row__main">
+        <div class="row__title"><a href="https://www.onepiece-cardgame.com/news/01_450.html" target="_blank" rel="noopener noreferrer" aria-label="オンラインでカードバトル！「メタロビWeekend」9月の開催日程を公開！ — 記事を開く">オンラインでカードバトル！「メタロビWeekend」9月の開催日程を公開！</a></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--onepiece ip--sm">ワンピ</span>
+          
+          <span class="row__src">ONE PIECEカードゲーム公式</span>
+        </div>
+        
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-09-01T04:28:00.000Z">9/1 13:28</time>
+      <div class="row__main">
+        <div class="row__title"><a href="https://www.famitsu.com/article/202609/86214" target="_blank" rel="noopener noreferrer" aria-label="データカードダス『アイカツ！アンコール』10月8日より稼働開始。『アイカツ！』アニメアンコール放送も10月9日スタート — 記事を開く">データカードダス『アイカツ！アンコール』10月8日より稼働開始。『アイカツ！』アニメアンコール放送も10月9日スタート</a></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--aikatsu ip--sm">アイカツ</span>
+          
+          <span class="row__src">ファミ通</span>
+        </div>
+        
+      </div>
+    </li>
+    <li class="row">
+      <time class="row__time" datetime="2026-08-31T15:00:00.000Z">9/1 00:00</time>
+      <div class="row__main">
+        <div class="row__title"><a href="https://www.dbs-cardgame.com/fw/jp/events/01_509.html" target="_blank" rel="noopener noreferrer" aria-label="交流会【スタートデッキ限定バトル】-2026年10月開催- — 記事を開く">交流会【スタートデッキ限定バトル】-2026年10月開催-</a></div>
+        <div class="row__meta">
+          
+          
+          <span class="ip ip--dragonball ip--sm">ドラゴンボール</span>
+          <span class="chip chip--neutral">コラボ</span>
+          <span class="row__src">ドラゴンボール フュージョンワールド公式</span>
+        </div>
+        
+      </div>
+    </li></ul>
+  </section>
+
+  <p class="foot">generated 9/2 18:22</p>
+</div>

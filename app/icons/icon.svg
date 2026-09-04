@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="TCGウォッチ">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1e293b"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="cardA" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="cardB" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fde047"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="cardC" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fb7185"/>
+      <stop offset="1" stop-color="#e11d48"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 背景（maskable のセーフゾーンを考慮して全面塗り） -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- 扇状に広がる3枚のカード -->
+  <g transform="translate(256 268)">
+    <g transform="rotate(-22) translate(-62 -108)">
+      <rect x="0" y="0" width="124" height="184" rx="16" fill="url(#cardC)" stroke="#ffffff" stroke-width="10"/>
+    </g>
+    <g transform="rotate(20) translate(-62 -108)">
+      <rect x="0" y="0" width="124" height="184" rx="16" fill="url(#cardA)" stroke="#ffffff" stroke-width="10"/>
+    </g>
+    <g transform="translate(-70 -118)">
+      <rect x="0" y="0" width="140" height="204" rx="18" fill="url(#cardB)" stroke="#ffffff" stroke-width="10"/>
+      <!-- カード面の星（レア感） -->
+      <path d="M70 52 L84.5 92 L127 94 L93.5 120 L105 161 L70 137 L35 161 L46.5 120 L13 94 L55.5 92 Z"
+            fill="#7c2d12" opacity="0.85"/>
+    </g>
+  </g>
+</svg>

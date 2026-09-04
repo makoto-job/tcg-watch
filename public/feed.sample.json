@@ -1,0 +1,376 @@
+{
+  "version": 1,
+  "generatedAt": "2026-08-23T05:00:00.000Z",
+  "ranking": {
+    "date": "2026-08-23",
+    "tweetUrl": "https://x.com/tcg_watch_jp/status/1959230000000000001",
+    "top": [
+      {
+        "rank": 1,
+        "id": "a1f39c02b7d84e15",
+        "title": "ポケモンカード「メガブレイク・ホライズン」9月26日発売決定 SAR収録リスト一部公開",
+        "url": "https://www.pokemon-card.com/info/2026/20260823_009000.html",
+        "sourceName": "ポケモンカード公式",
+        "publishedAt": "2026-08-23T04:10:00.000Z",
+        "summary": "株式会社ポケモンは、拡張パック「メガブレイク・ホライズン」を9月26日に発売すると発表した。メガシンカポケモンexを多数収録し、スペシャルアートレア枠も過去最多になるという。",
+        "ips": [
+          "pokemon"
+        ],
+        "intentTags": [
+          "新弾",
+          "予約"
+        ],
+        "score": 96.4,
+        "thumbnail": null,
+        "isRanked": true,
+        "kind": "official"
+      },
+      {
+        "rank": 2,
+        "id": "5c8b0e7734a2d961",
+        "title": "ONE PIECEカードゲーム「新時代の主役」再々販が決定 8月28日10時より抽選受付開始",
+        "url": "https://www.onepiece-cardgame.com/information/20260823_lottery.html",
+        "sourceName": "ONE PIECEカードゲーム公式",
+        "publishedAt": "2026-08-23T02:45:00.000Z",
+        "summary": "バンダイは品薄が続くブースターパック「新時代の主役」の再々販を告知。プレミアムバンダイにて8月28日10時から9月3日23時まで抽選受付を行う。当選発表は9月10日を予定。",
+        "ips": [
+          "onepiece",
+          "lottery"
+        ],
+        "intentTags": [
+          "抽選",
+          "再販",
+          "受付"
+        ],
+        "score": 93.1,
+        "thumbnail": null,
+        "isRanked": true,
+        "kind": "official"
+      },
+      {
+        "rank": 3,
+        "id": "e720d4a918c6b035",
+        "title": "遊戯王OCG 25thアニバーサリー「クォーターセンチュリー・レジェンズ」12月発売 初の再録BOX",
+        "url": "https://www.4gamer.net/games/999/G999999/20260823001/",
+        "sourceName": "4Gamer",
+        "publishedAt": "2026-08-23T01:20:00.000Z",
+        "summary": "KONAMIは遊戯王OCG25周年を締めくくる特別セット「クォーターセンチュリー・レジェンズ」を12月19日に発売すると発表。歴代の高額カードを新規イラストで再録する。",
+        "ips": [
+          "yugioh"
+        ],
+        "intentTags": [
+          "新弾",
+          "予約"
+        ],
+        "score": 88.7,
+        "thumbnail": null,
+        "isRanked": true,
+        "kind": "news"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "a1f39c02b7d84e15",
+      "title": "ポケモンカード「メガブレイク・ホライズン」9月26日発売決定 SAR収録リスト一部公開",
+      "url": "https://www.pokemon-card.com/info/2026/20260823_009000.html",
+      "sourceName": "ポケモンカード公式",
+      "publishedAt": "2026-08-23T04:10:00.000Z",
+      "summary": "株式会社ポケモンは、拡張パック「メガブレイク・ホライズン」を9月26日に発売すると発表した。メガシンカポケモンexを多数収録し、スペシャルアートレア枠も過去最多になるという。",
+      "ips": [
+        "pokemon"
+      ],
+      "intentTags": [
+        "新弾",
+        "予約"
+      ],
+      "score": 96.4,
+      "thumbnail": null,
+      "isRanked": true,
+      "rank": 1,
+      "kind": "official"
+    },
+    {
+      "id": "5c8b0e7734a2d961",
+      "title": "ONE PIECEカードゲーム「新時代の主役」再々販が決定 8月28日10時より抽選受付開始",
+      "url": "https://www.onepiece-cardgame.com/information/20260823_lottery.html",
+      "sourceName": "ONE PIECEカードゲーム公式",
+      "publishedAt": "2026-08-23T02:45:00.000Z",
+      "summary": "バンダイは品薄が続くブースターパック「新時代の主役」の再々販を告知。プレミアムバンダイにて8月28日10時から9月3日23時まで抽選受付を行う。当選発表は9月10日を予定。",
+      "ips": [
+        "onepiece",
+        "lottery"
+      ],
+      "intentTags": [
+        "抽選",
+        "再販",
+        "受付"
+      ],
+      "score": 93.1,
+      "thumbnail": null,
+      "isRanked": true,
+      "rank": 2,
+      "kind": "official"
+    },
+    {
+      "id": "e720d4a918c6b035",
+      "title": "遊戯王OCG 25thアニバーサリー「クォーターセンチュリー・レジェンズ」12月発売 初の再録BOX",
+      "url": "https://www.4gamer.net/games/999/G999999/20260823001/",
+      "sourceName": "4Gamer",
+      "publishedAt": "2026-08-23T01:20:00.000Z",
+      "summary": "KONAMIは遊戯王OCG25周年を締めくくる特別セット「クォーターセンチュリー・レジェンズ」を12月19日に発売すると発表。歴代の高額カードを新規イラストで再録する。",
+      "ips": [
+        "yugioh"
+      ],
+      "intentTags": [
+        "新弾",
+        "予約"
+      ],
+      "score": 88.7,
+      "thumbnail": null,
+      "isRanked": true,
+      "rank": 3,
+      "kind": "news"
+    },
+    {
+      "id": "b93a5f18c40e7d26",
+      "title": "ホロライブ公式トレカ 3期生ユニットBOX、hololive productionストアで受注開始",
+      "url": "https://hololive-store.jp/products/holotcg-gen3-box-2026",
+      "sourceName": "hololive production STORE",
+      "publishedAt": "2026-08-22T23:00:00.000Z",
+      "summary": "ホロライブ公式トレーディングカード最新弾の3期生ユニットBOXが受注販売を開始。受注期間は9月14日23時59分まで、発送は12月下旬を予定している。",
+      "ips": [
+        "hololive",
+        "lottery"
+      ],
+      "intentTags": [
+        "受付",
+        "予約"
+      ],
+      "score": 81.2,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "official"
+    },
+    {
+      "id": "c04e6b2971f8a3d5",
+      "title": "ガンダムカードゲーム 公式大会「GCGチャンピオンシップ2026秋」エントリー受付スタート",
+      "url": "https://www.gundam-gcg.com/ja/events/championship-2026-autumn/",
+      "sourceName": "GUNDAM CARD GAME公式",
+      "publishedAt": "2026-08-22T21:30:00.000Z",
+      "summary": "全国8会場で行われる公式大会のエントリー受付が開始。優勝者には世界大会への招待と限定プロモカード「νガンダム（GCGC刻印）」が贈られる。",
+      "ips": [
+        "gundam"
+      ],
+      "intentTags": [
+        "イベント",
+        "受付"
+      ],
+      "score": 74.9,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "official"
+    },
+    {
+      "id": "7d1c8a03e5b94f62",
+      "title": "デュエル・マスターズ 新章「超天ジャッジ」9月20日発売 殿堂改訂も同日施行へ",
+      "url": "https://dm.takaratomy.co.jp/news/20260822-choten-judge/",
+      "sourceName": "デュエル・マスターズ公式",
+      "publishedAt": "2026-08-22T19:15:00.000Z",
+      "summary": "タカラトミーはDM最新拡張「超天ジャッジ」の発売日を9月20日に決定したと発表。同日付けで殿堂・プレミアム殿堂の改訂も行われ、環境が大きく動く見込み。",
+      "ips": [
+        "duelmasters"
+      ],
+      "intentTags": [
+        "新弾"
+      ],
+      "score": 71.6,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "official"
+    },
+    {
+      "id": "2f5b9e6c13d087a4",
+      "title": "ドラゴンボールSCG フュージョンワールド 第9弾「宇宙の覇者」10月17日発売決定",
+      "url": "https://www.dbs-cardgame.com/fw/ja/news/20260822_fb09.php",
+      "sourceName": "ドラゴンボール超カードゲーム公式",
+      "publishedAt": "2026-08-22T17:40:00.000Z",
+      "summary": "フュージョンワールド第9弾のタイトルと発売日が公開。新リーダーとしてフリーザ（フルパワー）とビルスが参戦し、新能力「オーバーレイ」が実装される。",
+      "ips": [
+        "dragonball"
+      ],
+      "intentTags": [
+        "新弾",
+        "予約"
+      ],
+      "score": 78.3,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "official"
+    },
+    {
+      "id": "9a3d70e2b6c541f8",
+      "title": "MTG「タルキール龍紀伝リマスター」プレリリース、9月5日から全国店舗で開催",
+      "url": "https://mtg-jp.com/publicity/0040123/",
+      "sourceName": "マジック：ザ・ギャザリング日本公式",
+      "publishedAt": "2026-08-22T14:05:00.000Z",
+      "summary": "ウィザーズ・オブ・ザ・コーストは新セットのプレリリースイベント日程を公開。参加者全員に日本語版プロモ「龍王シルムガル」が配布される。",
+      "ips": [
+        "mtg"
+      ],
+      "intentTags": [
+        "イベント",
+        "新弾"
+      ],
+      "score": 66.4,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "official"
+    },
+    {
+      "id": "4e8c1b5a92f7d603",
+      "title": "新作TCG「アークライト・サーガ」11月始動 スターターデッキ4種を同時発売",
+      "url": "https://www.famitsu.com/news/202608/22345678.html",
+      "sourceName": "ファミ通.com",
+      "publishedAt": "2026-08-22T10:50:00.000Z",
+      "summary": "国内スタジオが手がける完全新規のトレーディングカードゲームが発表された。デジタル版とフィジカル版のカードプールを共通化する仕組みを採用する。",
+      "ips": [
+        "newtcg"
+      ],
+      "intentTags": [
+        "新作",
+        "新弾"
+      ],
+      "score": 62.8,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "news"
+    },
+    {
+      "id": "6b2f4d90a7e35c18",
+      "title": "ポケカ「ブラックボルト／ホワイトフレア」ヨドバシ.comで抽選販売 8月25日23時締切",
+      "url": "https://www.yodobashi.com/ec/informations/contents/100000009003241234/index.html",
+      "sourceName": "ヨドバシ.com",
+      "publishedAt": "2026-08-22T07:20:00.000Z",
+      "summary": "ヨドバシカメラが人気強化拡張パックの抽選販売を実施中。1人1BOXまで、当選者には8月27日以降にメールで案内される。",
+      "ips": [
+        "pokemon",
+        "lottery"
+      ],
+      "intentTags": [
+        "抽選",
+        "受付"
+      ],
+      "score": 85.5,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "news"
+    },
+    {
+      "id": "0c7e3a86d1b52f49",
+      "title": "遊戯王ラッシュデュエル 新スターターデッキ2種、9月13日に同時発売",
+      "url": "https://www.konami.com/yugioh/rushduel/ja/information/20260822/",
+      "sourceName": "遊戯王ラッシュデュエル公式",
+      "publishedAt": "2026-08-22T04:35:00.000Z",
+      "summary": "初心者向けのスターターデッキ2種が登場。それぞれに新規レジェンドカードが1枚ずつ封入され、構築済みのまま公認大会に参加できる。",
+      "ips": [
+        "yugioh"
+      ],
+      "intentTags": [
+        "新弾"
+      ],
+      "score": 58.1,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "official"
+    },
+    {
+      "id": "d5910c34e8a76b2f",
+      "title": "ワンピカード「頂上決戦」20thプロモ、全国のカードショップで配布開始",
+      "url": "https://www.gamer.ne.jp/news/202608220123/",
+      "sourceName": "Gamer",
+      "publishedAt": "2026-08-22T01:10:00.000Z",
+      "summary": "対象商品購入者へのプロモカード配布キャンペーンが全国のカードショップでスタート。配布はなくなり次第終了となる。",
+      "ips": [
+        "onepiece"
+      ],
+      "intentTags": [
+        "イベント"
+      ],
+      "score": 54.7,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "news"
+    },
+    {
+      "id": "8f46b2d70139ea5c",
+      "title": "ガンダムカードゲーム 構築済みデッキ「ジオン公国軍」11月14日発売 予約は8月29日から",
+      "url": "https://p-bandai.jp/item/item-1000123456/",
+      "sourceName": "プレミアムバンダイ",
+      "publishedAt": "2026-08-21T19:55:00.000Z",
+      "summary": "GCG初の陣営別構築済みデッキが登場。パラレル仕様のシャア専用ザクIIが1枚確定封入される。予約は8月29日16時から受付開始。",
+      "ips": [
+        "gundam",
+        "lottery"
+      ],
+      "intentTags": [
+        "予約",
+        "受付"
+      ],
+      "score": 69.3,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "official"
+    },
+    {
+      "id": "1e6f2b47c8d903a5",
+      "title": "デュエマ×ホロライブ コラボパック続報 収録タレント全35名を公開",
+      "url": "https://www.gamer.ne.jp/news/202608210077/",
+      "sourceName": "Gamer",
+      "publishedAt": "2026-08-21T09:00:00.000Z",
+      "summary": "10月発売予定のコラボパックについて、収録される全タレントと一部カードイラストが公開された。シークレット仕様は封入率非公開とされている。",
+      "ips": [
+        "duelmasters",
+        "hololive"
+      ],
+      "intentTags": [
+        "新弾"
+      ],
+      "score": 76.0,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "news"
+    },
+    {
+      "id": "7c04e9a1382bd5f6",
+      "title": "ドラゴンボールSCG 公式ストア限定「烈火のオーラ」スリーブ再販、本日20時より",
+      "url": "https://p-bandai.jp/item/item-1000998877/",
+      "sourceName": "プレミアムバンダイ",
+      "publishedAt": "2026-08-20T18:00:00.000Z",
+      "summary": "即完売となっていた公式スリーブの再販が決定。数量限定のため購入制限が設けられる。",
+      "ips": [
+        "dragonball",
+        "lottery"
+      ],
+      "intentTags": [
+        "再販"
+      ],
+      "score": 47.5,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "official"
+    }
+  ]
+}

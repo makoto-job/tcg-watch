@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TCGウォッチ</title>
+<meta name="description" content="ポケカ・ワンピ・遊戯王などトレカの最新ニュースと抽選/予約情報をまとめてチェック。">
+
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+
+<!-- iOS: ホーム画面追加時にスタンドアロン表示 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TCGウォッチ">
+<meta name="format-detection" content="telephone=no">
+
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<!-- Pull-to-refresh インジケータ -->
+<div id="ptr" class="ptr" aria-hidden="true">
+  <div class="ptr__spinner">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z" fill="currentColor"/>
+    </svg>
+  </div>
+</div>
+
+<header class="hdr" id="hdr">
+  <div class="hdr__row">
+    <div class="hdr__brand">
+      <svg class="hdr__logo" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+        <rect x="3" y="4" width="12" height="16" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M17.2 6.4l3 1.1a1.6 1.6 0 0 1 .95 2.06l-3.6 9.9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M9 8.4l1.05 2.9 3.05.14-2.4 1.9.83 2.96L9 14.6l-2.53 1.7.83-2.96-2.4-1.9 3.05-.14z" fill="currentColor"/>
+      </svg>
+      <h1 class="hdr__title" id="appName">TCGウォッチ</h1>
+    </div>
+    <div class="hdr__actions">
+    <button type="button" class="btn-icon" id="btnProfile" aria-label="マイ情報とショップ登録チェック">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M4.6 20.2a7.4 7.4 0 0 1 14.8 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <span class="btn-icon__dot" id="profileDot" hidden aria-hidden="true"></span>
+    </button>
+    <button type="button" class="btn-refresh" id="btnRefresh" aria-label="最新情報に更新">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z" fill="currentColor"/>
+      </svg>
+    </button>
+    </div>
+  </div>
+  <div class="hdr__row hdr__row--sub">
+    <p class="hdr__updated" id="hdrUpdated">読み込み中…</p>
+    <div class="hdr__sort" role="group" aria-label="並び替え">
+      <button type="button" class="seg" id="sortLatest" data-sort="latest" aria-pressed="true">最新順</button>
+      <button type="button" class="seg" id="sortDeadline" data-sort="deadline" aria-pressed="false">締切順</button>
+    </div>
+  </div>
+  <div class="hdr__chips" hidden>
+    <div class="filters__scroll" id="ipChips" role="group" aria-label="ジャンルで絞り込み"></div>
+    <button type="button" class="filters__clear" id="btnClearFilters" hidden>クリア</button>
+  </div>
+</header>
+
+<!-- iOS ホーム画面追加バナー / Android インストールバナー -->
+<div class="a2hs" id="a2hs" hidden>
+  <div class="a2hs__body">
+    <p class="a2hs__text" id="a2hsText"></p>
+    <button type="button" class="a2hs__install" id="a2hsInstall" hidden>インストール</button>
+  </div>
+  <button type="button" class="a2hs__close" id="a2hsClose" aria-label="閉じる">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+    </svg>
+  </button>
+</div>
+
+<main class="main" id="main">
+
+  <!-- 未登録ショップの警告。
+       抽選に落ちる一番よくある理由は倍率ではなく「当日に会員登録から始めて間に合わない」こと。
+       だから応募一覧より前、画面の最上部に出す。 -->
+  <section class="sec sec--warn" id="secWarn" aria-labelledby="secWarnTitle" hidden>
+    <div class="sec__head">
+      <h2 class="sec__title" id="secWarnTitle"><span aria-hidden="true">⚠️</span> 未登録のショップがあります</h2>
+      <button type="button" class="warn__link" id="btnWarnOpen">チェックリスト</button>
+    </div>
+    <div class="warns" id="warnList"></div>
+  </section>
+
+  <!-- いま応募できる（このアプリの主役。締切が近い順） -->
+  <section class="sec sec--apply" id="secApply" aria-labelledby="secApplyTitle" hidden>
+    <div class="sec__head">
+      <h2 class="sec__title" id="secApplyTitle"><span aria-hidden="true">🎯</span> いま応募できる</h2>
+      <span class="sec__date" id="applyCount"></span>
+    </div>
+    <div class="cards cards--apply" id="applyList"></div>
+  </section>
+
+  <!-- ランキング -->
+  <section class="sec" id="secRanking" aria-labelledby="secRankingTitle" hidden>
+    <div class="sec__head">
+      <h2 class="sec__title" id="secRankingTitle"><span aria-hidden="true">🏆</span> 本日のランキング</h2>
+      <span class="sec__date" id="rankDate"></span>
+    </div>
+    <div class="rank" id="rankList"></div>
+    <a class="rank__tweet" id="rankTweet" href="#" target="_blank" rel="noopener noreferrer" hidden>
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path d="M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.66l-5.22-6.82-5.96 6.82H1.66l7.73-8.84L1.25 2.25h6.83l4.72 6.24zm-1.16 17.52h1.83L7.08 4.13H5.11z" fill="currentColor"/>
+      </svg>
+      Xの投稿を見る
+    </a>
+  </section>
+
+  <!-- フィルタバー -->
+  <div class="filters" id="filters" hidden>
+    <div class="filters__toggle">
+      <label class="switch">
+        <input type="checkbox" id="lotteryOnly">
+        <span class="switch__track" aria-hidden="true"><span class="switch__thumb"></span></span>
+        <span class="switch__label">抽選・予約のみ</span>
+      </label>
+      <label class="switch switch--expired">
+        <input type="checkbox" id="showExpired">
+        <span class="switch__track" aria-hidden="true"><span class="switch__thumb"></span></span>
+        <span class="switch__label">終了分も表示</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- 最新情報 -->
+  <section class="sec" id="secFeed" aria-labelledby="secFeedTitle">
+    <div class="sec__head">
+      <h2 class="sec__title" id="secFeedTitle"><span aria-hidden="true">📰</span> 最新情報</h2>
+      <span class="sec__date" id="feedCount"></span>
+    </div>
+
+    <div class="cards" id="skeleton" aria-hidden="true">
+      <div class="sk-card"><div class="sk sk--chips"></div><div class="sk sk--title"></div><div class="sk sk--title sk--short"></div><div class="sk sk--line"></div><div class="sk sk--line sk--short"></div></div>
+      <div class="sk-card"><div class="sk sk--chips"></div><div class="sk sk--title"></div><div class="sk sk--title sk--short"></div><div class="sk sk--line"></div><div class="sk sk--line sk--short"></div></div>
+      <div class="sk-card"><div class="sk sk--chips"></div><div class="sk sk--title"></div><div class="sk sk--title sk--short"></div><div class="sk sk--line"></div><div class="sk sk--line sk--short"></div></div>
+      <div class="sk-card"><div class="sk sk--chips"></div><div class="sk sk--title"></div><div class="sk sk--title sk--short"></div><div class="sk sk--line"></div><div class="sk sk--line sk--short"></div></div>
+    </div>
+
+    <div class="cards" id="cards"></div>
+
+    <p class="empty" id="empty" hidden>該当する情報がありません</p>
+
+    <button type="button" class="btn-more" id="btnMore" hidden>もっと見る</button>
+  </section>
+
+  <!-- エラー -->
+  <div class="error" id="errorBox" hidden>
+    <p class="error__title">情報を取得できませんでした</p>
+    <p class="error__msg" id="errorMsg"></p>
+    <button type="button" class="btn-retry" id="btnRetry">再試行</button>
+  </div>
+
+</main>
+
+<footer class="ftr">
+  <p id="ftrUpdated"></p>
+  <p>データ元: 各社公式サイト / ニュースメディアのRSS</p>
+  <p class="ftr__ver" id="ftrVer"></p>
+</footer>
+
+<!-- ==========================================================================
+     応募のじゅんび（ボトムシート）
+     ・タブ1: ショップ登録チェックリスト（本命）
+     ・タブ2: マイ情報（会員登録フォームでよく要る項目のコピー元）
+     ページ遷移はしない。閉じれば元の一覧にそのまま戻る。
+     ========================================================================== -->
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet__scrim" id="sheetScrim"></div>
+  <div class="sheet__panel" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet__grab" aria-hidden="true"></div>
+
+    <div class="sheet__head">
+      <h2 class="sheet__title" id="sheetTitle">応募のじゅんび</h2>
+      <button type="button" class="sheet__close" id="sheetClose" aria-label="閉じる">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="sheet__tabs" role="tablist" aria-label="表示の切り替え">
+      <button type="button" class="seg" id="tabShops" role="tab" aria-selected="true" aria-controls="paneShops">登録チェック</button>
+      <button type="button" class="seg" id="tabProfile" role="tab" aria-selected="false" aria-controls="paneProfile">マイ情報</button>
+    </div>
+
+    <div class="sheet__body" id="sheetBody">
+
+      <!-- ---------- タブ1: 登録チェックリスト ---------- -->
+      <section class="pane" id="paneShops" role="tabpanel" aria-labelledby="tabShops">
+        <p class="pane__lead">
+          抽選に落ちる人の多くは、当日に会員登録から始めて間に合わない人です。
+          <strong>応募できる店には先に登録しておく。</strong>それだけで勝率が変わります。
+        </p>
+
+        <div class="pane__bar">
+          <p class="pane__count" id="shopCount">—</p>
+          <label class="switch switch--sm">
+            <input type="checkbox" id="shopUnregOnly">
+            <span class="switch__track" aria-hidden="true"><span class="switch__thumb"></span></span>
+            <span class="switch__label">未登録のみ</span>
+          </label>
+        </div>
+
+        <div class="shops" id="shopList"></div>
+
+        <p class="pane__note">
+          チェックの状態はこの端末の中だけに保存されます。
+          「開く」は各ショップのトップページを新しいタブで開きます（会員登録は各サイトで行ってください）。
+        </p>
+      </section>
+
+      <!-- ---------- タブ2: マイ情報 ---------- -->
+      <section class="pane" id="paneProfile" role="tabpanel" aria-labelledby="tabProfile" hidden>
+
+        <div class="notice notice--danger">
+          <p class="notice__title">パスワードとカード情報は保存しません</p>
+          <p class="notice__body">
+            このアプリはパスワード・クレジットカード番号・マイナンバーを
+            <strong>入力欄すら用意していません</strong>。
+            パスワードはiPhone/Androidのパスワード管理機能や 1Password などの
+            専用アプリに任せてください。
+          </p>
+        </div>
+
+        <div class="notice">
+          <p class="notice__body">
+            ここに入れた内容は<strong>この端末の中だけ</strong>に保存されます。
+            どこにも送信しません。会員登録フォームでは各項目の「コピー」を押して貼り付けてください。
+          </p>
+        </div>
+
+        <form class="pform" id="profileForm" autocomplete="off" novalidate></form>
+
+        <div class="pform__actions">
+          <button type="button" class="btn-primary" id="btnProfileSave">保存する</button>
+          <button type="button" class="btn-ghost" id="btnProfileCopyAll">全部まとめてコピー</button>
+        </div>
+
+        <h3 class="pane__h3">よく使う組み合わせ</h3>
+        <p class="pane__note">姓名をまとめて1欄に入れる店や、ハイフン無しの電話番号しか受け付けない店があります。</p>
+        <div class="copies" id="derivedList"></div>
+
+        <!-- ---------- バックアップ ---------- -->
+        <h3 class="pane__h3">暗号化バックアップ</h3>
+        <p class="pane__note">
+          機種変更のときに移せるよう、パスフレーズで暗号化したファイルを作れます。
+          暗号化も復号もこの端末の中だけで行い、鍵もファイルもどこにも送りません
+          （AES-GCM 256bit / PBKDF2-SHA256 210,000回）。
+        </p>
+
+        <div class="notice notice--warn">
+          <p class="notice__body">
+            <strong>パスフレーズを忘れると、二度と復元できません。</strong>
+            復旧してくれるサーバーは存在しません。紙かパスワード管理アプリに必ず控えてください。
+          </p>
+        </div>
+
+        <div class="bk">
+          <label class="bk__label" for="bkPass1">パスフレーズ（8文字以上）</label>
+          <input class="bk__input" type="password" id="bkPass1" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="例: 忘れない合言葉">
+          <label class="bk__label" for="bkPass2">確認のためもう一度</label>
+          <input class="bk__input" type="password" id="bkPass2" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+          <button type="button" class="btn-primary" id="btnExport">暗号化してファイルに保存</button>
+          <p class="bk__msg" id="bkExportMsg" hidden></p>
+          <div id="bkOutWrap" hidden>
+            <p class="pane__note" id="bkOutNote"></p>
+            <textarea class="bk__area" id="bkOut" readonly rows="6" spellcheck="false"></textarea>
+            <button type="button" class="btn-ghost" id="btnExportCopy">この暗号文をコピー</button>
+          </div>
+        </div>
+
+        <div class="bk">
+          <p class="bk__label">ファイルから復元</p>
+          <input class="bk__file" type="file" id="bkFile" accept="application/json,.json,.txt">
+          <p class="pane__note">ファイルを選べない環境では、バックアップの中身を下に貼り付けてください。</p>
+          <textarea class="bk__area" id="bkIn" rows="5" spellcheck="false" placeholder='{"v":1,"kdf":"PBKDF2-SHA256",...}'></textarea>
+          <label class="bk__label" for="bkPass3">そのときのパスフレーズ</label>
+          <input class="bk__input" type="password" id="bkPass3" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+          <button type="button" class="btn-primary" id="btnImport">復元する</button>
+          <p class="bk__msg" id="bkImportMsg" hidden></p>
+          <div class="bk__confirm" id="bkConfirm" hidden>
+            <p class="bk__msg bk__msg--ok" id="bkPreview"></p>
+            <div class="pform__actions">
+              <button type="button" class="btn-primary" id="btnImportApply">この内容で上書きする</button>
+              <button type="button" class="btn-ghost" id="btnImportCancel">やめる</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pform__actions pform__actions--danger">
+          <button type="button" class="btn-danger" id="btnProfileClear">この端末からマイ情報を消す</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>

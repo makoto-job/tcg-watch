@@ -1,0 +1,12 @@
+node_modules/
+.env
+data/cache/
+*.log
+.DS_Store
+
+# data/posted.json は GitHub Actions が投稿履歴としてコミットするため除外しない
+
+# ローカル確認用に public/feed.json をコピーしたもの。
+# 本番では GitHub Pages が public/feed.json を /feed.json として配信する
+app/feed.json
+public/app-single.html

@@ -1,0 +1,19 @@
+{
+  "name": "tcg-twitter-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "TCG/人気IPの最新ニュース・抽選予約情報を毎日ランキング形式でXに自動投稿するbot",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "collect": "node src/index.js --dry-run",
+    "preview": "node src/index.js --dry-run --verbose",
+    "post": "node src/index.js --post",
+    "auth-check": "node src/index.js --auth-check",
+    "test": "node --test",
+    "feed": "node src/index.js --dry-run --no-post",
+    "report": "node src/index.js --dry-run --html"
+  }
+}
