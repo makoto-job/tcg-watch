@@ -553,6 +553,7 @@ export async function collectAll(config, opts = {}) {
       startsAt: item.startsAt || null,
       deadline: item.deadline || null,
       applyVerified: item.applyVerified === true,
+      destIsEntry: item.destIsEntry === true,
     });
   }
 

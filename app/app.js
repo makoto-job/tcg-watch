@@ -355,9 +355,15 @@ function buildApplyButton(item) {
   // 飛んだ先が期間外・売り切れだったときに裏切りになる。
   // 確認できているものだけ「応募」、それ以外は「確認」と表現を分ける。
   const verified = item && item.applyVerified === true;
-  const verb = verified ? '応募' : '確認';
-  a.textContent = label ? `${label}で${verb}` : (verified ? '応募ページへ' : '商品ページを確認');
-  if (!verified) a.classList.add('apply--unverified');
+  const isEntry = item && item.destIsEntry === true;
+  // 商品ページが取れず店の入口だけ案内する場合は、そうと分かる文言にする。
+  // 「商品ページに飛ぶ」と思って押した先が店のトップだと裏切りになる。
+  const verb = isEntry ? '探す' : verified ? '応募' : '確認';
+  a.textContent = label
+    ? `${label}で${verb}`
+    : isEntry ? '店のページへ' : verified ? '応募ページへ' : '商品ページを確認';
+  if (!verified || isEntry) a.classList.add('apply--unverified');
+  if (isEntry) a.classList.add('apply--entry');
   a.setAttribute(
     'aria-label',
     `${item.title || ''} — ${destinationName(item)}の${verified ? '応募ページ' : '商品ページ'}を開く`
@@ -844,6 +850,16 @@ function buildCard(item) {
   if (dl) tags.appendChild(dl);
   const st = buildStartsBadge(item);
   if (st) tags.appendChild(st);
+
+  // 商品ページを取得できず、店の入口だけ案内している場合の印。
+  // 他のバッジと同じ体裁にして、押す前に行き先の種類が分かるようにする。
+  if (item.destIsEntry) {
+    const entry = document.createElement('span');
+    entry.className = 'tag tag--entry';
+    entry.textContent = '店から探す';
+    entry.title = '商品ページへ直接飛べないため、お店の入口を案内しています';
+    tags.appendChild(entry);
+  }
 
   if (item.isRanked && item.rank) {
     const medal = document.createElement('span');

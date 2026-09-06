@@ -329,6 +329,35 @@ function headlineNamesShop(headline, shop) {
 }
 
 /**
+ * 記事が名指ししている店の「入口ページ」を返す。
+ * 商品ページを取得できない店（bot拒否・JS描画）でも、
+ * 利用者が自分で辿れる入口までは案内できる。
+ * リンクを貼るのに、そのページを取得する必要はない。
+ * @param {string} headline
+ * @param {Array<object>} shops
+ * @returns {{url:string, label:string, entryLabel:string}|null}
+ */
+export function entryPageForHeadline(headline, shops) {
+  if (!headline || !Array.isArray(shops)) return null;
+  let best = null;
+  for (const shop of shops) {
+    if (!shop || !shop.entryUrl) continue;
+    if (!headlineNamesShop(headline, shop)) continue;
+    const priority = Number(shop.priority) || 0;
+    if (!best || priority > best.priority) {
+      best = {
+        url: String(shop.entryUrl),
+        label: String(shop.label || shop.domain),
+        entryLabel: String(shop.entryLabel || ''),
+        priority,
+      };
+    }
+  }
+  if (!best) return null;
+  return { url: best.url, label: best.label, entryLabel: best.entryLabel };
+}
+
+/**
  * 記事タイトルがいずれかの店を名指ししているか。
  * 名指しがある記事は「その店で応募する」記事なので、
  * 他店のリンクを応募先にしてはいけない。
@@ -1065,6 +1094,17 @@ export async function enrichItems(items, opts = {}) {
       if (dest && !item.destUrl) {
         item.destUrl = dest.url;
         item.destLabel = dest.label;
+      } else if (!item.destUrl) {
+        // 商品ページは取れなかったが、記事が店を名指ししている場合、
+        // その店の入口（抽選一覧など）だけでも案内する。
+        // 「どこで応募するか分かっているのに行き方が分からない」状態を避ける。
+        const entry = entryPageForHeadline(`${extractHeadline(html)} ${item.title || ''}`, shops);
+        if (entry) {
+          item.destUrl = entry.url;
+          item.destLabel = entry.label;
+          item.destIsEntry = true; // 商品ページではなく店の入口
+          item.destEntryLabel = entry.entryLabel;
+        }
       }
     } catch {
       /* noop */

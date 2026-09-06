@@ -1579,3 +1579,12 @@ body.is-locked { overflow: hidden; }
   border: 1px solid var(--border);
   box-shadow: none;
 }
+
+/* 商品ページに直接飛べず、店の入口を案内しているもの。
+   他のタグと同じ形・同じ大きさに揃え、色だけ控えめにする */
+.tag--entry {
+  background: var(--bg-sunken);
+  color: var(--text-sub);
+  border: 1px dashed var(--border);
+}
+.apply--entry { border-style: dashed; }

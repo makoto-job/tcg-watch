@@ -92,6 +92,8 @@ export function toFeedItem(rankedItem, opts = {}) {
     deadline: toIso(it.deadline) || null,
     // 受付中だと確認できているか（店の一覧由来は false）
     applyVerified: it.applyVerified === true,
+    // 商品ページではなく店の入口ページか（bot拒否等で商品ページを取得できない場合）
+    destIsEntry: it.destIsEntry === true,
   };
 }
 

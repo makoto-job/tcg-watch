@@ -22,7 +22,9 @@
         "プレバン",
         "プレミアムバンダイ",
         "プレミアム バンダイ"
-      ]
+      ],
+      "entryUrl": "https://p-bandai.jp/hobby/lotterysales/",
+      "entryLabel": "抽選販売の一覧"
     },
     {
       "domain": "pokemoncenter-online.com",
@@ -33,7 +35,9 @@
         "ポケセン",
         "ポケモンセンターオンライン",
         "ポケモンセンター"
-      ]
+      ],
+      "entryUrl": "https://www.pokemoncenter-online.com/",
+      "entryLabel": "ポケセン公式通販"
     },
     {
       "domain": "pokemon-card.com",
@@ -49,7 +53,9 @@
       "aliases": [
         "タカトミモール",
         "タカラトミーモール"
-      ]
+      ],
+      "entryUrl": "https://takaratomymall.jp/",
+      "entryLabel": "タカラトミーモール"
     },
     {
       "domain": "carddass.com",
@@ -110,7 +116,9 @@
       "priority": 8,
       "aliases": [
         "晴れる屋"
-      ]
+      ],
+      "entryUrl": "https://www.hareruyamtg.com/",
+      "entryLabel": "晴れる屋公式"
     },
     {
       "domain": "hareruya2.com",
@@ -119,7 +127,9 @@
       "priority": 8,
       "aliases": [
         "晴れる屋2"
-      ]
+      ],
+      "entryUrl": "https://www.hareruya2.com/",
+      "entryLabel": "晴れる屋2公式"
     },
     {
       "domain": "c-labo-online.jp",
@@ -129,7 +139,9 @@
       "aliases": [
         "カードラボ",
         "C-labo"
-      ]
+      ],
+      "entryUrl": "https://www.c-labo-online.jp/",
+      "entryLabel": "カードラボ公式"
     },
     {
       "domain": "yuyu-tei.jp",
@@ -138,7 +150,9 @@
       "priority": 8,
       "aliases": [
         "遊々亭"
-      ]
+      ],
+      "entryUrl": "https://yuyu-tei.jp/",
+      "entryLabel": "遊々亭公式"
     },
     {
       "domain": "hobby-station.com",
@@ -212,7 +226,9 @@
       "aliases": [
         "トイザらス",
         "トイザラス"
-      ]
+      ],
+      "entryUrl": "https://www.toysrus.co.jp/",
+      "entryLabel": "トイザらス公式"
     },
     {
       "domain": "amiami.jp",
@@ -221,7 +237,9 @@
       "priority": 8,
       "aliases": [
         "あみあみ"
-      ]
+      ],
+      "entryUrl": "https://www.amiami.jp/",
+      "entryLabel": "あみあみ公式"
     },
     {
       "domain": "1999.co.jp",
@@ -298,7 +316,9 @@
       "priority": 7,
       "aliases": [
         "楽天ブックス"
-      ]
+      ],
+      "entryUrl": "https://books.rakuten.co.jp/event/game/card/entry/",
+      "entryLabel": "カード抽選エントリー"
     },
     {
       "domain": "rakuten.co.jp",
@@ -356,7 +376,9 @@
       "priority": 7,
       "aliases": [
         "ヨドバシ"
-      ]
+      ],
+      "entryUrl": "https://limited.yodobashi.com/entry/shared",
+      "entryLabel": "抽選販売の受付"
     },
     {
       "domain": "biccamera.com",
@@ -444,7 +466,9 @@
         "セブンネット",
         "セブン-イレブン",
         "セブンイレブン"
-      ]
+      ],
+      "entryUrl": "https://7net.omni7.jp/",
+      "entryLabel": "セブンネット"
     },
     {
       "domain": "hmv.co.jp",
@@ -594,7 +618,9 @@
       "priority": 5,
       "aliases": [
         "駿河屋"
-      ]
+      ],
+      "entryUrl": "https://www.suruga-ya.jp/",
+      "entryLabel": "駿河屋公式"
     },
     {
       "domain": "shopping.bookoff.co.jp",

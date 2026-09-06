@@ -42,6 +42,7 @@ const FEED_ITEM_KEYS = [
   'startsAt',
   'deadline',
   'applyVerified',
+  'destIsEntry',
 ].sort();
 
 /**
