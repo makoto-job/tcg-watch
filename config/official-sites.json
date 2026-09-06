@@ -195,7 +195,8 @@
       "linkPattern": "<p class=\"article_title\"><a href=\"([^\"]+)\"",
       "titlePattern": "<p class=\"article_title\"><a[^>]*>([\\s\\S]*?)</a>",
       "note": "抽選販売の一次情報そのもの。/lottery/ や /lotterysales/ は404で、正しくはジャンル配下の https://p-bandai.jp/hobby/lotterysales/ （ホビーオンラインショップ＞抽選販売）。/chara/lotterysales/ も200だがバナーだけで商品リストが無い。1件は <div class=\"article_area\"> … <ul class=\"icon\"><li><img alt=\"抽選販売\"></li></ul> … <p class=\"article_title\"><a href=\"/item/item-1000224338/\">【抽選販売】…</a></p>。ページに日付が無いので pubDate は空（呼び出し側が現在時刻を入れる）。文字コードは Shift_JIS（Content-Type ヘッダが charset=Shift_JIS。metaタグは UTF-8 と書いてあるが嘘）。",
-      "titleFilter": "カードゲーム|カードダス|トレーディングカード|トレカ|カードコレクション|カードパック|カードバインダー|バトルスピリッツ|バトスピ|デジモンカード|アイカツ|遊戯王|ポケモンカード|ワンピースカード|フュージョンワールド|TCG|カードスリーブ|カードローダー|プレミアムカード"
+      "titleFilter": "カードゲーム|カードダス|トレーディングカード|トレカ|カードコレクション|カードパック|カードバインダー|バトルスピリッツ|バトスピ|デジモンカード|アイカツ|遊戯王|ポケモンカード|ワンピースカード|フュージョンワールド|TCG|カードスリーブ|カードローダー|プレミアムカード",
+      "deadlinePattern": "TimerEnd\"\\s+value=\"([^\"]+)\""
     },
     {
       "id": "p-bandai-new",
@@ -213,7 +214,8 @@
       "linkPattern": "href=\"([^\"]+)\"",
       "titlePattern": "<p class=\"itemslist_name\">[\\s\\S]*?<span>([\\s\\S]*?)</span>",
       "titleFilter": "カードゲーム|カードダス|トレーディングカード|トレカ|カードコレクション|カードパック|カードバインダー|バトルスピリッツ|バトスピ|デジモンカード|アイカツ|遊戯王|ポケモンカード|ワンピースカード|フュージョンワールド|TCG|カードスリーブ|カードローダー|プレミアムカード",
-      "note": "受注・抽選の受付開始はここに一番早く出る（記事より速い）。全ジャンルの新着が1日300件ほど流れてくるので titleFilter でカード系だけに絞っている。商品名は一覧上で20字ほどに切られる（'…' が付く）のでタイトルは途中までしか取れない。ページ内の絞り込みはPOSTフォームなのでカテゴリ指定URLは作れない（検索の search.p-bandai.jp はJSチャレンジでbotブロック）。日付は「開始：8/24 8時」形式で年が無いため採らない。"
+      "note": "受注・抽選の受付開始はここに一番早く出る（記事より速い）。全ジャンルの新着が1日300件ほど流れてくるので titleFilter でカード系だけに絞っている。商品名は一覧上で20字ほどに切られる（'…' が付く）のでタイトルは途中までしか取れない。ページ内の絞り込みはPOSTフォームなのでカテゴリ指定URLは作れない（検索の search.p-bandai.jp はJSチャレンジでbotブロック）。日付は「開始：8/24 8時」形式で年が無いため採らない。",
+      "deadlinePattern": "TimerEnd\"\\s+value=\"([^\"]+)\""
     },
     {
       "id": "p-bandai-deadline",
@@ -231,7 +233,8 @@
       "linkPattern": "href=\"([^\"]+)\"",
       "titlePattern": "<p class=\"itemslist_name\">[\\s\\S]*?<span>([\\s\\S]*?)</span>",
       "titleFilter": "カードゲーム|カードダス|トレーディングカード|トレカ|カードコレクション|カードパック|カードバインダー|バトルスピリッツ|バトスピ|デジモンカード|アイカツ|遊戯王|ポケモンカード|ワンピースカード|フュージョンワールド|TCG|カードスリーブ|カードローダー|プレミアムカード",
-      "note": "締切間近の受注/抽選一覧。「間に合わせる」目的に直結する。構造は new_itemlist と同じで、締切は <input class=\"TimerEnd\" value=\"2026/08/24 23:59:59\"> に入っている（deadline への転記は区画Gの担当なのでここでは取らない）。"
+      "note": "締切間近の受注/抽選一覧。「間に合わせる」目的に直結する。構造は new_itemlist と同じで、締切は <input class=\"TimerEnd\" value=\"2026/08/24 23:59:59\"> に入っている（deadline への転記は区画Gの担当なのでここでは取らない）。",
+      "deadlinePattern": "TimerEnd\"\\s+value=\"([^\"]+)\""
     },
     {
       "id": "pokemoncenter-online",

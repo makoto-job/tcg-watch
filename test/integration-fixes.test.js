@@ -604,3 +604,67 @@ test('enrichItems: 年の無い「8月28日まで」を、記事の掲載日基�
     `記事掲載年で解釈されるべき（実際: ${item.deadline}）`
   );
 });
+
+// --- 商品一覧に埋め込まれた締切の取り込み ---
+
+import { parseNewsList as parseOfficialList } from '../src/sources/official.js';
+
+test('parseNewsList: プレミアムバンダイの TimerEnd から締切を取り込む', () => {
+  // 記事本文に締切が書かれていないことが多いため、
+  // 店が一覧に埋め込んでいる締切は「間に合う」ための貴重な情報源。
+  const html = `
+<li class="heightLine-group2 bl-hot">
+  <a href="/item/item-1000256594/">
+    <p class="ttl">デジモンカードゲーム リミテッドパック</p>
+  </a>
+  <input type="hidden" name="itemTimerEnd" value="2026/09/06 23:59:59">
+</li>`;
+  const site = {
+    id: 'p-bandai-deadline',
+    baseUrl: 'https://p-bandai.jp',
+    itemPattern: '<li class="heightLine-group2[^"]*">([\\s\\S]*?)</li>',
+    linkPattern: '<a href="([^"]+)"',
+    titlePattern: '<p class="ttl">([\\s\\S]*?)</p>',
+    deadlinePattern: 'TimerEnd"\\s+value="([^"]+)"',
+    titleFilter: 'カードゲーム|カードダス|トレカ',
+  };
+  const out = parseOfficialList(html, site);
+  assert.equal(out.length, 1);
+  assert.equal(out[0].title, 'デジモンカードゲーム リミテッドパック');
+  // 「2026/09/06 23:59:59」は日本時間 → UTC では 14:59:59
+  assert.equal(out[0].deadline, '2026-09-06T14:59:59.000Z');
+});
+
+test('parseNewsList: deadlinePattern 未設定なら締切は空（後方互換）', () => {
+  const html = `
+<li class="heightLine-group2">
+  <a href="/item/1/"><p class="ttl">なにかのカードゲーム</p></a>
+  <input type="hidden" name="itemTimerEnd" value="2026/09/06 23:59:59">
+</li>`;
+  const site = {
+    id: 'x', baseUrl: 'https://p-bandai.jp',
+    itemPattern: '<li class="heightLine-group2[^"]*">([\\s\\S]*?)</li>',
+    linkPattern: '<a href="([^"]+)"',
+    titlePattern: '<p class="ttl">([\\s\\S]*?)</p>',
+  };
+  const out = parseOfficialList(html, site);
+  assert.equal(out.length, 1);
+  assert.equal(out[0].deadline, '');
+});
+
+test('parseNewsList: カード以外（Tシャツ・プラモ）は締切があっても除外する', () => {
+  const html = `
+<li class="heightLine-group2">
+  <a href="/item/1/"><p class="ttl">東映ヒーローTシャツ 超宇宙刑事</p></a>
+  <input type="hidden" name="itemTimerEnd" value="2026/09/06 23:59:59">
+</li>`;
+  const site = {
+    id: 'x', baseUrl: 'https://p-bandai.jp',
+    itemPattern: '<li class="heightLine-group2[^"]*">([\\s\\S]*?)</li>',
+    linkPattern: '<a href="([^"]+)"',
+    titlePattern: '<p class="ttl">([\\s\\S]*?)</p>',
+    deadlinePattern: 'TimerEnd"\\s+value="([^"]+)"',
+    titleFilter: 'カードゲーム|カードダス|トレカ',
+  };
+  assert.equal(parseOfficialList(html, site).length, 0);
+});

@@ -188,7 +188,31 @@ export function parseNewsList(html, siteConfig) {
   const out = [];
   const seen = new Set();
 
-  const push = (rawTitle, rawLink, pubDate) => {
+  const deadlineRe = toRegExp(site.deadlinePattern);
+
+  /**
+   * 商品一覧に埋め込まれた受付締切を取り出す。
+   * プレミアムバンダイは <input ... name="...TimerEnd" value="2026/09/06 23:59:59">
+   * の形で正式な締切を持っている。記事本文には締切が書かれていないことが多いので、
+   * ここで取れる締切は貴重（「間に合う」ための核心情報）。
+   * @param {string} fragment
+   * @returns {string} ISO8601。取れなければ空文字
+   */
+  const pickDeadline = (fragment) => {
+    if (!deadlineRe || !fragment) return '';
+    deadlineRe.lastIndex = 0;
+    const m = deadlineRe.exec(String(fragment));
+    if (!m) return '';
+    const raw = (m[1] || m[0]).trim();
+    // 「2026/09/06 23:59:59」を日本時間として解釈する
+    const p = /(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/.exec(raw);
+    if (!p) return '';
+    const [, y, mo, d, hh = '23', mi = '59', ss = '59'] = p;
+    const ms = Date.UTC(+y, +mo - 1, +d, +hh - 9, +mi, +ss);
+    return Number.isFinite(ms) ? new Date(ms).toISOString() : '';
+  };
+
+  const push = (rawTitle, rawLink, pubDate, fragment) => {
     const title = cleanTitle(rawTitle);
     const link = absolutizeUrl(rawLink, base);
     if (!title || !link) return;
@@ -197,7 +221,7 @@ export function parseNewsList(html, siteConfig) {
     const key = `${normalizeForMatch(title)}|${canonicalizeUrl(link)}`;
     if (seen.has(key)) return; // 同じ記事がタブごとに重複出力されるサイト対策
     seen.add(key);
-    out.push({ title, link, pubDate: pubDate || '' });
+    out.push({ title, link, pubDate: pubDate || '', deadline: pickDeadline(fragment) });
   };
 
   const itemRe = toRegExp(site.itemPattern, 'g');
@@ -212,7 +236,7 @@ export function parseNewsList(html, siteConfig) {
       const pubDate = extractDate(block[0], dateRe);
       entryRe.lastIndex = 0;
       for (const entry of iterateMatches(entryRe, fragment)) {
-        push(entry[2], entry[1], pubDate);
+        push(entry[2], entry[1], pubDate, entry[0]);
         if (out.length >= maxItems) return out;
       }
     }
@@ -229,7 +253,8 @@ export function parseNewsList(html, siteConfig) {
     push(
       titleHit ? titleHit[1] : '',
       linkHit ? linkHit[1] : '',
-      extractDate(fragment, dateRe)
+      extractDate(fragment, dateRe),
+      fragment
     );
     if (out.length >= maxItems) break;
   }
@@ -515,7 +540,11 @@ export async function fetchOfficialItems(config, opts = {}) {
         destUrl: null,
         destLabel: null,
         startsAt: null,
-        deadline: null,
+        // 一覧に締切が埋まっているサイト（プレミアムバンダイ等）から取れた正式な締切。
+        // 記事本文には締切が書かれていないことが多いため、これは貴重な情報。
+        deadline: entry.deadline || null,
+        // 店が公表している締切なので「受付中と確認できた」扱いにできる
+        applyVerified: Boolean(entry.deadline),
       });
       accepted += 1;
     }
