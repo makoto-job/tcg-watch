@@ -204,11 +204,23 @@ export function parseNewsList(html, siteConfig) {
     const m = deadlineRe.exec(String(fragment));
     if (!m) return '';
     const raw = (m[1] || m[0]).trim();
-    // 「2026/09/06 23:59:59」を日本時間として解釈する
-    const p = /(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/.exec(raw);
+    // 日本時間として解釈する。2つの書き方に対応:
+    //   「2026/09/06 23:59:59」   プレミアムバンダイの TimerEnd
+    //   「2026年9月27日 23時59分」 トレコロ等の応募期限
+    // 後者を読めないと、店が公表している本物の応募締切を取りこぼす。
+    const slash = /(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/.exec(raw);
+    // 曜日の括弧はあってもなくてもよい。括弧の中身だけを飛ばし、
+    // 括弧が無いときに時刻まで食い潰さないようにする。
+    const jp = /(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日\s*(?:[（(][^)）]*[)）]\s*)?(?:(\d{1,2})[時:](\d{1,2})分?)?/.exec(raw);
+    const p = slash || jp;
     if (!p) return '';
-    const [, y, mo, d, hh = '23', mi = '59', ss = '59'] = p;
-    const ms = Date.UTC(+y, +mo - 1, +d, +hh - 9, +mi, +ss);
+    const [, y, mo, d, hh, mi, ss] = p;
+    // 時刻の指定が無ければ「その日いっぱい」= 23:59:59 とみなす。
+    // 分まで指定されている場合は、秒を勝手に59にしない（23時59分 → 23:59:00）。
+    const H = hh === undefined ? 23 : +hh;
+    const M = mi === undefined ? 59 : +mi;
+    const S = ss !== undefined ? +ss : hh === undefined ? 59 : 0;
+    const ms = Date.UTC(+y, +mo - 1, +d, H - 9, M, S);
     return Number.isFinite(ms) ? new Date(ms).toISOString() : '';
   };
 

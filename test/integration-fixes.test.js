@@ -668,3 +668,80 @@ test('parseNewsList: カード以外（Tシャツ・プラモ）は締切があ�
   };
   assert.equal(parseOfficialList(html, site).length, 0);
 });
+
+// --- 和風の日付表記の締切（店が公表している応募期限）---
+
+test('parseNewsList: 「2026年9月27日 23時59分」形式の締切を読める', () => {
+  // 店が公表している応募期限はこの書き方が多い。
+  // スラッシュ区切りしか読めないと、本物の締切を取りこぼす。
+  const site = {
+    id: 't', baseUrl: 'https://www.torecolo.jp',
+    itemPattern: '<li>([\\s\\S]*?)</li>',
+    linkPattern: 'href="([^"]+)"',
+    titlePattern: '<p>([\\s\\S]*?)</p>',
+    deadlinePattern: 'deadline:\\s*"([^"]*)"',
+  };
+  const html = '<li><a href="/shop/form/form.aspx?questionnaire=poke20"><p>ストームエメラルダ 抽選販売</p></a>deadline: "2026年9月27日 23時59分"</li>';
+  const out = parseOfficialList(html, site);
+  assert.equal(out.length, 1);
+  assert.equal(out[0].deadline, '2026-09-27T14:59:00.000Z', 'JSTとして解釈されること');
+});
+
+test('parseNewsList: 和風表記で時刻が無ければ その日の23:59 とみなす', () => {
+  const site = {
+    id: 't', baseUrl: 'https://x.jp',
+    itemPattern: '<li>([\\s\\S]*?)</li>',
+    linkPattern: 'href="([^"]+)"',
+    titlePattern: '<p>([\\s\\S]*?)</p>',
+    deadlinePattern: '応募期限：([^<]+)',
+  };
+  const html = '<li><a href="/a"><p>ポケカ抽選</p></a>応募期限：2026年10月3日</li>';
+  const out = parseOfficialList(html, site);
+  assert.equal(out[0].deadline, '2026-10-03T14:59:59.000Z');
+});
+
+test('parseNewsList: 曜日つき「2026年9月27日(土) 23時59分」も読める', () => {
+  const site = {
+    id: 't', baseUrl: 'https://x.jp',
+    itemPattern: '<li>([\\s\\S]*?)</li>',
+    linkPattern: 'href="([^"]+)"',
+    titlePattern: '<p>([\\s\\S]*?)</p>',
+    deadlinePattern: '応募期限：([^<]+)',
+  };
+  const html = '<li><a href="/a"><p>ポケカ抽選</p></a>応募期限：2026年9月27日(土) 23時59分</li>';
+  const out = parseOfficialList(html, site);
+  assert.equal(out[0].deadline, '2026-09-27T14:59:00.000Z');
+});
+
+// --- 弾名（拡張パック名）でのIP判定 ---
+
+test('matchIps: 弾名だけの商品名でも何のカードか判定できる', () => {
+  // 店の商品名は「ストームエメラルダ（1box）抽選販売」のように
+  // ゲーム名を含まないことが多い。弾名が無いと取りこぼす。
+  const ips = JSON.parse(readFileSync(join(ROOT, 'config/sources.json'), 'utf8')).ips;
+  const cases = [
+    ['ストームエメラルダ（1box） 抽選販売', 'pokemon'],
+    ['30th CELEBRATION プレミアムデッキセット', 'pokemon'],
+    ['世界最強の戦士【OP-17】抽選販売', 'onepiece'],
+    ['CROSS FORCE [FB10] ブースターパック', 'dragonball'],
+    ['逆札篇 第2弾 燃えろ禁断！', 'duelmasters'],
+  ];
+  for (const [title, expected] of cases) {
+    const got = matchIps(title, ips);
+    assert.ok(got.includes(expected), `「${title}」が ${expected} と判定されない（実際: ${got.join(',')}）`);
+  }
+});
+
+test('matchIps: 弾名を足しても無関係な記事を誤判定しない', () => {
+  const ips = JSON.parse(readFileSync(join(ROOT, 'config/sources.json'), 'utf8')).ips;
+  const negatives = [
+    '逆転裁判の新作が発表',            // 「逆」だけでは当たらない
+    'クロスフォースという名の映画',      // カタカナ表記では当たらない
+    '世界最強の力士が引退',            // 「世界最強の戦士」とは別
+    'ストームの被害状況',              // 「ストームエメラルダ」の部分一致を防ぐ
+  ];
+  for (const title of negatives) {
+    const got = matchIps(title, ips).filter((k) => k !== 'lottery');
+    assert.equal(got.length, 0, `「${title}」を誤判定している: ${got.join(',')}`);
+  }
+});
