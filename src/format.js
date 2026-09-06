@@ -306,11 +306,14 @@ function toMs(value, fallback) {
  */
 export function isApplyOpen(item, now = new Date()) {
   if (!destUrl(item)) return false;
-  // 受付中だと確認できていないものは「応募できる」と断定しない。
-  // 店の商品一覧に載っていても、抽選エントリーが既に終わっていることがある。
-  // 実際、楽天の販売期間内の商品が店側で「エントリー期間外」と表示された。
-  if (item && item.applyVerified !== true) return false;
   const nowMs = toMs(now, Date.now());
+  // 「受付中だと言える根拠」があるものだけを対象にする。根拠は2つのどちらか。
+  //   1. 店が公表している受付情報を取得できた（applyVerified）
+  //   2. 締切日時が明示されていて、まだ過ぎていない
+  // 根拠が無いもの（店の商品一覧に載っているだけ）は対象外。
+  // 楽天の販売期間内の商品が店側で「エントリー期間外」と表示された事例があるため。
+  const hasStatedDeadline = Number.isFinite(deadlineMs(item));
+  if (item && item.applyVerified !== true && !hasStatedDeadline) return false;
   // 受付開始前のものを「応募できる」と扱わない。
   // 開始前にリンクを踏むと店側で「エントリー期間外」と表示され、
   // 応募できたつもりで取り逃す。締切切れと同じくらい有害。

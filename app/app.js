@@ -271,9 +271,12 @@ function isExpired(item, now = new Date()) {
 /** 応募ページがあり、締切切れでない */
 function isApplyOpen(item, now = new Date()) {
   if (!safeUrl(item && item.destUrl)) return false;
-  // 受付中だと確認できていないものは「いま応募できる」に出さない。
-  // 店の一覧に載っていても抽選が締め切られていることがあるため。
-  if (item.applyVerified !== true) return false;
+  // 「受付中だと言える根拠」があるものだけを出す。根拠は2つのどちらか。
+  //   1. 店が公表している受付情報を取得できた（applyVerified）
+  //   2. 締切日時が明示されていて、まだ過ぎていない
+  // 根拠が無いもの（店の一覧に載っているだけ）は出さない。
+  const hasStatedDeadline = Number.isFinite(Date.parse(item.deadline));
+  if (item.applyVerified !== true && !hasStatedDeadline) return false;
   // 受付開始前は「いま応募できる」ではない。
   // 開始前にリンクを踏むと店側で「エントリー期間外」と出て、応募できたつもりで取り逃す。
   if (isApplyUpcoming(item, now)) return false;

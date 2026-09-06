@@ -257,7 +257,9 @@
       "priority": 8,
       "aliases": [
         "ヤマシロヤ"
-      ]
+      ],
+      "entryUrl": "https://e-yamashiroya.com/",
+      "entryLabel": "ヤマシロヤ通販（抽選販売はこちら）"
     },
     {
       "domain": "volks.co.jp",
@@ -388,7 +390,9 @@
       "aliases": [
         "ビックカメラ",
         "ビック"
-      ]
+      ],
+      "entryUrl": "https://www.biccamera.com/",
+      "entryLabel": "ビックカメラ.com"
     },
     {
       "domain": "joshinweb.jp",
@@ -408,7 +412,9 @@
       "priority": 7,
       "aliases": [
         "エディオン"
-      ]
+      ],
+      "entryUrl": "https://www.edion.com/category002.html?c_cd=001039031",
+      "entryLabel": "トレーディングカード売り場"
     },
     {
       "domain": "ksdenki.com",
@@ -428,7 +434,9 @@
         "ヤマダ電機",
         "ヤマダウェブコム",
         "ヤマダデンキ"
-      ]
+      ],
+      "entryUrl": "https://www.yamada-denkiweb.com/",
+      "entryLabel": "ヤマダウェブコム"
     },
     {
       "domain": "nojima.co.jp",
@@ -498,7 +506,9 @@
       "aliases": [
         "ファミマ",
         "ファミリーマート"
-      ]
+      ],
+      "entryUrl": "https://famima-online.family.co.jp/search?category=hobby",
+      "entryLabel": "ファミマオンライン ホビー（抽選商品）"
     },
     {
       "domain": "animate-onlineshop.jp",
@@ -658,7 +668,9 @@
       "priority": 5,
       "aliases": [
         "イオン"
-      ]
+      ],
+      "entryUrl": "https://aeonretail.com/",
+      "entryLabel": "イオンスタイルオンライン"
     },
     {
       "domain": "donki.com",
@@ -678,6 +690,56 @@
       "aliases": [
         "西友"
       ]
+    },
+    {
+      "domain": "famima-online.family.co.jp",
+      "label": "ファミマオンライン",
+      "category": "cvs",
+      "priority": 6,
+      "aliases": [
+        "ファミマオンライン",
+        "ファミマ",
+        "ファミリーマート"
+      ],
+      "entryUrl": "https://famima-online.family.co.jp/search?category=hobby",
+      "entryLabel": "ホビー（抽選商品はここに並ぶ）"
+    },
+    {
+      "domain": "e-yamashiroya.com",
+      "label": "ヤマシロヤ",
+      "category": "toy",
+      "priority": 8,
+      "aliases": [
+        "ヤマシロヤ",
+        "e-ヤマシロヤ"
+      ],
+      "entryUrl": "https://e-yamashiroya.com/",
+      "entryLabel": "ヤマシロヤ通販（抽選販売の告知はここ）"
+    },
+    {
+      "domain": "iyec.itoyokado.co.jp",
+      "label": "イトーヨーカドーネット通販",
+      "category": "super",
+      "priority": 5,
+      "aliases": [
+        "イトーヨーカドー",
+        "ヨーカドー",
+        "イトーヨーカドーネット通販"
+      ],
+      "entryUrl": "https://iyec.itoyokado.co.jp/shop/e/eE4reslot/",
+      "entryLabel": "開催中の予約・抽選"
+    },
+    {
+      "domain": "aeonretail.com",
+      "label": "イオンスタイルオンライン",
+      "category": "super",
+      "priority": 5,
+      "aliases": [
+        "イオンスタイルオンライン",
+        "イオン"
+      ],
+      "entryUrl": "https://aeonretail.com/",
+      "entryLabel": "イオンスタイルオンライン"
     }
   ],
   "blockedDomains": [

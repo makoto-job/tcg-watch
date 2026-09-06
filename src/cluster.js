@@ -188,6 +188,23 @@ function ts(item) {
  * @param {{threshold?: number}} [opts]
  * @returns {Array<RawItem[]>}
  */
+/**
+ * 応募先を表す鍵。応募URLがあればそのホスト＋パス、無ければ null。
+ * 同じ商品でも応募先が違えば別の応募機会なので、まとめてはいけない。
+ * @param {{destUrl?:string}} item
+ * @returns {string|null}
+ */
+function applyKey(item) {
+  const u = item && item.destUrl;
+  if (typeof u !== 'string' || !/^https?:\/\//i.test(u)) return null;
+  try {
+    const p = new URL(u);
+    return `${p.hostname.toLowerCase()}${p.pathname}${p.search}`;
+  } catch {
+    return null;
+  }
+}
+
 export function clusterItems(items, opts = {}) {
   const threshold =
     typeof opts.threshold === 'number' && Number.isFinite(opts.threshold)
@@ -204,12 +221,19 @@ export function clusterItems(items, opts = {}) {
     const grams = bigrams(norm);
     const uk = urlKey(item.url);
 
+    // 応募先が違うものは、商品名が同じでも別の機会として扱う。
+    // 抽選は「多くの店に応募するほど当たる」ので、
+    // 同じ商品の別店舗の抽選をまとめると価値そのものが消える。
+    const dk = applyKey(item);
+
     let target = null;
     for (const c of clusters) {
       if (uk && c.urls.has(uk)) {
         target = c;
         break;
       }
+      // 応募先が明示されていて、かつ互いに違うならクラスタにしない
+      if (dk && c.applyKeys.size > 0 && !c.applyKeys.has(dk)) continue;
       if (!norm) continue;
       for (let i = 0; i < c.keys.length; i++) {
         const k = c.keys[i];
@@ -232,11 +256,13 @@ export function clusterItems(items, opts = {}) {
       target.keys.push(norm);
       target.grams.push(grams);
       if (uk) target.urls.add(uk);
+      if (dk) target.applyKeys.add(dk);
     } else {
       clusters.push({
         items: [item],
         keys: [norm],
         grams: [grams],
+        applyKeys: new Set(dk ? [dk] : []),
         urls: new Set(uk ? [uk] : []),
       });
     }

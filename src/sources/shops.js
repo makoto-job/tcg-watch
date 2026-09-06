@@ -32,6 +32,7 @@ import {
   LOTTERY_IP,
 } from './official.js';
 import { canonicalizeUrl } from '../resolve.js';
+import { parseFeed } from '../rss.js';
 
 export { USER_AGENT, LOTTERY_HINTS, LOTTERY_IP };
 
@@ -209,6 +210,44 @@ export function parseShopJson(json, siteConfig) {
   return out;
 }
 
+/**
+ * RSS/Atom を読んで一覧に変換する。
+ * 小売店のお知らせがWordPressのRSSで出ている場合に使う。
+ * `src/rss.js` の自前パーサを通すので、英語月名の日付も正しく解釈できる。
+ * @param {string} xml
+ * @param {Object} siteConfig
+ * @returns {Array<{title:string, link:string, pubDate:string, deadline:string}>}
+ */
+export function parseShopFeed(xml, siteConfig) {
+  const site = siteConfig || {};
+  const titleFilter = toRegExp(site.titleFilter);
+  const titleExclude = toRegExp(site.titleExclude);
+  const maxItems = Number(site.maxItemsPerSite) > 0 ? Number(site.maxItemsPerSite) : DEFAULT_MAX_ITEMS;
+
+  let feed;
+  try {
+    feed = parseFeed(String(xml || ''));
+  } catch {
+    return [];
+  }
+
+  const out = [];
+  const seen = new Set();
+  for (const item of (feed && feed.items) || []) {
+    const title = cleanTitle(item.title);
+    const link = absolutizeUrl(String(item.link || ''), site.baseUrl || site.url || '');
+    if (!title || !link) continue;
+    if (titleFilter && !titleFilter.test(title)) continue;
+    if (titleExclude && titleExclude.test(title)) continue;
+    const key = `${normalizeForMatch(title)}|${canonicalizeUrl(link)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ title, link, pubDate: item.pubDate || '', deadline: '' });
+    if (out.length >= maxItems) break;
+  }
+  return out;
+}
+
 /* ------------------------------------------------------------------ */
 /* 取得                                                                */
 /* ------------------------------------------------------------------ */
@@ -248,6 +287,17 @@ export async function fetchSiteEntries(site, defaults = {}) {
       accept: 'application/json, text/javascript, */*;q=0.8',
     });
     return parseShopJson(JSON.parse(text), site);
+  }
+
+  if (site.type === 'rss') {
+    // 正規表現でRSSを無理に読むと日付（英語月名のRFC822）を落とす。
+    // 既存の自前パーサを使えば正しく解釈できる。
+    const xml = await fetchText(url, {
+      charset: site.charset,
+      timeoutMs,
+      accept: 'application/rss+xml, application/xml, text/xml, */*;q=0.8',
+    });
+    return parseShopFeed(xml, site);
   }
 
   const html = await fetchText(url, { charset: site.charset, timeoutMs });
@@ -327,7 +377,13 @@ export async function fetchShopItems(config, opts = {}) {
 
     const entries = Array.isArray(r.value) ? r.value : [];
     if (entries.length === 0) {
-      console.warn(`[shops] 取得0件 ${site.id} (${site.resolvedUrl}) — サイト構造が変わった可能性`);
+      // 対象商品が無い日が普通にあるサイト（抽選一覧など）は警告しない。
+      // 毎日warnが出ると、本物の構造変更を見逃すようになる。
+      if (site.expectEmpty) {
+        if (verbose) console.log(`[shops] ${site.id}: 対象0件（このサイトでは正常）`);
+      } else {
+        console.warn(`[shops] 取得0件 ${site.id} (${site.resolvedUrl}) — サイト構造が変わった可能性`);
+      }
       continue;
     }
 
@@ -373,7 +429,9 @@ export async function fetchShopItems(config, opts = {}) {
         tier: 'shop',
         // 小売店由来なので応募先は最初から分かっている
         destUrl: url,
-        destLabel,
+        // 項目ごとに応募先が違うサイト（まとめサイト等）は、その店名を優先する。
+        // サイト名を出すと『まとめサイトで確認』と表示しながら別の店へ飛ばすことになる。
+        destLabel: entry.destLabel || destLabel,
         startsAt: entry.startsAt || null,
         deadline: entry.deadline || null,
         // 店の商品一覧から作った項目は、受付中かどうかを確認できていない。

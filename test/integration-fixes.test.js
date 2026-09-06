@@ -745,3 +745,45 @@ test('matchIps: 弾名を足しても無関係な記事を誤判定しない', (
     assert.equal(got.length, 0, `「${title}」を誤判定している: ${got.join(',')}`);
   }
 });
+
+// --- 小売店のRSS対応と「0件が正常」の扱い ---
+
+import { parseShopFeed } from '../src/sources/shops.js';
+
+test('parseShopFeed: 英語月名のRFC822日付を正しく解釈する', () => {
+  // 正規表現でRSSを読むと「Sat, 05 Sep 2026」の月を数値化できず日付を落とす。
+  // 自前パーサを通せば正しく解釈できる。
+  const xml = `<?xml version="1.0"?><rss version="2.0"><channel>
+    <item><title>【抽選販売】ポケモンカードゲーム 30th CELEBRATION</title>
+      <link>https://e-yamashiroya.com/a</link>
+      <pubDate>Sat, 05 Sep 2026 10:00:00 +0900</pubDate></item>
+  </channel></rss>`;
+  const out = parseShopFeed(xml, { baseUrl: 'https://e-yamashiroya.com' });
+  assert.equal(out.length, 1);
+  assert.equal(out[0].pubDate, '2026-09-05T01:00:00.000Z', 'JST 9/5 10:00 として解釈されること');
+});
+
+test('parseShopFeed: titleFilter でカード商品だけ残る', () => {
+  const xml = `<?xml version="1.0"?><rss version="2.0"><channel>
+    <item><title>【抽選販売】ポケモンカードゲーム BOX</title><link>https://x.jp/a</link></item>
+    <item><title>店舗休業のお知らせ</title><link>https://x.jp/b</link></item>
+  </channel></rss>`;
+  const out = parseShopFeed(xml, { baseUrl: 'https://x.jp', titleFilter: 'カードゲーム|トレカ' });
+  assert.equal(out.length, 1);
+  assert.match(out[0].title, /ポケモンカードゲーム/);
+});
+
+test('parseShopFeed: 壊れたXMLでも例外を投げない', () => {
+  assert.deepEqual(parseShopFeed('<rss><channel><item>', { baseUrl: 'https://x.jp' }), []);
+  assert.deepEqual(parseShopFeed('', { baseUrl: 'https://x.jp' }), []);
+  assert.deepEqual(parseShopFeed(null, {}), []);
+});
+
+test('設定: 0件が正常なサイトには expectEmpty が付いている', () => {
+  // 対象商品が無い日が普通にあるサイトで毎日警告が出ると、
+  // 本物の構造変更を見逃すようになる。
+  const cfg = JSON.parse(readFileSync(join(ROOT, 'config/shop-sources.json'), 'utf8'));
+  const iy = cfg.sites.find((s) => s.id === 'iyec-lottery');
+  assert.ok(iy, 'iyec-lottery が無い');
+  assert.equal(iy.expectEmpty, true);
+});

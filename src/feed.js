@@ -115,16 +115,33 @@ export function isHttpUrl(v) {
  * @param {{maxItems:number, minPerIp:number}} opts
  * @returns {Array<object>} publishedAt 降順
  */
-export function ensureIpCoverage(all, base, { maxItems = 50, minPerIp = 4 } = {}) {
+export function ensureIpCoverage(all, base, { maxItems = 50, minPerIp = 4, mustKeep = [] } = {}) {
   const list = Array.isArray(all) ? all : [];
   const cap = Math.max(0, maxItems);
   if (list.length <= cap) return list.slice();
-  if (minPerIp <= 0) return list.slice(0, cap);
 
   const picked = new Map();
   const add = (it) => {
     if (it && !picked.has(it.id)) picked.set(it.id, it);
   };
+
+  // 0) 受付中の抽選（締切あり）を最優先で確保する。
+  //    締切が近い順に入れるので、枠が足りなくても急ぎのものから残る。
+  const keep = (Array.isArray(mustKeep) ? mustKeep : [])
+    .slice()
+    .sort((a, b) => (Date.parse(a.deadline) || 0) - (Date.parse(b.deadline) || 0));
+  for (const it of keep) {
+    if (picked.size >= cap) break;
+    add(it);
+  }
+
+  if (minPerIp <= 0) {
+    for (const it of list) {
+      if (picked.size >= cap) break;
+      add(it);
+    }
+    return sortByPublished([...picked.values()].slice(0, cap));
+  }
 
   // 1) 各IPの最新 minPerIp 件を確保する（lottery は横断タグなので対象外）
   const perIp = new Map();
@@ -146,16 +163,19 @@ export function ensureIpCoverage(all, base, { maxItems = 50, minPerIp = 4 } = {}
   }
 
   // 3) 確保のために入れた古い記事があるので、最後に必ず新しい順へ戻す
-  return [...picked.values()]
-    .slice(0, cap)
-    .sort((a, b) => {
-      const ta = Date.parse(a.publishedAt);
-      const tb = Date.parse(b.publishedAt);
-      const va = Number.isFinite(ta) ? ta : -Infinity;
-      const vb = Number.isFinite(tb) ? tb : -Infinity;
-      if (vb !== va) return vb - va;
-      return (b.score || 0) - (a.score || 0);
-    });
+  return sortByPublished([...picked.values()].slice(0, cap));
+}
+
+/** publishedAt 降順（同着は score 降順） */
+function sortByPublished(items) {
+  return items.sort((a, b) => {
+    const ta = Date.parse(a.publishedAt);
+    const tb = Date.parse(b.publishedAt);
+    const va = Number.isFinite(ta) ? ta : -Infinity;
+    const vb = Number.isFinite(tb) ? tb : -Infinity;
+    if (vb !== va) return vb - va;
+    return (b.score || 0) - (a.score || 0);
+  });
 }
 
 /**
@@ -236,7 +256,33 @@ export function buildFeedJson({ ranked = [], top = [], tweetUrl = null, now = ne
   // 最新順に切るだけだと、記事数の多いIP（ポケカ・ワンピ）が枠を埋めてしまい、
   // 記事数の少ないIP（ドラゴンボール等）がアプリから消える。
   // 「自分の好きなTCGの情報が無い」状態を防ぐため、各IPに最低枠を確保する。
-  const selected = ensureIpCoverage(allItems, items, { maxItems, minPerIp });
+  // 締切があって、まだ受付中のものは必ず残す。
+  // 「最新順に50件」で切ると、今日締切の抽選が新着記事に押し出されて消える。
+  // このアプリの目的は「間に合わせること」なので、そこを最優先で確保する。
+  const nowMs = now instanceof Date ? now.getTime() : Date.now();
+  // ただし1つの情報源だけで枠を埋めない。
+  // まとめサイトは同じ商品の別店舗が何十件も並ぶので、
+  // 無制限に通すと他ジャンル（遊戯王・デュエマ等）が全部消える。
+  const perSourceCap = Math.max(1, Math.floor(maxItems * 0.4));
+  const bySource = new Map();
+  const openNow = allItems
+    .filter((it) => {
+      const dl = Date.parse(it.deadline);
+      return Number.isFinite(dl) && dl > nowMs && it.destUrl;
+    })
+    .sort((a, b) => (Date.parse(a.deadline) || 0) - (Date.parse(b.deadline) || 0))
+    .filter((it) => {
+      const key = it.sourceName || '';
+      const n = bySource.get(key) || 0;
+      if (n >= perSourceCap) return false;
+      bySource.set(key, n + 1);
+      return true;
+    });
+  const selected = ensureIpCoverage(allItems, items, {
+    maxItems,
+    minPerIp,
+    mustKeep: openNow,
+  });
 
   // ranking.top: rank 昇順
   const rankingTop = topList

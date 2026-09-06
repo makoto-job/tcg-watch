@@ -224,6 +224,16 @@ export function parseNewsList(html, siteConfig) {
     return Number.isFinite(ms) ? new Date(ms).toISOString() : '';
   };
 
+  const destLabelRe = toRegExp(site.destLabelPattern);
+
+  /** 断片から応募先の店名を取り出す（まとめサイトのように項目ごとに店が違う場合） */
+  const pickDestLabel = (fragment) => {
+    if (!destLabelRe || !fragment) return '';
+    destLabelRe.lastIndex = 0;
+    const m = destLabelRe.exec(String(fragment));
+    return m ? cleanTitle(m[1] || m[0]) : '';
+  };
+
   const push = (rawTitle, rawLink, pubDate, fragment) => {
     const title = cleanTitle(rawTitle);
     const link = absolutizeUrl(rawLink, base);
@@ -233,7 +243,13 @@ export function parseNewsList(html, siteConfig) {
     const key = `${normalizeForMatch(title)}|${canonicalizeUrl(link)}`;
     if (seen.has(key)) return; // 同じ記事がタブごとに重複出力されるサイト対策
     seen.add(key);
-    out.push({ title, link, pubDate: pubDate || '', deadline: pickDeadline(fragment) });
+    out.push({
+      title,
+      link,
+      pubDate: pubDate || '',
+      deadline: pickDeadline(fragment),
+      destLabel: pickDestLabel(fragment),
+    });
   };
 
   const itemRe = toRegExp(site.itemPattern, 'g');

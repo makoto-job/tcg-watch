@@ -660,7 +660,8 @@ test('config/shop-sources.json: 全サイトが必須キーを持ち、id が一
     assert.ok(s.url, `${s.id}: url が無い`);
     assert.ok(s.name, `${s.id}: name が無い`);
     assert.ok(s.note, `${s.id}: note（調査メモ）が無い`);
-    assert.ok(['html', 'json'].includes(s.type), `${s.id}: type が不正`);
+    // rss は小売店のお知らせがWordPress等のRSSで出ている場合に使う
+    assert.ok(['html', 'json', 'rss'].includes(s.type), `${s.id}: type が不正`);
     assert.ok(Array.isArray(s.ips), `${s.id}: ips が配列でない`);
     assert.equal(typeof s.enabled, 'boolean', `${s.id}: enabled が boolean でない`);
     // 無効サイトは必ず理由を note に書く約束
