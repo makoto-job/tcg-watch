@@ -432,6 +432,9 @@ export async function fetchShopItems(config, opts = {}) {
         // 項目ごとに応募先が違うサイト（まとめサイト等）は、その店名を優先する。
         // サイト名を出すと『まとめサイトで確認』と表示しながら別の店へ飛ばすことになる。
         destLabel: entry.destLabel || destLabel,
+        // 遠方の実店舗を勧めないための判別材料
+        prefecture: entry.prefecture || '',
+        deliveryType: entry.deliveryType || '',
         startsAt: entry.startsAt || null,
         deadline: entry.deadline || null,
         // 店の商品一覧から作った項目は、受付中かどうかを確認できていない。

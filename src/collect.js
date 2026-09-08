@@ -554,6 +554,8 @@ export async function collectAll(config, opts = {}) {
       deadline: item.deadline || null,
       applyVerified: item.applyVerified === true,
       destIsEntry: item.destIsEntry === true,
+      prefecture: item.prefecture || '',
+      deliveryType: item.deliveryType || '',
     });
   }
 

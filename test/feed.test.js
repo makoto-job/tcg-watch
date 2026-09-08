@@ -46,6 +46,8 @@ const FEED_ITEM_KEYS = [
   'applyVerified',
   'destIsEntry',
   'otherShops',
+  'prefecture',
+  'deliveryType',
 ].sort();
 
 /**

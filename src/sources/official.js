@@ -225,6 +225,18 @@ export function parseNewsList(html, siteConfig) {
   };
 
   const destLabelRe = toRegExp(site.destLabelPattern);
+  // 都道府県と受取方法。遠方の実店舗を勧めても行けないので、
+  // 「オンラインか」「自分の県か」を判別できるようにする。
+  const prefectureRe = toRegExp(site.prefecturePattern);
+  const deliveryRe = toRegExp(site.deliveryPattern);
+
+  /** 断片から1つ取り出す小道具 */
+  const pick = (re, fragment) => {
+    if (!re || !fragment) return '';
+    re.lastIndex = 0;
+    const m = re.exec(String(fragment));
+    return m ? String(m[1] || m[0]).trim() : '';
+  };
 
   /** 断片から応募先の店名を取り出す（まとめサイトのように項目ごとに店が違う場合） */
   const pickDestLabel = (fragment) => {
@@ -258,6 +270,8 @@ export function parseNewsList(html, siteConfig) {
       pubDate: pubDate || '',
       deadline: pickDeadline(fragment),
       destLabel: pickDestLabel(fragment),
+      prefecture: pick(prefectureRe, fragment),
+      deliveryType: pick(deliveryRe, fragment),
     });
   };
 

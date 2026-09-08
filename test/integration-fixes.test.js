@@ -832,3 +832,48 @@ test('mergeSameProduct: http(s) 以外の他店URLは持たせない', () => {
   assert.equal(out.length, 1);
   assert.equal(out[0].otherShops.length, 0, '危険なURLは持たせない');
 });
+
+// --- 都道府県・受取方法の取り込み（遠方の実店舗を勧めないため）---
+
+test('parseNewsList: まとめサイトから都道府県と受取方法を取り出す', () => {
+  // 遠方の実店舗を「登録してください」と勧めても行けないので意味がない。
+  // オンラインか／自分の県かを判別できるようにする。
+  const site = {
+    id: 't', baseUrl: 'https://pokeca-navi.jp',
+    itemPattern: '\\{([\\s\\S]*?)\\}',
+    linkPattern: '"applicationUrl":"([^"]+)"',
+    titlePattern: '"productName":"([^"]+)"',
+    destLabelPattern: '"storeName":"([^"]+)"',
+    prefecturePattern: '"prefecture":"([^"]+)"',
+    deliveryPattern: '"deliveryType":"([^"]+)"',
+  };
+  const html =
+    '{"productName":"30th CELEBRATION BOX","storeName":"トクジロー浦安店",' +
+    '"prefecture":"chiba","deliveryType":"store",' +
+    '"applicationUrl":"https://example.com/entry"}';
+  const out = parseOfficialList(html, site);
+  assert.equal(out.length, 1);
+  assert.equal(out[0].destLabel, 'トクジロー浦安店');
+  assert.equal(out[0].prefecture, 'chiba');
+  assert.equal(out[0].deliveryType, 'store');
+});
+
+test('parseNewsList: 都道府県のパターンが未設定なら空文字（後方互換）', () => {
+  const site = {
+    id: 't', baseUrl: 'https://x.jp',
+    itemPattern: '\\{([\\s\\S]*?)\\}',
+    linkPattern: '"url":"([^"]+)"',
+    titlePattern: '"name":"([^"]+)"',
+  };
+  const out = parseOfficialList('{"name":"商品","url":"https://x.jp/a","prefecture":"tokyo"}', site);
+  assert.equal(out[0].prefecture, '');
+  assert.equal(out[0].deliveryType, '');
+});
+
+test('設定: まとめサイトに都道府県の取得パターンがある', () => {
+  const cfg = JSON.parse(readFileSync(join(ROOT, 'config/shop-sources.json'), 'utf8'));
+  const s = cfg.sites.find((x) => x.id === 'pokeca-navi-lotteries');
+  assert.ok(s, 'pokeca-navi-lotteries が無い');
+  assert.ok(s.prefecturePattern, '都道府県のパターンが未設定');
+  assert.ok(s.deliveryPattern, '受取方法のパターンが未設定');
+});

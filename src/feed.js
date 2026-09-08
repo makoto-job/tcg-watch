@@ -101,6 +101,11 @@ export function toFeedItem(rankedItem, opts = {}) {
     applyVerified: it.applyVerified === true,
     // 商品ページではなく店の入口ページか（bot拒否等で商品ページを取得できない場合）
     destIsEntry: it.destIsEntry === true,
+    // 遠方の実店舗を勧めないための判別材料
+    // prefecture: 'all'（全国＝オンライン）または 'tokyo' 等
+    // deliveryType: 'store'（店頭受取）/ 'online' / 'all'
+    prefecture: typeof it.prefecture === 'string' ? it.prefecture : '',
+    deliveryType: typeof it.deliveryType === 'string' ? it.deliveryType : '',
     // 同じ商品を扱う他の店（抽選は多くの店に応募するほど当たる）
     otherShops: Array.isArray(it.otherShops)
       ? it.otherShops
