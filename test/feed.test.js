@@ -45,6 +45,7 @@ const FEED_ITEM_KEYS = [
   'deadline',
   'applyVerified',
   'destIsEntry',
+  'otherShops',
 ].sort();
 
 /**
@@ -54,7 +55,9 @@ const FEED_ITEM_KEYS = [
 function ranked(over = {}) {
   return {
     id: over.id ?? 'id-0000000000000',
-    title: over.title ?? 'テスト記事',
+    // 同じ商品名は1件に集約される仕様なので、既定のタイトルは id ごとに変える。
+    // 同一商品としてまとめられる挙動を試したいテストは title を明示すること。
+    title: over.title ?? `テスト記事${over.id ?? ''}`,
     url: over.url ?? 'https://example.com/a',
     sourceName: over.sourceName ?? '4Gamer',
     sourceId: over.sourceId ?? '4gamer',

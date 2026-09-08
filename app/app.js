@@ -435,6 +435,32 @@ function buildApplyButton(item) {
   arrow.setAttribute('aria-hidden', 'true');
   arrow.textContent = '→';
   a.appendChild(arrow);
+
+  // 同じ商品を他の店でも応募できる場合は、その数を示す。
+  // 抽選は応募する店を増やすほど当たるので、ここは価値のある情報。
+  const others = Array.isArray(item.otherShops) ? item.otherShops.filter((o) => safeUrl(o.url)) : [];
+  if (others.length) {
+    const more = document.createElement('details');
+    more.className = 'others';
+    const sum = document.createElement('summary');
+    sum.textContent = `ほか${others.length}店でも応募できます`;
+    more.appendChild(sum);
+    const ul = document.createElement('ul');
+    ul.className = 'others__list';
+    for (const o of others) {
+      const li = document.createElement('li');
+      const link = document.createElement('a');
+      link.href = safeUrl(o.url);
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = o.label;
+      link.setAttribute('aria-label', `${item.title || ''} — ${o.label}の応募ページを開く`);
+      li.appendChild(link);
+      ul.appendChild(li);
+    }
+    more.appendChild(ul);
+    a.after(more);
+  }
   return a;
 }
 

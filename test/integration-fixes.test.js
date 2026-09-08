@@ -787,3 +787,48 @@ test('設定: 0件が正常なサイトには expectEmpty が付いている', (
   assert.ok(iy, 'iyec-lottery が無い');
   assert.equal(iy.expectEmpty, true);
 });
+
+// --- 同じ商品を1件にまとめる ---
+
+import { mergeSameProduct } from '../src/feed.js';
+
+test('mergeSameProduct: 同じ商品名は1件にまとめ、他店を otherShops に持たせる', () => {
+  // 抽選は多くの店に応募するほど当たるので他店の情報も価値があるが、
+  // 一覧に同じ商品名が10件並ぶと読めない。
+  const mk = (shop, url, deadline) => ({
+    id: shop,
+    title: '30th CELEBRATION BOX',
+    url,
+    destUrl: url,
+    destLabel: shop,
+    deadline,
+    publishedAt: '2026-09-08T00:00:00.000Z',
+  });
+  const out = mergeSameProduct([
+    mk('A店', 'https://a.example.com/1', '2026-09-10T00:00:00.000Z'),
+    mk('B店', 'https://b.example.com/1', '2026-09-09T00:00:00.000Z'),
+    mk('C店', 'https://c.example.com/1', null),
+  ]);
+  assert.equal(out.length, 1, '1件にまとまること');
+  assert.equal(out[0].destLabel, 'B店', '締切が近い店が代表になること');
+  assert.equal(out[0].otherShops.length, 2, '他店が残ること');
+  assert.deepEqual(out[0].otherShops.map((o) => o.label), ['A店', 'C店']);
+});
+
+test('mergeSameProduct: 別商品はまとめない', () => {
+  const out = mergeSameProduct([
+    { id: 'a', title: 'ストームエメラルダ', url: 'https://a.example.com/1', publishedAt: '2026-09-08T00:00:00.000Z' },
+    { id: 'b', title: '30th CELEBRATION BOX', url: 'https://b.example.com/1', publishedAt: '2026-09-08T00:00:00.000Z' },
+  ]);
+  assert.equal(out.length, 2);
+});
+
+test('mergeSameProduct: http(s) 以外の他店URLは持たせない', () => {
+  const mk = (shop, url) => ({
+    id: shop, title: '同じ商品', url: 'https://x.example.com/' + shop,
+    destUrl: url, destLabel: shop, publishedAt: '2026-09-08T00:00:00.000Z',
+  });
+  const out = mergeSameProduct([mk('A', 'https://a.example.com/1'), mk('B', 'javascript:alert(1)')]);
+  assert.equal(out.length, 1);
+  assert.equal(out[0].otherShops.length, 0, '危険なURLは持たせない');
+});

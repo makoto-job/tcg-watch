@@ -1644,3 +1644,34 @@ body.is-locked { overflow: hidden; }
   border: 1px dashed var(--border);
 }
 .apply--entry { border-style: dashed; }
+
+/* 同じ商品を扱う他の店。既定は閉じておき、必要な人だけ開く */
+.others { margin-top: 6px; font-size: 12.5px; }
+.others summary {
+  cursor: pointer;
+  color: var(--text-sub);
+  padding: 4px 0;
+  min-height: var(--tap, 32px);
+  display: flex;
+  align-items: center;
+}
+.others summary::marker { color: var(--text-mute); }
+.others__list {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0 0 0 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.others__list a {
+  display: inline-block;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-sunken);
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 12px;
+}
+.others__list a:hover { border-color: var(--accent); }

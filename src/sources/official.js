@@ -234,10 +234,19 @@ export function parseNewsList(html, siteConfig) {
     return m ? cleanTitle(m[1] || m[0]) : '';
   };
 
+  // 一覧に「在庫なし」「SOLD OUT」が出ている商品を除外する。
+  // 一覧では受付中に見えても、開くと買えない商品が混ざる。
+  // 実測でカードラボの予約一覧119件中44件が在庫なしだった。
+  const stockExcludeRe = toRegExp(site.stockExcludePattern);
+
   const push = (rawTitle, rawLink, pubDate, fragment) => {
     const title = cleanTitle(rawTitle);
     const link = absolutizeUrl(rawLink, base);
     if (!title || !link) return;
+    if (stockExcludeRe && fragment) {
+      stockExcludeRe.lastIndex = 0;
+      if (stockExcludeRe.test(String(fragment))) return;
+    }
     if (titleFilter && !titleFilter.test(title)) return;
     if (titleExclude && titleExclude.test(title)) return;
     const key = `${normalizeForMatch(title)}|${canonicalizeUrl(link)}`;

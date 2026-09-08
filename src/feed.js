@@ -101,6 +101,13 @@ export function toFeedItem(rankedItem, opts = {}) {
     applyVerified: it.applyVerified === true,
     // 商品ページではなく店の入口ページか（bot拒否等で商品ページを取得できない場合）
     destIsEntry: it.destIsEntry === true,
+    // 同じ商品を扱う他の店（抽選は多くの店に応募するほど当たる）
+    otherShops: Array.isArray(it.otherShops)
+      ? it.otherShops
+          .filter((o) => o && typeof o.label === 'string' && isHttpUrl(o.url))
+          .map((o) => ({ label: o.label, url: o.url }))
+          .slice(0, 12)
+      : [],
   };
 }
 
@@ -130,6 +137,71 @@ export function isHttpUrl(v) {
  * @param {{maxItems:number, minPerIp:number, mustKeep?:Array<object>, perSourceCap?:number, now?:Date|number}} opts
  * @returns {Array<object>} publishedAt 降順
  */
+/**
+ * 同じ商品を1件にまとめる。
+ * 抽選は「多くの店に応募するほど当たる」ので他店の情報も価値があるが、
+ * 一覧に同じ商品名が並ぶと読めなくなる。
+ * 代表を1件だけ残し、他店は otherShops として持たせる。
+ *
+ * 代表の選び方: 締切が近いもの → 締切が明示されているもの → 新しいもの
+ *
+ * @param {Array<object>} items publishedAt 降順に並んだ一覧
+ * @returns {Array<object>}
+ */
+export function mergeSameProduct(items) {
+  const list = Array.isArray(items) ? items : [];
+  const keyOf = (it) =>
+    String(it.title || '')
+      .normalize('NFKC')
+      .replace(/[\s\p{P}\p{S}]/gu, '')
+      .toLowerCase();
+
+  const groups = new Map();
+  for (const it of list) {
+    const k = keyOf(it);
+    if (!k) continue;
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(it);
+  }
+
+  const out = [];
+  for (const group of groups.values()) {
+    if (group.length === 1) {
+      out.push(group[0]);
+      continue;
+    }
+    // 締切が近い順 → 締切がある順 → 新しい順
+    const sorted = group.slice().sort((a, b) => {
+      const da = Date.parse(a.deadline);
+      const db = Date.parse(b.deadline);
+      const va = Number.isFinite(da) ? da : Infinity;
+      const vb = Number.isFinite(db) ? db : Infinity;
+      if (va !== vb) return va - vb;
+      return (Date.parse(b.publishedAt) || 0) - (Date.parse(a.publishedAt) || 0);
+    });
+    const rep = sorted[0];
+    const others = sorted.slice(1);
+    out.push({
+      ...rep,
+      // 他にも応募できる店があることを示す（アプリ側で「他N店」と出せる）
+      otherShops: others
+        .map((o) => ({ label: o.destLabel || o.sourceName || '', url: o.destUrl || o.url || '' }))
+        .filter((o) => o.label && /^https?:\/\//i.test(o.url))
+        .slice(0, 12),
+    });
+  }
+
+  // publishedAt 降順に戻す
+  return out.sort((a, b) => {
+    const ta = Date.parse(a.publishedAt);
+    const tb = Date.parse(b.publishedAt);
+    const va = Number.isFinite(ta) ? ta : -Infinity;
+    const vb = Number.isFinite(tb) ? tb : -Infinity;
+    if (vb !== va) return vb - va;
+    return (b.score || 0) - (a.score || 0);
+  });
+}
+
 export function ensureIpCoverage(all, base, {
   maxItems = 50,
   minPerIp = 4,
@@ -329,7 +401,11 @@ export function buildFeedJson({ ranked = [], top = [], tweetUrl = null, now = ne
       if (vb !== va) return vb - va;
       return (b.score || 0) - (a.score || 0);
     });
-  const items = allItems.slice(0, Math.max(0, maxItems));
+  // 同じ商品が複数の店に出ている場合は先に1件へ集約する。
+  // これを後回しにすると、受付中の抽選を優先確保する処理が
+  // 重複したまま枠を埋めてしまう。
+  const merged = mergeSameProduct(allItems);
+  const items = merged.slice(0, Math.max(0, maxItems));
 
   // 最新順に切るだけだと、記事数の多いIP（ポケカ・ワンピ）が枠を埋めてしまい、
   // 記事数の少ないIP（ドラゴンボール等）がアプリから消える。
@@ -343,7 +419,7 @@ export function buildFeedJson({ ranked = [], top = [], tweetUrl = null, now = ne
   // 無制限に通すと他ジャンル（遊戯王・デュエマ等）が全部消える。
   const perSourceCap = Math.max(1, Math.floor(maxItems * 0.4));
   const bySource = new Map();
-  const openNow = allItems
+  const openNow = merged
     .filter((it) => {
       const dl = Date.parse(it.deadline);
       return Number.isFinite(dl) && dl > nowMs && it.destUrl;
@@ -356,7 +432,7 @@ export function buildFeedJson({ ranked = [], top = [], tweetUrl = null, now = ne
       bySource.set(key, n + 1);
       return true;
     });
-  const selected = ensureIpCoverage(allItems, items, {
+  const selected = ensureIpCoverage(merged, items, {
     maxItems,
     minPerIp,
     mustKeep: openNow,
