@@ -39,7 +39,11 @@ import {
   categoryLabels,
   shopStatusSummary,
   unregisteredShopsFor,
+  partitionUnregisteredShops,
+  loadHiddenShops,
+  saveHiddenShops,
   safeShopUrl,
+  normalizePref,
 } from './profile.js';
 
 import { encryptJson, decryptJson, isEncryptedBackup } from './crypto.js';
@@ -102,6 +106,9 @@ const el = {
   secWarn: $('secWarn'),
   warnList: $('warnList'),
   btnWarnOpen: $('btnWarnOpen'),
+  warnMore: $('warnMore'),
+  warnMoreNote: $('warnMoreNote'),
+  btnWarnScope: $('btnWarnScope'),
 
   // ボトムシート
   sheet: $('sheet'),
@@ -124,6 +131,13 @@ const el = {
   btnProfileCopyAll: $('btnProfileCopyAll'),
   btnProfileClear: $('btnProfileClear'),
   derivedList: $('derivedList'),
+
+  // お店の表示範囲
+  areaNote: $('areaNote'),
+  areaCount: $('areaCount'),
+  areaShowAll: $('areaShowAll'),
+  mutedWrap: $('mutedWrap'),
+  mutedList: $('mutedList'),
 
   // 暗号化バックアップ
   bkPass1: $('bkPass1'),
@@ -179,6 +193,12 @@ const state = {
   profile: {},
   /** 「未登録のみ」表示 */
   shopUnregOnly: false,
+  /** { [shopId]: true } 「興味なし」にした店。これは出さない */
+  shopHidden: {},
+  /** 遠方の実店舗も出すか（既定は出さない。オンラインと自分の都道府県だけ） */
+  warnShowAll: false,
+  /** @type {{list:Array,near:Array,far:Array,muted:Array,pref:string|null}|null} 直近の仕分け結果 */
+  warnParts: null,
   /** 復元待ちのバックアップ内容（ユーザーの確認前） */
   pendingRestore: null,
 };
@@ -1100,6 +1120,34 @@ function clearAllFilters({ showExpired = false } = {}) {
   renderFilterDependent();
 }
 
+/**
+ * 「どこの店の、店頭受取か」を示すタグ。
+ *
+ * 遠方の店頭抽選を消してしまうと、旅行や出張のついでに応募する人の機会を奪う。
+ * かといって黙って並べると、開いてから「行けない店だった」と分かる。
+ * そこで**消さずに、押す前に分かるようにする**。
+ * マイ情報に都道府県が入っていて、それと違う県なら控えめな色にする。
+ */
+function buildPlaceBadge(item) {
+  const pref = String((item && item.prefecture) || '').trim();
+  // 「全国」＝通販。場所の話をする必要が無いので出さない
+  if (!pref || pref === '全国') return null;
+  if (item.deliveryType && item.deliveryType !== 'store') return null;
+
+  const tag = document.createElement('span');
+  tag.className = 'tag tag--place';
+  tag.textContent = `${pref} 店頭`;
+
+  const mine = normalizePref(state.profile && state.profile.pref);
+  if (mine && mine !== pref) {
+    tag.classList.add('tag--place-far');
+    tag.title = `${pref}のお店の店頭受取です（マイ情報の${mine}とは別の県）`;
+  } else {
+    tag.title = `${pref}のお店の店頭受取です`;
+  }
+  return tag;
+}
+
 function buildCard(item) {
   const article = document.createElement('article');
   article.className = 'card';
@@ -1124,6 +1172,9 @@ function buildCard(item) {
     entry.title = '商品ページへ直接飛べないため、お店の入口を案内しています';
     tags.appendChild(entry);
   }
+
+  const place = buildPlaceBadge(item);
+  if (place) tags.appendChild(place);
 
   // 取得から時間がたった店の情報。押す前に「変わっているかも」と分かるようにする
   const stale = buildFreshnessBadge(item);
@@ -1392,6 +1443,7 @@ function saveFilters() {
     lotteryOnly: state.lotteryOnly,
     sortMode: state.sortMode,
     showExpired: state.showExpired,
+    warnShowAll: state.warnShowAll,
   }));
 }
 
@@ -1408,6 +1460,7 @@ function restoreFilters() {
     state.sortMode = saved.sortMode === 'deadline' ? 'deadline' : 'latest';
     state.showExpired = Boolean(saved.showExpired);
     el.showExpired.checked = state.showExpired;
+    state.warnShowAll = Boolean(saved.warnShowAll);
   } catch { /* 壊れていたら無視 */ }
   syncSortButtons();
 }
@@ -1651,8 +1704,17 @@ function formatMonthDay(iso) {
 function renderWarn() {
   if (!el.secWarn) return;
 
-  const list = unregisteredShopsFor(state.items, state.shopStatus, state.shops)
-    .slice(0, 4);
+  // 仕分けは1か所で。ここで隠したものも件数としては残す（行き止まりにしない）
+  const all = unregisteredShopsFor(state.items, state.shopStatus, state.shops);
+  const parts = partitionUnregisteredShops(all, {
+    pref: state.profile.pref,
+    hidden: state.shopHidden,
+    showAll: state.warnShowAll,
+  });
+  state.warnParts = parts;
+  renderAreaBox();
+
+  const list = parts.list.slice(0, 4);
 
   if (el.profileDot) el.profileDot.hidden = list.length === 0;
 
@@ -1663,6 +1725,96 @@ function renderWarn() {
   }
   el.secWarn.hidden = false;
   el.warnList.replaceChildren(...list.map(buildWarnCard));
+  renderWarnMore(parts);
+}
+
+/**
+ * 隠している分の行き先。**押す前に何件出るかを見せる。**
+ * 都道府県が未入力のときは、入れると何が良くなるかを一行で添える（強制はしない）。
+ */
+function renderWarnMore(parts) {
+  if (!el.warnMore) return;
+
+  const far = parts.far.length;
+  const notes = [];
+  if (parts.pref) notes.push(`いまは「${parts.pref}」のお店とオンラインのお店だけを出しています`);
+  else if (far) notes.push('マイ情報に都道府県を入れると、近くのお店だけ出せます');
+
+  el.warnMoreNote.textContent = notes.join('');
+  el.warnMoreNote.hidden = notes.length === 0;
+
+  if (!far) {
+    el.btnWarnScope.hidden = true;
+    el.warnMore.hidden = notes.length === 0;
+    return;
+  }
+  el.btnWarnScope.hidden = false;
+  el.btnWarnScope.textContent = state.warnShowAll
+    ? '近くのお店だけにする'
+    : `遠方のお店も表示（${far}件）`;
+  el.btnWarnScope.setAttribute('aria-pressed', String(state.warnShowAll));
+  el.warnMore.hidden = false;
+}
+
+/**
+ * マイ情報の「お店の表示範囲」。
+ * 未登録警告の欄が消えていても、ここから必ず全件に戻れるようにしておく。
+ */
+function renderAreaBox() {
+  if (!el.areaNote) return;
+  const parts = state.warnParts || { near: [], far: [], muted: [], pref: null };
+  const pref = parts.pref;
+
+  el.areaNote.textContent = pref
+    ? `「${pref}」のお店とオンラインのお店だけを出しています。行けない場所の店は勧めません。`
+    : '都道府県が未入力なので、いまはオンラインのお店だけを出しています。'
+      + '都道府県を入れると近くのお店も出せます（入力は任意で、この端末から出ません）。';
+
+  const muted = mutedRows();
+  el.areaCount.textContent = `遠方 ${parts.far.length}件 / 興味なし ${muted.length}件`;
+  el.areaShowAll.checked = state.warnShowAll;
+
+  el.mutedWrap.hidden = muted.length === 0;
+  el.mutedList.replaceChildren(...muted.map(buildMutedRow));
+}
+
+/**
+ * 「興味なし」にした店の一覧。
+ * いま抽選が無い店も必ず出す。**そうしないと解除できない店が生まれる。**
+ */
+function mutedRows() {
+  const seen = new Map();
+  for (const entry of (state.warnParts && state.warnParts.muted) || []) seen.set(entry.id, entry.label);
+  const rows = Object.keys(state.shopHidden).map((id) => {
+    if (seen.has(id)) return { id, label: seen.get(id) };
+    const shop = state.shops.find((s) => s.id === id);
+    if (shop) return { id, label: shop.label };
+    return { id, label: id.startsWith('other:') ? id.slice('other:'.length) : id };
+  });
+  rows.sort((a, b) => a.label.localeCompare(b.label, 'ja'));
+  return rows;
+}
+
+function buildMutedRow(entry) {
+  const row = document.createElement('div');
+  row.className = 'shop';
+
+  const name = document.createElement('span');
+  name.className = 'shop__name shop__name--plain';
+  name.textContent = entry.label;
+
+  const undo = document.createElement('button');
+  undo.type = 'button';
+  undo.className = 'shop__open';
+  undo.textContent = '解除';
+  undo.setAttribute('aria-label', `${entry.label}をまた表示する`);
+  undo.addEventListener('click', () => {
+    setShopHidden(entry.id, false);
+    toast(`「${entry.label}」をまた表示します`);
+  });
+
+  row.append(name, undo);
+  return row;
 }
 
 function buildWarnCard(entry) {
@@ -1710,6 +1862,18 @@ function buildWarnCard(entry) {
   });
   actions.appendChild(done);
 
+  // 行けない店・使わない店を黙らせる。取り消しはマイ情報の「お店の表示範囲」から
+  const mute = document.createElement('button');
+  mute.type = 'button';
+  mute.className = 'warn__mute';
+  mute.textContent = '興味なし';
+  mute.setAttribute('aria-label', `${entry.label}を今後表示しない`);
+  mute.addEventListener('click', () => {
+    setShopHidden(entry.id, true);
+    toast(`「${entry.label}」は今後出しません（マイ情報で解除できます）`);
+  });
+  actions.appendChild(mute);
+
   card.append(head, body, actions);
   return card;
 }
@@ -1725,6 +1889,22 @@ function setShopRegistered(id, registered) {
   state.shopStatus = saveShopStatus(next);
   renderWarn();
   renderShopList();
+}
+
+/** 「興味なし」の付け外し。登録状況とは別物なので混ぜない */
+function setShopHidden(id, hidden) {
+  const next = { ...state.shopHidden };
+  if (hidden) next[id] = true;
+  else delete next[id];
+  state.shopHidden = saveHiddenShops(next);
+  renderWarn();
+}
+
+/** 遠方の店を出すかどうか */
+function setWarnShowAll(showAll) {
+  state.warnShowAll = Boolean(showAll);
+  saveFilters();
+  renderWarn();
 }
 
 /* ---------------------------------------------------------------
@@ -1875,6 +2055,8 @@ function buildProfileRow(field) {
     profileSaveTimer = setTimeout(() => {
       state.profile = saveProfile(state.profile);
       renderDerived();
+      // 都道府県は「どの店を出すか」に直結する。入れた瞬間に反映する
+      if (field.key === 'pref') renderWarn();
     }, 400);
   });
 
@@ -1957,6 +2139,8 @@ function backupPayload() {
     savedAt: new Date().toISOString(),
     profile: normalizeProfile(state.profile),
     shopStatus: normalizeShopStatus(state.shopStatus),
+    // 機種変更で「興味なし」がゼロに戻ると、消したはずの店がまた全部出てくる
+    shopHidden: normalizeShopStatus(state.shopHidden),
   };
 }
 
@@ -2063,7 +2247,10 @@ async function importBackup() {
       throw new Error('復号できましたが、復元できる内容が入っていませんでした。');
     }
 
-    state.pendingRestore = { profile, shopStatus };
+    // 古いバックアップには入っていない。無ければ空でよい（復元の可否は判断しない）
+    const shopHidden = normalizeShopStatus(payload.shopHidden);
+
+    state.pendingRestore = { profile, shopStatus, shopHidden };
     const savedAt = Date.parse(payload.savedAt);
     const when = Number.isFinite(savedAt) ? `${formatDateTime(savedAt)}に保存` : '保存日時不明';
     el.bkPreview.textContent =
@@ -2082,6 +2269,7 @@ function applyRestore() {
   if (!state.pendingRestore) return;
   state.profile = saveProfile(state.pendingRestore.profile);
   state.shopStatus = saveShopStatus(state.pendingRestore.shopStatus);
+  state.shopHidden = saveHiddenShops(state.pendingRestore.shopHidden || {});
   state.pendingRestore = null;
 
   el.bkConfirm.hidden = true;
@@ -2142,6 +2330,10 @@ function setupSheet() {
   el.tabShops.addEventListener('click', () => selectTab('shops'));
   el.tabProfile.addEventListener('click', () => selectTab('profile'));
 
+  // 遠方の店の出し入れ。警告欄とマイ情報の2か所から同じ設定を触れる
+  el.btnWarnScope.addEventListener('click', () => setWarnShowAll(!state.warnShowAll));
+  el.areaShowAll.addEventListener('change', () => setWarnShowAll(el.areaShowAll.checked));
+
   document.addEventListener('keydown', (ev) => {
     if (ev.key === 'Escape' && !el.sheet.hidden) closeSheet();
   });
@@ -2169,6 +2361,7 @@ function setupSheet() {
     clearTimeout(profileSaveTimer);
     state.profile = clearProfile();
     renderProfileForm();
+    renderWarn(); // 都道府県も消えたので、出す店の範囲を戻す
     toast('マイ情報を消しました');
   });
 
@@ -2209,6 +2402,7 @@ function setupSheet() {
 async function setupProfile() {
   state.profile = loadProfile();
   state.shopStatus = loadShopStatus();
+  state.shopHidden = loadHiddenShops();
   setupSheet();
   await loadShops();
   renderShopList();

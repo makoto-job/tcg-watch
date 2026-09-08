@@ -24,11 +24,14 @@ const read = (p) => readFile(join(root, p), 'utf8');
 // ここに書き漏らすと単一ファイル版だけ 404 になり、機能が丸ごと無効化される。
 const MODULES = ['config.js', 'crypto.js', 'profile.js'];
 
-const [html, css, appJs, feed, ...moduleSources] = await Promise.all([
+const [html, css, appJs, feed, shops, ...moduleSources] = await Promise.all([
   read('app/index.html'),
   read('app/style.css'),
   read('app/app.js'),
   read('public/feed.json'),
+  // 店の一覧。これが読めないと「この店は通販か実店舗か」の判定が
+  // 店名の見た目だけに頼ることになり、紀伊國屋書店などを実店舗と誤判定する。
+  read('config/shops.json'),
   ...MODULES.map((m) => read(`app/${m}`)),
 ]);
 
@@ -83,16 +86,24 @@ s = s.replace(/^.*<link rel="stylesheet" href="\.\/style\.css">.*$/gm, `<style>\
 // JS をインライン化。feed は埋め込み済みデータを使う
 const bootstrap = `
 <script type="application/json" id="embedded-feed">${JSON.stringify(JSON.parse(feed))}</script>
+<script type="application/json" id="embedded-shops">${JSON.stringify(JSON.parse(shops))}</script>
 <script type="module">
 // --- 単一ファイル版 ---
 // feed.json を取りに行かず、埋め込んだデータを返す。
 // これによりオフラインでも、また静的ホスティングが無くても動作する。
 const __embedded = JSON.parse(document.getElementById('embedded-feed').textContent);
+const __embeddedShops = JSON.parse(document.getElementById('embedded-shops').textContent);
 const __origFetch = globalThis.fetch ? globalThis.fetch.bind(globalThis) : null;
 globalThis.fetch = async (input, init) => {
   const url = String(typeof input === 'string' ? input : (input && input.url) || '');
   if (/feed(\\.sample)?\\.json/.test(url)) {
     return new Response(JSON.stringify(__embedded), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  if (/shops\\.json/.test(url)) {
+    return new Response(JSON.stringify(__embeddedShops), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

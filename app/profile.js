@@ -16,6 +16,8 @@
 /** localStorage キー（config.js の命名に合わせる） */
 export const STORAGE_KEY_PROFILE = 'tcgwatch:profile:v1';
 export const STORAGE_KEY_SHOP_STATUS = 'tcgwatch:shop-status:v1';
+/** 「興味なし」にした店。登録状況とは別に持つ（登録済みと混ぜると意味が変わる） */
+export const STORAGE_KEY_SHOP_HIDDEN = 'tcgwatch:shop-hidden:v1';
 
 /** 「近日中」とみなす日数。これより先の予定では警告を出さない。 */
 export const LOOKAHEAD_DAYS = 30;
@@ -50,7 +52,8 @@ export const PROFILE_FIELDS = [
   // 日本の会員登録フォームは郵便番号が3桁+4桁に分かれていることが非常に多い
   { key: 'zip1', label: '郵便番号（上3桁）', group: 'address', placeholder: '100', inputmode: 'numeric', maxLength: 3 },
   { key: 'zip2', label: '郵便番号（下4桁）', group: 'address', placeholder: '0001', inputmode: 'numeric', maxLength: 4 },
-  { key: 'pref', label: '都道府県', group: 'address', placeholder: '東京都' },
+  // 都道府県は住所欄であると同時に「どの店を出すか」の判断材料。理由を添えて任意で促す
+  { key: 'pref', label: '都道府県', group: 'address', placeholder: '東京都', hint: '入れると近くのお店だけ出せます' },
   { key: 'city', label: '市区町村', group: 'address', placeholder: '千代田区千代田' },
   { key: 'address1', label: '番地', group: 'address', placeholder: '1-1' },
   { key: 'address2', label: '建物名・部屋番号', group: 'address', placeholder: '〇〇マンション101' },
@@ -440,6 +443,213 @@ export function clearShopStatus() {
   return {};
 }
 
+/* ---------- 興味なし（この店はもう出さない） ---------- */
+
+/**
+ * 「興味なし」にした店。登録状況と同じ形（true のキーだけ）にしている。
+ * 消し方はマイ情報の「お店の表示範囲」から。**押したら二度と戻れない、にはしない。**
+ */
+export function loadHiddenShops() {
+  const raw = storage.get(STORAGE_KEY_SHOP_HIDDEN);
+  if (!raw) return {};
+  try {
+    return normalizeShopStatus(JSON.parse(raw));
+  } catch {
+    return {};
+  }
+}
+
+/** @returns {Record<string, true>} 保存した内容 */
+export function saveHiddenShops(hidden) {
+  const clean = normalizeShopStatus(hidden);
+  storage.set(STORAGE_KEY_SHOP_HIDDEN, JSON.stringify(clean));
+  return clean;
+}
+
+/** 「興味なし」を全部取り消す */
+export function clearHiddenShops() {
+  storage.remove(STORAGE_KEY_SHOP_HIDDEN);
+  return {};
+}
+
+/* ==========================================================================
+   お店が「行ける場所」かどうか
+   ------------------------------------------------------------------------
+   利用者の指摘：
+     「未登録のショップがあります」に、住んでいるエリアからだいぶ遠い
+      実店舗が出てくる。行けないので登録しても意味がない。
+
+   遠いかどうかを距離で測るのはやめている（緯度経度も地図データも要らない）。
+   **都道府県が一致するか**だけを見る。日本の店舗網ではこれで十分で、
+   しかも都道府県はマイ情報にすでにある（追加入力を求めない）。
+
+   分類は3つだけ:
+     online  … 住所に関係なく申し込める（通販・全国対応）→ 常に出す
+     local   … 特定の場所にある実店舗                  → 同じ都道府県のときだけ出す
+     unknown … どちらとも判断できない                  → 出す（黙って落とさない）
+
+   **unknown を「出す」側に倒しているのは意図的。**
+   判断できないものを勝手に隠すと、間に合ったはずの抽選を落とす。
+   CLAUDE.md の「誤った情報は情報が無いことより有害」「行き止まりを作らない」に従う。
+   ========================================================================== */
+
+/** 47都道府県（正式名） */
+export const PREFECTURES = [
+  '北海道', '青森県', '岩手県', '宮城県', '秋田県', '山形県', '福島県',
+  '茨城県', '栃木県', '群馬県', '埼玉県', '千葉県', '東京都', '神奈川県',
+  '新潟県', '富山県', '石川県', '福井県', '山梨県', '長野県',
+  '岐阜県', '静岡県', '愛知県', '三重県',
+  '滋賀県', '京都府', '大阪府', '兵庫県', '奈良県', '和歌山県',
+  '鳥取県', '島根県', '岡山県', '広島県', '山口県',
+  '徳島県', '香川県', '愛媛県', '高知県',
+  '福岡県', '佐賀県', '長崎県', '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県',
+];
+
+/**
+ * 突き合わせ用の候補。正式名と、末尾の 都/道/府/県 を落とした短い形の両方を持つ。
+ * 長い順に見るので「東京都」の中の「京都」を京都府と誤認しない。
+ */
+const PREF_CANDIDATES = (() => {
+  const list = [];
+  for (const full of PREFECTURES) {
+    list.push({ text: full, pref: full });
+    const bare = full === '北海道' ? '北海道' : full.slice(0, -1);
+    if (bare !== full) list.push({ text: bare, pref: full });
+  }
+  list.sort((a, b) => b.text.length - a.text.length);
+  return list;
+})();
+
+/** 表記ゆれを均す（全角英数・空白など） */
+function plain(value) {
+  let s = String(value ?? '');
+  try { s = s.normalize('NFKC'); } catch { /* 古い環境は素通し */ }
+  return s.trim();
+}
+
+/**
+ * 文字列の中から都道府県を1つ拾う。左から順に、長い名前を優先して当てる。
+ * 「東京都」は 東京都、「カードラボ 福岡天神店」は 福岡県 になる。
+ * @returns {string|null} 正式名
+ */
+export function detectPrefIn(text) {
+  const s = plain(text);
+  if (!s) return null;
+  for (let i = 0; i < s.length; i += 1) {
+    for (const cand of PREF_CANDIDATES) {
+      if (s.startsWith(cand.text, i)) return cand.pref;
+    }
+  }
+  return null;
+}
+
+/**
+ * 利用者が入力した都道府県を正式名に直す。
+ * 「東京」「東京都」「東京都千代田区」いずれも「東京都」。読めなければ null。
+ */
+export function normalizePref(value) {
+  const s = plain(value);
+  if (!s) return null;
+  return detectPrefIn(s);
+}
+
+/** 「全国どこからでも」を表す書き方（まとめサイトの prefecture / region 用） */
+const NATIONWIDE_WORDS = ['all', '全国', 'オンライン', 'online', 'ネット', 'web', '通販', '-'];
+
+/**
+ * 店名に出てくる「実店舗の印」。
+ * ここに当たるのは支店名だけにしたいので、**先に shops.json 掲載店を除外**する。
+ * （「紀伊國屋書店」「三省堂書店」も 店 で終わるが、これらは通販サイトとして登録済み）
+ */
+const LOCAL_NAME_RE = /(店|支店|本店|営業所|売場|売り場)$/;
+const LOCAL_WORD_RE = /(支店|本店|駅前店|号店|営業所)/;
+
+/** 店名に出てくる「通販の印」 */
+const ONLINE_WORD_RE = /(オンライン|online|通販|ネットショップ|ネット通販|モール|mall|公式ストア|公式通販|webストア|ウェブストア|\.com|\.jp|\.net)/i;
+
+/**
+ * その店が「行ける場所の店」かどうかを決める。
+ *
+ * 手がかりは強い順に:
+ *   1. 収集側が付けた prefecture（まとめサイトのデータに入っている）
+ *   2. config/shops.json に載っているか（載っている69店はすべて通販サイト）
+ *   3. 店名の形（「〜店」は支店、都道府県名が入っていればその県）
+ *   4. 店名に通販らしい語があるか
+ *
+ * @param {{label?:string, known?:boolean, prefecture?:string, region?:string, deliveryType?:string}} hint
+ * @returns {{kind:'online'|'local'|'unknown', pref:string|null, reason:string}}
+ */
+export function classifyShopLocality(hint) {
+  const h = hint && typeof hint === 'object' ? hint : {};
+  const label = plain(h.label);
+
+  // 1. 収集側のデータが一番強い
+  for (const raw of [h.prefecture, h.region]) {
+    const value = plain(raw);
+    if (!value) continue;
+    if (NATIONWIDE_WORDS.includes(value.toLowerCase())) {
+      return { kind: 'online', pref: null, reason: 'data:全国' };
+    }
+    const pref = normalizePref(value);
+    if (pref) return { kind: 'local', pref, reason: 'data:都道府県' };
+  }
+
+  // 2. 許可ドメイン一覧に載っている＝通販として認識している店
+  if (h.known === true) return { kind: 'online', pref: null, reason: 'shops.json' };
+
+  // 3. 店名が支店の形をしている
+  if (label && (LOCAL_NAME_RE.test(label) || LOCAL_WORD_RE.test(label))) {
+    return { kind: 'local', pref: detectPrefIn(label), reason: '店名:支店' };
+  }
+  // 都道府県名が入っているなら、その土地の店とみなす
+  const inName = detectPrefIn(label);
+  if (inName) return { kind: 'local', pref: inName, reason: '店名:地名' };
+
+  // 4. 通販らしい語
+  if (label && ONLINE_WORD_RE.test(label)) {
+    return { kind: 'online', pref: null, reason: '店名:通販' };
+  }
+
+  // 5. 分からない。**隠さない。**
+  return { kind: 'unknown', pref: null, reason: '不明' };
+}
+
+/**
+ * 未登録の店を「いま出すもの」と「遠くて出さないもの」に分ける。
+ *
+ * ・online / unknown → 常に出す
+ * ・local            → 利用者の都道府県と一致したときだけ出す
+ * ・都道府県が未入力 → local はすべて出さない（勝手に全国の実店舗を出さない）
+ * ・興味なしにした店 → どちらにも入れず muted へ（すべて表示でも出さない。解除はマイ情報から）
+ *
+ * @param {Array<object>} entries  unregisteredShopsFor() の戻り
+ * @param {{pref?:string, hidden?:Record<string,true>, showAll?:boolean}} [opts]
+ * @returns {{list:Array<object>, near:Array<object>, far:Array<object>, muted:Array<object>, pref:string|null, showAll:boolean}}
+ */
+export function partitionUnregisteredShops(entries, opts = {}) {
+  const pref = normalizePref(opts && opts.pref);
+  const hidden = normalizeShopStatus(opts && opts.hidden);
+  const showAll = Boolean(opts && opts.showAll);
+
+  const list = [];
+  const near = [];
+  const far = [];
+  const muted = [];
+
+  for (const entry of Array.isArray(entries) ? entries : []) {
+    if (!entry || typeof entry !== 'object') continue;
+    if (hidden[entry.id]) { muted.push(entry); continue; }
+
+    const loc = entry.locality || classifyShopLocality(entry);
+    const isFar = loc.kind === 'local' && !(pref !== null && loc.pref === pref);
+
+    if (isFar) far.push(entry); else near.push(entry);
+    if (!isFar || showAll) list.push(entry);
+  }
+
+  return { list, near, far, muted, pref, showAll };
+}
+
 /* ---------- 未登録警告 ---------- */
 
 function parseTime(value) {
@@ -454,6 +664,24 @@ function looksApplyable(item) {
 }
 
 /**
+ * FeedItem から「場所の手がかり」だけを取り出す。
+ * 収集側がまだ付けていない項目は undefined のまま（無い物を作らない）。
+ * まとめサイト（ポケカ抽選図鑑）の生データには prefecture / deliveryType が入っているので、
+ * 収集側が feed に載せてくれれば、この関数を変えずに精度が上がる。
+ */
+function localityHints(item) {
+  const pick = (value) => {
+    const text = typeof value === 'string' ? value.trim() : '';
+    return text || undefined;
+  };
+  return {
+    prefecture: pick(item && (item.prefecture ?? item.destPrefecture)),
+    region: pick(item && item.region),
+    deliveryType: pick(item && item.deliveryType),
+  };
+}
+
+/**
  * 近日中に抽選/予約があるのに、まだ会員登録していない店を洗い出す。
  *
  * 判定に使うのは feed の destLabel（どの店か）と deadline / startsAt（いつか）。
@@ -464,11 +692,15 @@ function looksApplyable(item) {
  * ・config/shops.json に無い店（例: ミントモール）も取りこぼさず警告する。
  *   その場合 id は "other:店名"、登録ページのURLは推測しない（null）。
  *
+ * 各件に locality（online / local / unknown と都道府県）を付ける。
+ * **ここでは絞り込まない。** 遠い近いで実際に隠すのは partitionUnregisteredShops の仕事で、
+ * 分けておかないと「隠したものが数にも残らない」＝行き止まりになる。
+ *
  * @param {Array<object>} items          FeedItem[]
  * @param {Record<string,true>} status   loadShopStatus() の戻り
  * @param {Array<object>} shopList       normalizeShopList() の戻り
  * @param {{now?:Date, withinDays?:number}} [opts]
- * @returns {Array<{id:string,label:string,url:string|null,shop:object|null,known:boolean,count:number,nextAt:string|null,nextKind:'start'|'deadline'|null,sample:object}>}
+ * @returns {Array<{id:string,label:string,url:string|null,shop:object|null,known:boolean,count:number,nextAt:string|null,nextKind:'start'|'deadline'|null,sample:object,locality:{kind:string,pref:string|null,reason:string}}>}
  */
 export function unregisteredShopsFor(items, status, shopList, opts = {}) {
   const now = opts.now instanceof Date ? opts.now : new Date();
@@ -522,10 +754,16 @@ export function unregisteredShopsFor(items, status, shopList, opts = {}) {
         nextAt,
         nextKind,
         sample: item,
+        hints: localityHints(item),
       });
       continue;
     }
     current.count += 1;
+    // 場所の手がかりは、同じ店の別の記事に入っていることがある。空いている所だけ埋める
+    const hints = localityHints(item);
+    for (const key of Object.keys(hints)) {
+      if (!current.hints[key] && hints[key]) current.hints[key] = hints[key];
+    }
     if (nextAt !== null && (current.nextAt === null || nextAt < current.nextAt)) {
       current.nextAt = nextAt;
       current.nextKind = nextKind;
@@ -533,9 +771,16 @@ export function unregisteredShopsFor(items, status, shopList, opts = {}) {
     }
   }
 
-  const out = [...groups.values()].map((g) => ({
+  const out = [...groups.values()].map(({ hints, ...g }) => ({
     ...g,
     nextAt: g.nextAt === null ? null : new Date(g.nextAt).toISOString(),
+    locality: classifyShopLocality({
+      label: g.label,
+      known: g.known,
+      prefecture: hints.prefecture,
+      region: hints.region,
+      deliveryType: hints.deliveryType,
+    }),
   }));
 
   // 日時が近いものから。日時不明は末尾に、その中では件数が多い順。

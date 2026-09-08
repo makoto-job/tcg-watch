@@ -10,6 +10,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { resolveFromRoot } from './config.js';
+import { normalizePrefecture } from './prefecture.js';
 
 /** feed.json のスキーマバージョン */
 export const FEED_VERSION = 1;
@@ -102,9 +103,11 @@ export function toFeedItem(rankedItem, opts = {}) {
     // 商品ページではなく店の入口ページか（bot拒否等で商品ページを取得できない場合）
     destIsEntry: it.destIsEntry === true,
     // 遠方の実店舗を勧めないための判別材料
-    // prefecture: 'all'（全国＝オンライン）または 'tokyo' 等
+    // prefecture: '全国'（場所を問わない＝通販）または '東京都' 等の正式名。
+    //   情報源はローマ字（'tokyo' / 'all'）で持っているが、ここで正式名に揃える。
+    //   アプリ側は正式名で突き合わせるので、変換を忘れると所在地が全部「不明」になる。
     // deliveryType: 'store'（店頭受取）/ 'online' / 'all'
-    prefecture: typeof it.prefecture === 'string' ? it.prefecture : '',
+    prefecture: normalizePrefecture(it.prefecture),
     deliveryType: typeof it.deliveryType === 'string' ? it.deliveryType : '',
     // 同じ商品を扱う他の店（抽選は多くの店に応募するほど当たる）
     otherShops: Array.isArray(it.otherShops)

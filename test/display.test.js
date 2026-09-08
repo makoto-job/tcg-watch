@@ -159,3 +159,66 @@ test('href に入れる前に http(s) かどうかを必ず確かめている', 
     .filter((line) => !/(url|dest|tweetUrl|href)\b/.test(line));
   assert.deepEqual(bad, [], `検査していない href 代入がある: ${bad.join(' / ')}`);
 });
+
+// ────────────────────────────────────────────────────────────
+// お店の表示範囲
+//
+// 利用者から「未登録のショップに、住んでるエリアからだいぶ遠い小売店が出る。
+// 行けないので不要」という指摘があった件。
+// 既定はオンライン＋自分の都道府県だけ。ただし全部見る道は必ず残す。
+// ────────────────────────────────────────────────────────────
+
+test('警告は仕分けを通してから描く（生の一覧をそのまま出さない）', async () => {
+  const js = await read('app/app.js');
+  assert.ok(js.includes('partitionUnregisteredShops('), '遠近の仕分けを通していない');
+  assert.ok(
+    !/unregisteredShopsFor\([^)]*\)\s*\n?\s*\.slice\(/.test(js),
+    '仕分けを通さずに未登録一覧をそのまま切り出している（遠方の店がまた出る）',
+  );
+  assert.ok(js.includes('pref: state.profile.pref'), 'マイ情報の都道府県を見ていない');
+});
+
+test('隠した分は件数で見せ、すべて表示に戻れる（行き止まりを作らない）', async () => {
+  const html = await read('app/index.html');
+  const js = await read('app/app.js');
+
+  assert.ok(html.includes('id="btnWarnScope"'), '遠方も表示するボタンが無い');
+  assert.ok(html.includes('id="areaShowAll"'), 'マイ情報側の切り替えが無い');
+  // 押す前に何件出るか分かる
+  assert.ok(/遠方のお店も表示（\$\{far\}件）/.test(js), '件数を出さずに押させている');
+  assert.ok(js.includes('近くのお店だけにする'), '戻す側の文言が無い');
+  assert.ok(js.includes('function setWarnShowAll('), '表示範囲を切り替える処理が無い');
+});
+
+test('「興味なし」は取り消せる（マイ情報に一覧と解除がある）', async () => {
+  const html = await read('app/index.html');
+  const js = await read('app/app.js');
+
+  assert.ok(js.includes("mute.className = 'warn__mute'"), '興味なしボタンが無い');
+  assert.ok(js.includes('function setShopHidden('), '興味なしの保存処理が無い');
+  assert.ok(html.includes('id="mutedList"'), '興味なしにした店の一覧が無い');
+  assert.ok(js.includes('function mutedRows()'), '一覧を組み立てる処理が無い');
+  assert.ok(js.includes('function buildMutedRow('), '解除ボタンを作る処理が無い');
+  // 抽選が無くなった店も一覧に出す（そうしないと解除できない）
+  assert.ok(js.includes('Object.keys(state.shopHidden).map('), '保存済みの全件から一覧を作っていない');
+});
+
+test('都道府県を促すときは理由を添える（強制しない）', async () => {
+  const js = await read('app/app.js');
+  const profile = await read('app/profile.js');
+  assert.ok(js.includes('近くのお店だけ出せます'), '入力を促す理由が書かれていない');
+  assert.ok(profile.includes("key: 'pref'") && profile.includes('入れると近くのお店だけ出せます'), '入力欄に理由が無い');
+  // 必須にしていないこと
+  assert.ok(!/pref[^\n]*required/.test(profile), '都道府県を必須にしている');
+});
+
+test('表示範囲のスタイルは既存のトークンで作る（後付けの色を足さない）', async () => {
+  const css = await read('app/style.css');
+  for (const sel of ['.warn__mute', '.warn__more', '.warn__scope', '.shop__name--plain']) {
+    assert.ok(css.includes(sel), `${sel} のスタイルが無い`);
+  }
+  const block = css.slice(css.indexOf('.warn__mute'), css.indexOf('/* ---------- ボトムシート'));
+  const hardCoded = block.match(/:\s*#[0-9a-f]{3,8}\b/gi) || [];
+  assert.deepEqual(hardCoded, [], `色を直書きしている: ${hardCoded.join(' / ')}`);
+  assert.ok(block.includes('min-height: var(--tap)'), 'タップ領域が既存の寸法に揃っていない');
+});

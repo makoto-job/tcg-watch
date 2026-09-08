@@ -1185,6 +1185,52 @@ button {
 }
 .warn__done:active { background: var(--bg-sunken); }
 
+/* 「興味なし」。登録済みにするより弱く見せる（押し間違いを減らす）。
+   折り返しても位置が変わらないよう、常に右端に置く */
+.warn__mute {
+  flex: none;
+  margin-left: auto;
+  min-height: var(--tap);
+  padding: 0 12px;
+  border-radius: 11px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-mute);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.warn__mute:active { background: var(--bg-sunken); }
+
+/* 遠方の店を隠しているときの行き先。件数を出して、押す前に結果が分かるようにする */
+.warn__more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+.warn__more[hidden] { display: none; }
+.warn__note {
+  flex: 1 1 180px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-mute);
+}
+.warn__scope {
+  flex: none;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 11px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-elev);
+  color: var(--accent);
+  font-size: 12.5px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.warn__scope:active { background: var(--bg-sunken); }
+
 /* ---------- ボトムシート ---------- */
 body.is-locked { overflow: hidden; }
 
@@ -1400,6 +1446,15 @@ body.is-locked { overflow: hidden; }
   white-space: nowrap;
 }
 .shop.is-done .shop__name { color: var(--text-mute); }
+/* 「興味なし」にした店の行。チェックボックスが無いだけで、寸法は同じ */
+.shop__name--plain {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--tap);
+  display: flex;
+  align-items: center;
+  color: var(--text-sub);
+}
 .shop__open {
   flex: none;
   min-height: var(--tap);
@@ -1644,6 +1699,18 @@ body.is-locked { overflow: hidden; }
   border: 1px dashed var(--border);
 }
 .apply--entry { border-style: dashed; }
+
+/* 店頭受取の県。消さずに、押す前に「行ける店か」が分かるようにするためのタグ */
+.tag--place {
+  background: var(--bg-sunken);
+  color: var(--text-sub);
+  border: 1px solid var(--border);
+}
+/* マイ情報の県と違う店。目立たせず、しかし読めるように */
+.tag--place-far {
+  opacity: 0.75;
+  border-style: dashed;
+}
 
 /* 同じ商品を扱う他の店。既定は閉じておき、必要な人だけ開く */
 .others { margin-top: 6px; font-size: 12.5px; }

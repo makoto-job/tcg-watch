@@ -96,6 +96,11 @@
       <button type="button" class="warn__link" id="btnWarnOpen">チェックリスト</button>
     </div>
     <div class="warns" id="warnList"></div>
+    <!-- 遠方の店を隠しているときの行き先。押す前に何件出るかを見せる -->
+    <div class="warn__more" id="warnMore" hidden>
+      <p class="warn__note" id="warnMoreNote"></p>
+      <button type="button" class="warn__scope" id="btnWarnScope" hidden></button>
+    </div>
   </section>
 
   <!-- いま応募できる（このアプリの主役。締切が近い順） -->
@@ -259,6 +264,24 @@
         <h3 class="pane__h3">よく使う組み合わせ</h3>
         <p class="pane__note">姓名をまとめて1欄に入れる店や、ハイフン無しの電話番号しか受け付けない店があります。</p>
         <div class="copies" id="derivedList"></div>
+
+        <!-- ---------- お店の表示範囲 ---------- -->
+        <h3 class="pane__h3">お店の表示範囲</h3>
+        <p class="pane__note" id="areaNote"></p>
+
+        <div class="pane__bar">
+          <p class="pane__count" id="areaCount">—</p>
+          <label class="switch switch--sm">
+            <input type="checkbox" id="areaShowAll">
+            <span class="switch__track" aria-hidden="true"><span class="switch__thumb"></span></span>
+            <span class="switch__label">遠方も表示</span>
+          </label>
+        </div>
+
+        <div id="mutedWrap" hidden>
+          <h4 class="shops__cat">興味なしにしたお店</h4>
+          <div class="shops" id="mutedList"></div>
+        </div>
 
         <!-- ---------- バックアップ ---------- -->
         <h3 class="pane__h3">暗号化バックアップ</h3>

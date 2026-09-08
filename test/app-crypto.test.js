@@ -55,6 +55,16 @@ import {
   saveShopStatus,
   shopStatusSummary,
   unregisteredShopsFor,
+  PREFECTURES,
+  normalizePref,
+  detectPrefIn,
+  classifyShopLocality,
+  partitionUnregisteredShops,
+  loadHiddenShops,
+  saveHiddenShops,
+  clearHiddenShops,
+  STORAGE_KEY_SHOP_HIDDEN,
+  STORAGE_KEY_SHOP_STATUS,
 } from '../app/profile.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -710,4 +720,183 @@ test('categoryLabels: config の _categories を優先しつつ既定で埋め�
   assert.equal(labels.maker, 'メーカー直販・公式ストア');
   assert.equal(labels.other, 'その他', '設定に無いキーは既定で埋まる');
   assert.equal(categoryLabels(null).cardshop, 'カードショップ');
+});
+
+/* ==========================================================================
+   お店の表示範囲（遠方の実店舗を勧めない）
+
+   利用者の指摘:
+     「未登録のショップがあります」に、住んでるエリアからだいぶ遠い小売店が出る。
+      行けないので登録しても意味がない。オンライン系は表示してほしい。
+
+   距離では測らない。都道府県が一致するかだけを見る（地図データを持たずに済む）。
+   ========================================================================== */
+
+test('PREFECTURES: 47件そろっていて重複が無い', () => {
+  assert.equal(PREFECTURES.length, 47);
+  assert.equal(new Set(PREFECTURES).size, 47);
+  assert.ok(PREFECTURES.includes('北海道') && PREFECTURES.includes('沖縄県'));
+});
+
+test('normalizePref: 「東京」「東京都」「東京都千代田区」はすべて東京都', () => {
+  assert.equal(normalizePref('東京'), '東京都');
+  assert.equal(normalizePref('東京都'), '東京都');
+  assert.equal(normalizePref('東京都千代田区千代田'), '東京都');
+  assert.equal(normalizePref(' 神奈川 '), '神奈川県');
+  assert.equal(normalizePref('大阪府'), '大阪府');
+});
+
+test('normalizePref: 読めないものは null（勝手に決めない）', () => {
+  assert.equal(normalizePref(''), null);
+  assert.equal(normalizePref(null), null);
+  assert.equal(normalizePref(undefined), null);
+  assert.equal(normalizePref('どこか'), null);
+  assert.equal(normalizePref({}), null);
+});
+
+test('detectPrefIn: 「東京都」の中の「京都」を京都府と読み違えない', () => {
+  assert.equal(detectPrefIn('東京都渋谷区'), '東京都');
+  assert.equal(detectPrefIn('京都府京都市'), '京都府');
+  assert.equal(detectPrefIn('カードラボ 福岡天神店'), '福岡県');
+  assert.equal(detectPrefIn('ブックオフ秋葉原駅前店'), null, '地名だけでは県を決めない');
+});
+
+test('classifyShopLocality: 収集側の prefecture が最優先', () => {
+  assert.deepEqual(
+    classifyShopLocality({ label: 'ポケモンカードストア', prefecture: 'all' }).kind,
+    'online',
+    '全国＝住所に関係なく申し込める',
+  );
+  const local = classifyShopLocality({ label: 'なんとかストア', prefecture: '福岡県' });
+  assert.equal(local.kind, 'local');
+  assert.equal(local.pref, '福岡県');
+  // 店頭受取でも全国なら出す（全国チェーンの登録は住所に関係なく効く）
+  assert.equal(classifyShopLocality({ label: 'X', prefecture: 'all', deliveryType: 'store' }).kind, 'online');
+});
+
+test('classifyShopLocality: shops.json に載っている店は通販として扱う', () => {
+  // 「紀伊國屋書店」は 店 で終わるが実店舗の支店名ではない。掲載店の判定を先に通す
+  assert.equal(classifyShopLocality({ label: '紀伊國屋書店', known: true }).kind, 'online');
+  assert.equal(classifyShopLocality({ label: 'カードラボ', known: true }).kind, 'online');
+});
+
+test('classifyShopLocality: 「〜店」は実店舗、県名が入っていればその県', () => {
+  const fukuoka = classifyShopLocality({ label: 'カードラボ 福岡天神店' });
+  assert.equal(fukuoka.kind, 'local');
+  assert.equal(fukuoka.pref, '福岡県');
+
+  const unknownPref = classifyShopLocality({ label: 'TSUTAYA 平塚店' });
+  assert.equal(unknownPref.kind, 'local');
+  assert.equal(unknownPref.pref, null, '県が分からない実店舗は県なしの local');
+});
+
+test('classifyShopLocality: 通販らしい店名はオンライン扱い', () => {
+  assert.equal(classifyShopLocality({ label: '通販のPAO' }).kind, 'online');
+  assert.equal(classifyShopLocality({ label: 'ミントモール' }).kind, 'online');
+  assert.equal(classifyShopLocality({ label: 'なんとかオンラインショップ' }).kind, 'online');
+});
+
+test('classifyShopLocality: 判断できないものは unknown（黙って落とさない）', () => {
+  const out = classifyShopLocality({ label: 'CBトレコロ' });
+  assert.equal(out.kind, 'unknown');
+  assert.equal(out.pref, null);
+  // 壊れた入力でも落ちない
+  assert.equal(classifyShopLocality(null).kind, 'unknown');
+  assert.equal(classifyShopLocality({}).kind, 'unknown');
+});
+
+test('unregisteredShopsFor: 各件に locality が付く', () => {
+  const out = unregisteredShopsFor(
+    [item({ destLabel: 'カードラボ 福岡天神店', deadline: '2026-09-05T00:00:00.000Z' })],
+    {},
+    SHOPS,
+    { now: NOW },
+  );
+  assert.equal(out.length, 1, '分類は絞り込みではない。ここでは1件も落とさない');
+  assert.equal(out[0].locality.kind, 'local');
+  assert.equal(out[0].locality.pref, '福岡県');
+});
+
+test('unregisteredShopsFor: feed に prefecture があれば使う（収集側が付けたら効く）', () => {
+  const out = unregisteredShopsFor(
+    [item({ destLabel: 'どこかのお店', prefecture: '北海道', deadline: '2026-09-05T00:00:00.000Z' })],
+    {},
+    SHOPS,
+    { now: NOW },
+  );
+  assert.equal(out[0].locality.pref, '北海道');
+  assert.equal(out[0].locality.reason, 'data:都道府県');
+});
+
+/* ---------- 仕分け ---------- */
+
+const AREA_ITEMS = [
+  item({ destLabel: 'ヨドバシ', deadline: '2026-09-02T00:00:00.000Z' }),                   // online（掲載店）
+  item({ destLabel: 'カードラボ 福岡天神店', deadline: '2026-09-03T00:00:00.000Z' }),        // local 福岡県
+  item({ destLabel: 'TSUTAYA 平塚店', deadline: '2026-09-04T00:00:00.000Z' }),             // local 県不明
+  item({ destLabel: '通販のPAO', deadline: '2026-09-05T00:00:00.000Z' }),                  // online（店名）
+  item({ destLabel: 'CBトレコロ', deadline: '2026-09-06T00:00:00.000Z' }),                  // unknown
+];
+const AREA_ALL = () => unregisteredShopsFor(AREA_ITEMS, {}, SHOPS, { now: NOW });
+
+test('partitionUnregisteredShops: 都道府県が未入力ならオンラインだけ（勝手に全国の実店舗を出さない）', () => {
+  const p = partitionUnregisteredShops(AREA_ALL(), {});
+  assert.deepEqual(p.list.map((e) => e.label), ['ヨドバシ.com', '通販のPAO', 'CBトレコロ']);
+  assert.deepEqual(p.far.map((e) => e.label), ['カードラボ 福岡天神店', 'TSUTAYA 平塚店']);
+  assert.equal(p.pref, null);
+});
+
+test('partitionUnregisteredShops: 自分の都道府県の店は出す', () => {
+  const p = partitionUnregisteredShops(AREA_ALL(), { pref: '福岡' });
+  assert.ok(p.list.some((e) => e.label === 'カードラボ 福岡天神店'));
+  assert.equal(p.far.length, 1, '県が分からない実店舗は出さないまま');
+  assert.equal(p.pref, '福岡県');
+});
+
+test('partitionUnregisteredShops: 別の都道府県なら出さない', () => {
+  const p = partitionUnregisteredShops(AREA_ALL(), { pref: '東京都' });
+  assert.ok(!p.list.some((e) => e.label === 'カードラボ 福岡天神店'));
+  assert.equal(p.far.length, 2);
+});
+
+test('partitionUnregisteredShops: すべて表示なら全部出る（行き止まりを作らない）', () => {
+  const p = partitionUnregisteredShops(AREA_ALL(), { showAll: true });
+  assert.equal(p.list.length, 5);
+  assert.equal(p.far.length, 2, '出していても「遠方」の件数は数えたまま');
+  // 並び順は元のまま（締切が近い順）
+  assert.deepEqual(p.list.map((e) => e.nextAt), AREA_ALL().map((e) => e.nextAt));
+});
+
+test('partitionUnregisteredShops: 興味なしにした店は、すべて表示でも出さない', () => {
+  const hidden = { 'other:CBトレコロ': true };
+  const p = partitionUnregisteredShops(AREA_ALL(), { hidden, showAll: true });
+  assert.ok(!p.list.some((e) => e.label === 'CBトレコロ'));
+  assert.deepEqual(p.muted.map((e) => e.label), ['CBトレコロ'], '解除できるように控えは残す');
+});
+
+test('partitionUnregisteredShops: 壊れた引数でも落ちない', () => {
+  assert.deepEqual(partitionUnregisteredShops(null).list, []);
+  assert.deepEqual(partitionUnregisteredShops(undefined, {}).far, []);
+  assert.deepEqual(partitionUnregisteredShops([null, 'ごみ', {}], {}).list, [{}].slice(0, 1));
+});
+
+test('興味なしの保存先は登録状況と別（混ぜると意味が変わる）', () => {
+  assert.notEqual(STORAGE_KEY_SHOP_HIDDEN, STORAGE_KEY_SHOP_STATUS);
+  // Node には localStorage が無い。それでも例外を投げずに空を返すこと
+  assert.deepEqual(loadHiddenShops(), {});
+  assert.deepEqual(saveHiddenShops({ 'a.jp': true, 'b.jp': false, bad: 1 }), { 'a.jp': true });
+  assert.deepEqual(clearHiddenShops(), {});
+});
+
+test('実データ: 遠方の実店舗が既定で消え、オンラインは残る', async () => {
+  const feed = JSON.parse(await readFile(join(root, 'public', 'feed.sample.json'), 'utf8'));
+  const shops = normalizeShopList(await realShopsConfig());
+  const all = unregisteredShopsFor(feed.items, {}, shops, { now: NOW, withinDays: 3650 });
+
+  const p = partitionUnregisteredShops(all, {});
+  for (const entry of p.list) {
+    assert.notEqual(entry.locality.kind, 'local', `行けない実店舗が既定で出ている: ${entry.label}`);
+  }
+  // すべて表示にすれば戻る
+  assert.equal(partitionUnregisteredShops(all, { showAll: true }).list.length, all.length);
 });
