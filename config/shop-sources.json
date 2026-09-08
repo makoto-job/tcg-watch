@@ -132,7 +132,7 @@
       "linkPattern": "",
       "titlePattern": "",
       "datePattern": "",
-      "note": "ドラゴンボールは実測で過去7日9件と薄かったIP。トレカジャンル内をドラゴンボールで絞った新着登録順（hit 76件）。query はUTF-8のパーセントエンコード済み（'ドラゴンボール'）。フュージョンワールドのブースター／スタートデッキ／スリーブがここに出る。ジャンル横断feedと重複するがIDが同じなので shops.js 側で重複除去される。 ／ sales_start_time・sales_end_time は抽選受付期間ではないため未使用（実地確認）。",
+      "note": "ドラゴンボールは実測で過去7日9件と薄かったIP。トレカジャンル内をドラゴンボールで絞った新着登録順（hit 76件）。query はUTF-8のパーセントエンコード済み（'ドラゴンボール'）。フュージョンワールドのブースター／スタートデッキ／スリーブがここに出る。ジャンル横断feedと重複するがIDが同じなので shops.js 側で重複除去される。 ／ sales_start_time・sales_end_time は抽選受付期間ではないため未使用（実地確認）。 【2026-09-08 実測・expectEmpty は付けない判断】この日は採用0件だったが異常ではない。hit76 / 抽出3件 は取れており、落ちているのは creation_time が maxAgeHours(168h)の窓の外だから（新規登録が無かった週は必ずこうなる）。src/sources/shops.js は dateKey を持つサイトについては採用0件でも warn を出さない実装（「N時間以内の新着なし」を verbose ログに出すだけ）なので、そもそも警告は発生していない。ここに expectEmpty:true を付けると「抽出そのものが0＝APIやセレクタが壊れた」場合の警告まで消えて本物の故障に気づけなくなるため、付けないこと。",
       "releaseTextKey": "release_date_text",
       "stockTextKey": "stock_status_text",
       "stockExclude": "ご注文できない|売り切れ|品切|販売終了|取扱い?終了|在庫なし",
@@ -162,7 +162,7 @@
       "titlePattern": "",
       "datePattern": "",
       "titleExclude": "愛蔵版|（\\d+）$|WIN（",
-      "note": "デュエマは実測で過去7日3件と最も薄かったIP。トレカジャンル内をデュエル・マスターズで絞った新着登録順（hit 156件）。query は 'デュエル・マスターズ' のパーセントエンコード。DM26-RP3 逆札篇第3弾 などの予約商品が取れる。ジャンルを外すとコミック（愛蔵版・WIN）が大量に混ざるので genres 指定＋titleExclude で二重に落としている。 ／ sales_start_time・sales_end_time は抽選受付期間ではないため未使用（実地確認）。",
+      "note": "デュエマは実測で過去7日3件と最も薄かったIP。トレカジャンル内をデュエル・マスターズで絞った新着登録順（hit 156件）。query は 'デュエル・マスターズ' のパーセントエンコード。DM26-RP3 逆札篇第3弾 などの予約商品が取れる。ジャンルを外すとコミック（愛蔵版・WIN）が大量に混ざるので genres 指定＋titleExclude で二重に落としている。 ／ sales_start_time・sales_end_time は抽選受付期間ではないため未使用（実地確認）。 【2026-09-08 実測・expectEmpty は付けない判断】この日は採用0件だったが異常ではない。抽出4件 は取れており、落ちているのは creation_time が maxAgeHours(168h)の窓の外だから（新規登録が無かった週は必ずこうなる）。src/sources/shops.js は dateKey を持つサイトについては採用0件でも warn を出さない実装（「N時間以内の新着なし」を verbose ログに出すだけ）なので、そもそも警告は発生していない。ここに expectEmpty:true を付けると「抽出そのものが0＝APIやセレクタが壊れた」場合の警告まで消えて本物の故障に気づけなくなるため、付けないこと。",
       "releaseTextKey": "release_date_text",
       "stockTextKey": "stock_status_text",
       "stockExclude": "ご注文できない|売り切れ|品切|販売終了|取扱い?終了|在庫なし",
@@ -346,7 +346,7 @@
       "note": "【enabled:false の理由】ブロックはされていない（Shopifyなので /collections.json も /collections/all/products.json も200で返る。robots.txt が Disallow しているのは /search /cart /checkout 等で、products.json は対象外）。使わないのは中身が目的に合わないから。ポケカのシングルカード専門店で総商品数38,387件、コレクション一覧250件を見ても『抽選』も『予約』も無く（唯一の『イベント予約』コレクションは2件）、新着＝シングルカードの入荷なので抽選・予約情報は一切出てこない。設定は将来 hareruya2 が抽選販売を始めた時のために検証済みの形で残す（products.json の構造は確認済み）。"
     },
     {
-      "id": "pokemoncenter-online",
+      "id": "pokemoncenter-online-shop",
       "name": "ポケモンセンターオンライン",
       "destLabel": "ポケモンセンターオンライン",
       "url": "https://www.pokemoncenter-online.com/",
@@ -363,7 +363,7 @@
       "linkPattern": "",
       "titlePattern": "",
       "datePattern": "",
-      "note": "【enabled:false の理由】config/official-sites.json の同名エントリと同じ。Bot Manager のJavaScriptチャレンジで商品HTMLが取れない。ブラウザUAなら通る可能性があるが回避行為なのでやらない。重複定義になるので shops.js 側では二重取得しないよう常に無効のままにしておくこと。"
+      "note": "【enabled:false の理由】config/official-sites.json の同名エントリと同じ。Bot Manager のJavaScriptチャレンジで商品HTMLが取れない。ブラウザUAなら通る可能性があるが回避行為なのでやらない。重複定義になるので shops.js 側では二重取得しないよう常に無効のままにしておくこと。 ／【2026-09-08 id を pokemoncenter-online から pokemoncenter-online-shop に改名】config/official-sites.json 側に同じ id のエントリがあり、sourceId が衝突していた。両方 enabled:false なので現状の収集結果は変わらないが、どちらかを有効に戻した瞬間に feed.json やレポートの情報源別集計が片方に寄って消える。test/sources-health.test.js の id 一意性チェックで検出。"
     },
     {
       "id": "c-labo-yoyaku",
@@ -553,11 +553,12 @@
       "linkPattern": "",
       "titlePattern": "",
       "datePattern": "",
-      "note": "区画Mで追加。ユニオンアリーナ（バンダイのクロスIP TCG。ハンターハンター・ジョジョ・ウマ娘等が参戦）は当botに専用IPが無く丸ごと取りこぼしていた。ドラゴンボール版と同じトレカジャンル(006510016007)内をキーワードで絞った新着登録順。実測20件ヒットし、「UNION ARENA ブースターパック ウマ娘 プリティーダービー【UA59BT】(発売2026年12月11日)」のような“まだ発売前だが予約が始まっている商品”がそのまま並ぶ。なお同APIは release_date_text（例「2026年12月11日」）も返すが、src/sources/shops.js が読んでいないため現状は取り込めない（親への依頼事項）。 ／ sales_start_time・sales_end_time は抽選受付期間ではないため未使用（実地確認）。",
+      "note": "区画Mで追加。ユニオンアリーナ（バンダイのクロスIP TCG。ハンターハンター・ジョジョ・ウマ娘等が参戦）は当botに専用IPが無く丸ごと取りこぼしていた。ドラゴンボール版と同じトレカジャンル(006510016007)内をキーワードで絞った新着登録順。実測20件ヒットし、「UNION ARENA ブースターパック ウマ娘 プリティーダービー【UA59BT】(発売2026年12月11日)」のような“まだ発売前だが予約が始まっている商品”がそのまま並ぶ。なお同APIは release_date_text（例「2026年12月11日」）も返すが、src/sources/shops.js が読んでいないため現状は取り込めない（親への依頼事項）。 ／ sales_start_time・sales_end_time は抽選受付期間ではないため未使用（実地確認）。【2026-09-08 実測・「サイト構造が変わった可能性」警告の原因判明。クエリは壊れていない】query=ユニオンアリーナ は効いている（header.hit_count = 97、返る items は全て UNION ARENA の商品）。0件になるのは stockExclude の側で、hits=100 まで広げて97件全部を見ても stock_status が全件 2（stock_status_text=「ご注文できない商品」）だった＝楽天ブックスのトレカジャンル内に、いま注文できる UNION ARENA 商品が1件も無い。最新登録の『【セット商品】UNION ARENA ブースターパック ウマ娘 プリティーダービー【UA59BT】…』(creation_time 2026-08-19, release_date 2026-12-11) すら既に受付終了している。比較のため同時刻に測ったジャンル新着feed(rakuten-books-tcg-new, hits=80)は「予約受付中」63件・「予約受付中(発売日以降のお届け)」2件・「ご注文できない商品」15件なので、API・ジャンル・在庫表記のどれも正常。なおジャンル指定を外すと注文可能な2件が出るが、中身は『リユニオン・アリーナ、ダラス』というジャズのライブ盤CD（ジャンル002102006/002102002）の誤ヒットなので genres は外さないこと。またジャンル新着feedの最新80件には UNION ARENA が1件も含まれないため、このIP専用feedを消すと楽天ブックス側のUAは丸ごと落ちる。したがって enabled:true のまま残す。 ／ 0件が正常なので expectEmpty:true。ただしこのサイトに限り stockExclude が全件を落とすため「抽出0」と「本当の構造変更」が区別できない。本当に壊れたかどうかは header.hit_count で判定すること: `curl -A 'Mozilla/5.0 (compatible; TCGNewsBot/1.0)' '<このurl>' | node -e \"let d='';process.stdin.on('data',c=>d+=c).on('end',()=>console.log(JSON.parse(d).header.hit_count))\"` が0や取得失敗になったら異常（2026-09-08 は 97）。新弾の予約・抽選が楽天ブックスで始まればそのまま拾える。",
       "releaseTextKey": "release_date_text",
       "stockTextKey": "stock_status_text",
       "stockExclude": "ご注文できない|売り切れ|品切|販売終了|取扱い?終了|在庫なし",
-      "applyVerified": false
+      "applyVerified": false,
+      "expectEmpty": true
     },
     {
       "id": "pao-reservation",
@@ -624,7 +625,7 @@
       "linkPattern": "",
       "titlePattern": "",
       "datePattern": "",
-      "note": "区画Nで追加。vanguard は CONTRACT のIPキーにありながら専用の情報源が1つも無かった。ドラゴンボール版と同じトレカジャンル(006510016007)内をキーワード『ヴァンガード』で絞った新着登録順。2026-09-06 実測 hit 115件。先頭に「VG-DZ-SS20 スペシャルシリーズ Stride Deckset Altmile（予約受付中）」等が並ぶ。stockExclude で「ご注文できない商品」を落とすので、買えない商品を応募先として出さない。 ／ sales_start_time・sales_end_time は抽選受付期間ではないため未使用（実地確認）。",
+      "note": "区画Nで追加。vanguard は CONTRACT のIPキーにありながら専用の情報源が1つも無かった。ドラゴンボール版と同じトレカジャンル(006510016007)内をキーワード『ヴァンガード』で絞った新着登録順。2026-09-06 実測 hit 115件。先頭に「VG-DZ-SS20 スペシャルシリーズ Stride Deckset Altmile（予約受付中）」等が並ぶ。stockExclude で「ご注文できない商品」を落とすので、買えない商品を応募先として出さない。 ／ sales_start_time・sales_end_time は抽選受付期間ではないため未使用（実地確認）。 【2026-09-08 実測・expectEmpty は付けない判断】この日は採用0件だったが異常ではない。抽出4件 は取れており、落ちているのは creation_time が maxAgeHours(168h)の窓の外だから（新規登録が無かった週は必ずこうなる）。src/sources/shops.js は dateKey を持つサイトについては採用0件でも warn を出さない実装（「N時間以内の新着なし」を verbose ログに出すだけ）なので、そもそも警告は発生していない。ここに expectEmpty:true を付けると「抽出そのものが0＝APIやセレクタが壊れた」場合の警告まで消えて本物の故障に気づけなくなるため、付けないこと。",
       "releaseTextKey": "release_date_text",
       "stockTextKey": "stock_status_text",
       "stockExclude": "ご注文できない|売り切れ|品切|販売終了|取扱い?終了|在庫なし",
@@ -653,7 +654,7 @@
       "linkPattern": "",
       "titlePattern": "",
       "datePattern": "",
-      "note": "区画Nで追加。weiss も専用の情報源が無かったIP。トレカジャンル内をキーワード『ヴァイスシュヴァルツ』で絞った新着登録順。2026-09-06 実測 hit 283件。「ヴァイスシュヴァルツ ブースターパック BanG Dream！[夢限大みゅーたいぷ]（予約受付中）」等。ブラウ／ロゼも同じキーワードに含まれる。 ／ sales_start_time・sales_end_time は抽選受付期間ではないため未使用（実地確認）。",
+      "note": "区画Nで追加。weiss も専用の情報源が無かったIP。トレカジャンル内をキーワード『ヴァイスシュヴァルツ』で絞った新着登録順。2026-09-06 実測 hit 283件。「ヴァイスシュヴァルツ ブースターパック BanG Dream！[夢限大みゅーたいぷ]（予約受付中）」等。ブラウ／ロゼも同じキーワードに含まれる。 ／ sales_start_time・sales_end_time は抽選受付期間ではないため未使用（実地確認）。 【2026-09-08 実測・expectEmpty は付けない判断】この日は採用0件だったが異常ではない。抽出7件 は取れており、落ちているのは creation_time が maxAgeHours(168h)の窓の外だから（新規登録が無かった週は必ずこうなる）。src/sources/shops.js は dateKey を持つサイトについては採用0件でも warn を出さない実装（「N時間以内の新着なし」を verbose ログに出すだけ）なので、そもそも警告は発生していない。ここに expectEmpty:true を付けると「抽出そのものが0＝APIやセレクタが壊れた」場合の警告まで消えて本物の故障に気づけなくなるため、付けないこと。",
       "releaseTextKey": "release_date_text",
       "stockTextKey": "stock_status_text",
       "stockExclude": "ご注文できない|売り切れ|品切|販売終了|取扱い?終了|在庫なし",
@@ -682,7 +683,7 @@
       "linkPattern": "",
       "titlePattern": "",
       "datePattern": "",
-      "note": "区画Nで追加。hololive の小売店由来の情報源は カードラボ／PAO だけだった。トレカジャンル内をキーワード『ホロライブ』で絞った新着登録順。2026-09-06 実測 hit 41件。ただし実測時点では上位の大半が「ご注文できない商品」で stockExclude に落ちる（＝採用は数件）。新弾の予約が始まった時に効く保険という位置づけ。 ／ sales_start_time・sales_end_time は抽選受付期間ではないため未使用（実地確認）。",
+      "note": "区画Nで追加。hololive の小売店由来の情報源は カードラボ／PAO だけだった。トレカジャンル内をキーワード『ホロライブ』で絞った新着登録順。2026-09-06 実測 hit 41件。ただし実測時点では上位の大半が「ご注文できない商品」で stockExclude に落ちる（＝採用は数件）。新弾の予約が始まった時に効く保険という位置づけ。 ／ sales_start_time・sales_end_time は抽選受付期間ではないため未使用（実地確認）。 【2026-09-08 実測・expectEmpty は付けない判断】この日は採用0件だったが異常ではない。抽出1件 は取れており、落ちているのは creation_time が maxAgeHours(168h)の窓の外だから（新規登録が無かった週は必ずこうなる）。src/sources/shops.js は dateKey を持つサイトについては採用0件でも warn を出さない実装（「N時間以内の新着なし」を verbose ログに出すだけ）なので、そもそも警告は発生していない。ここに expectEmpty:true を付けると「抽出そのものが0＝APIやセレクタが壊れた」場合の警告まで消えて本物の故障に気づけなくなるため、付けないこと。",
       "releaseTextKey": "release_date_text",
       "stockTextKey": "stock_status_text",
       "stockExclude": "ご注文できない|売り切れ|品切|販売終了|取扱い?終了|在庫なし",

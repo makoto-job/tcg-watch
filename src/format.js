@@ -44,8 +44,14 @@ export const IP_LABELS = {
   carddass: 'カードダス',
   vanguard: 'ヴァンガード',
   weiss: 'ヴァイス',
+  // ユニオンアリーナは対象17IPに含まれるがラベルが抜けていた（無いとラベル無しで出る）
+  unionarena: 'ユニオンアリーナ',
   lottery: '抽選',
 };
+
+/** 時間の定数（ミリ秒） */
+const HOUR_MS = 3600 * 1000;
+const DAY_MS = 24 * HOUR_MS;
 
 /** 順位マーク。6位以降は「6.」のような数字フォールバック */
 const MEDALS = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
@@ -272,6 +278,128 @@ function itemUrl(item) {
 }
 
 // ---------------------------------------------------------------------------
+// タイトルの整形
+//
+// 小売店の商品名には店側の定型の飾りが前後に付く。
+//   【抽選商品】ポケモンカードゲーム MEGA 拡張パック 30th CELEBRATION
+//   ※9月12日まで受付※【予約】[新品ボックス]DIVINE CROSS ブースター…
+//   【予約商品】 2026年11月14日発売 ホロビート HB-BP01 拡張パック第一弾（お1人様 4 BOXまで）
+// これが重み20〜40を食うため、肝心の商品名が「30th CELEBR…」で切れる。
+// 飾りは落とし、「抽選/予約/再販」の区別は別に [抽選] のマークとして残す（情報は捨てない）。
+// ---------------------------------------------------------------------------
+
+/** 店側の定型ラベル（この語だけを落とす。ホワイトリスト式で誤爆を避ける） */
+const NOISE_LABEL =
+  '(?:抽選(?:商品|販売|受付|品)?|予約(?:商品|販売|受付中?|開始)?|再販|新品(?:ボックス|BOX|未開封)?|中古|未開封|送料無料|即納|受注(?:生産|商品)?|数量限定)';
+
+/** 先頭の飾り: 【予約】 [新品ボックス] ※9月12日まで受付※ 2026年11月14日発売 */
+const LEAD_NOISE = new RegExp(
+  '^(?:\\s*(?:' +
+    `[【\\[［]${NOISE_LABEL}[】\\]］]` +
+    '|※[^※]{0,24}?(?:まで|受付|締切)[^※]{0,10}?※' +
+    '|\\d{4}年\\d{1,2}月\\d{1,2}日発売' +
+    '))+\\s*',
+  'u',
+);
+
+/** 末尾の飾り: [再販/2610]（店の管理番号） （お1人様 4 BOXまで） */
+const TAIL_NOISE = new RegExp(
+  '(?:\\s*(?:' +
+    '[\\[［][^\\]］]{0,12}[/／]\\s*\\d{2,6}[\\]］]' +
+    '|[（(]お[1１一]人様[^）)]{0,24}[）)]' +
+    '))+\\s*$',
+  'u',
+);
+
+/**
+ * 商品名から店側の定型の飾りを落とす。全部落ちて空になる場合は元のまま返す。
+ * @param {string} value
+ * @returns {string}
+ */
+export function cleanTitle(value) {
+  const src = cleanText(value);
+  if (!src) return '';
+  const out = src
+    .replace(LEAD_NOISE, '')
+    .replace(TAIL_NOISE, '')
+    .replace(/[ 　]{2,}/gu, ' ')
+    .trim();
+  return out === '' ? src : out;
+}
+
+/**
+ * 見出しでは IPラベル（ポケカ／ワンピカード…）を必ず付けるので、
+ * タイトル先頭のシリーズ名は同じことを2回言っているだけになる。
+ *   「ポケカ ポケモンカードゲーム MEGA 拡張パック 30th CELEBRATION」
+ * 先頭の20weightを返してもらうと、末尾が「30th CELEBR…」で切れずに済む。
+ * 落とすのは見出しだけ。詳細ツイート（2本目以降）は正式名称のまま残す。
+ */
+const REDUNDANT_PREFIXES = {
+  pokemon: ['ポケモンカードゲーム', 'ポケモンカード', 'ポケカ'],
+  onepiece: ['ONE PIECEカードゲーム', 'ONE PIECE カードゲーム', 'ONE PIECE CARD GAME', 'ワンピースカードゲーム'],
+  yugioh: ['遊戯王OCG デュエルモンスターズ', '遊戯王OCG', '遊戯王'],
+  dragonball: ['ドラゴンボールスーパーカードゲーム フュージョンワールド', 'ドラゴンボールスーパーカードゲーム'],
+  gundam: ['ガンダムカードゲーム', 'GUNDAM CARD GAME'],
+  duelmasters: ['デュエル・マスターズ', 'デュエルマスターズ'],
+  mtg: ['マジック：ザ・ギャザリング', 'MAGIC: THE GATHERING'],
+  digimon: ['デジモンカードゲーム'],
+  battlespirits: ['バトルスピリッツ'],
+  vanguard: ['カードファイト!! ヴァンガード', 'カードファイト!!ヴァンガード'],
+  weiss: ['ヴァイスシュヴァルツ'],
+  unionarena: ['ユニオンアリーナ', 'UNION ARENA'],
+};
+
+/** シリーズ名の直後がここに挙げた区切りなら「先頭のシリーズ名」とみなす */
+const PREFIX_BOUNDARY = /^[\s　「『【〈《（(\[［:：\-－―]/u;
+
+/** 残りがこれ未満になるなら削らない（削りすぎて何の商品か分からなくなるのを防ぐ） */
+const MIN_REMAINDER_WEIGHT = 8;
+
+/**
+ * IPラベルと重複するシリーズ名をタイトル先頭から落とす（見出し専用）。
+ * @param {string} title 整形済みタイトル
+ * @param {object} item
+ * @returns {string}
+ */
+function stripRedundantPrefix(title, item) {
+  const ips = Array.isArray(item?.ips) ? item.ips : [];
+  const lower = title.toLowerCase();
+  for (const ip of ips) {
+    for (const prefix of REDUNDANT_PREFIXES[ip] ?? []) {
+      if (!lower.startsWith(prefix.toLowerCase())) continue;
+      const rest = title.slice(prefix.length);
+      // 「ヴァイスシュヴァルツロゼ」のような別シリーズを切らないため、
+      // シリーズ名の直後が区切り文字（または末尾）のときだけ落とす。
+      if (rest !== '' && !PREFIX_BOUNDARY.test(rest)) continue;
+      const trimmed = rest.replace(/^[\s　:：\-－―]+/u, '').trim();
+      if (weightedLength(trimmed) < MIN_REMAINDER_WEIGHT) continue;
+      return trimmed;
+    }
+  }
+  return title;
+}
+
+/** 見出しに出す種別マーク。優先度は 抽選 > 予約 > 再販 */
+const KIND_WORDS = ['抽選', '予約', '再販'];
+
+/**
+ * 「これは抽選なのか予約なのか」を一目で分かるようにする短いマーク。
+ * 整形後のタイトルに既にその語があるなら、二重表記になるので付けない。
+ * @param {object} item
+ * @param {string} cleanedTitle
+ * @returns {string} '抽選' | '予約' | '再販' | ''
+ */
+export function kindMarker(item, cleanedTitle = '') {
+  const tags = Array.isArray(item?.intentTags) ? item.intentTags : [];
+  const src = [...tags, item?.title].filter((v) => typeof v === 'string').join(' ');
+  for (const word of KIND_WORDS) {
+    if (!src.includes(word)) continue;
+    return cleanedTitle.includes(word) ? '' : word;
+  }
+  return '';
+}
+
+// ---------------------------------------------------------------------------
 // 第2フェーズ: 応募導線（destUrl / destLabel / deadline）
 // すべて任意フィールド。無ければ従来と完全に同じ出力になる。
 // ---------------------------------------------------------------------------
@@ -355,6 +483,10 @@ function applyLines(item, nowMs) {
     lines.push(`⏳ ${formatDateTimeJst(item.startsAt)} 受付開始`);
   } else if (dl !== null && dl > nowMs) {
     lines.push(`⏰ ${formatDateTimeJst(item.deadline)}まで`);
+  } else if (destUrl(item) && item && item.applyVerified === true) {
+    // 締切が取れていないが、店の受付情報は確認できている場合。
+    // 「いつまで」を言えないことを隠さない。黙っていると読み手は勝手に余裕があると思う。
+    lines.push('✅ 受付中（締切は店ページで確認）');
   }
   const label = destLabel(item);
   if (destUrl(item) && label) lines.push(`🛒 ${label}`);
@@ -362,11 +494,115 @@ function applyLines(item, nowMs) {
 }
 
 // ---------------------------------------------------------------------------
+// 見出しの緊急度・フォロー理由・ハッシュタグ
+// ---------------------------------------------------------------------------
+
+/**
+ * 見出しに出す「いちばん近い締切」の1行。
+ * このツールの目的は「抽選に間に合わせること」なので、
+ * 締切が分かっているなら見出しの時点で伝える。
+ *
+ * 誇張はしない。分かっている事実（日時）だけを書く。
+ * 締切が分かっているものが1件も無ければ空文字（見出しから消える）。
+ *
+ * @param {Array<object>} items
+ * @param {number} nowMs
+ * @returns {string}
+ */
+export function urgencyLine(items, nowMs) {
+  const now = new Date(nowMs);
+  const list = Array.isArray(items) ? items : [];
+
+  // 1) いま応募できて、締切が分かっているもののうち最短
+  let nearest = null;
+  for (const it of list) {
+    if (!isApplyOpen(it, now)) continue;
+    const dl = deadlineMs(it);
+    if (dl === null || dl <= nowMs) continue;
+    if (nearest === null || dl < nearest) nearest = dl;
+  }
+  if (nearest !== null) {
+    const rest = nearest - nowMs;
+    if (rest <= 24 * HOUR_MS) {
+      const hours = Math.floor(rest / HOUR_MS);
+      // 「あと1時間を切っている」は事実。煽り文句は足さない
+      return hours >= 1
+        ? `⏰ 最短の締切まで約${hours}時間（${formatDateTimeJst(nearest)}）`
+        : `⏰ 最短の締切は${formatDateTimeJst(nearest)}（1時間以内）`;
+    }
+    if (rest <= 7 * DAY_MS) return `⏰ 最短の締切 ${formatDateTimeJst(nearest)}`;
+    return '';
+  }
+
+  // 2) 締切が分かるものが無いなら、受付開始が近いものを知らせる
+  let soonest = null;
+  for (const it of list) {
+    if (!isApplyUpcoming(it, now)) continue;
+    const st = Date.parse(it && it.startsAt);
+    if (!Number.isFinite(st)) continue;
+    if (soonest === null || st < soonest) soonest = st;
+  }
+  if (soonest !== null && soonest - nowMs <= 7 * DAY_MS) {
+    return `⏳ 受付開始 ${formatDateTimeJst(soonest)}`;
+  }
+  return '';
+}
+
+/**
+ * 「なぜこのアカウントをフォローするのか」を1行で。
+ * 毎日まったく同じ文面を投稿するとXの重複判定に触れるため、
+ * 日付から決まる順番で入れ替える（同じ日付なら常に同じ＝再現可能）。
+ * どれも誇張せず、実際にやっていることだけを書く。
+ */
+const FOLLOW_LINES = [
+  '複数タイトルの抽選・予約を毎日まとめています',
+  '締切が分かるものを優先して並べています',
+  '応募ページへの直リンクだけを載せています',
+  'アプリには全件と締切をまとめています',
+];
+
+/** 日付（Asia/Tokyo）から決まるフォロー理由の1行 */
+export function followLine(date) {
+  const d = toDate(date) ?? new Date();
+  const p = partsOf(JST_MD, d);
+  const idx = (Number(p.month) * 31 + Number(p.day)) % FOLLOW_LINES.length;
+  return FOLLOW_LINES[idx];
+}
+
+/**
+ * 見出しに付けるハッシュタグ。
+ * - IPタグ（#ポケカ 等）を最大2個。実際に検索されているのはこちら
+ * - 呼び出し側から渡されたタグ（#抽選販売 等）を足して合計3個まで
+ * 4個以上は内容より飾りが多く見えるので付けない。
+ * @param {Array<object>} items
+ * @param {string[]} hashtags
+ * @returns {string[]}
+ */
+export function headerHashtags(items, hashtags) {
+  const ipTags = [];
+  for (const it of Array.isArray(items) ? items : []) {
+    const label = ipLabel(it);
+    if (label) ipTags.push(`#${label}`);
+  }
+  return normalizeHashtags([...normalizeHashtags(ipTags, 2), ...(hashtags || [])], 3);
+}
+
+// ---------------------------------------------------------------------------
 // 1本目（見出し）
 // ---------------------------------------------------------------------------
 
 function headlineText(item) {
-  return joinLabelTitle(ipLabel(item), cleanText(item?.title));
+  const title = cleanTitle(item?.title);
+  const marker = kindMarker(item, title);
+  const body = joinLabelTitle(ipLabel(item), stripRedundantPrefix(title, item));
+  return marker ? `[${marker}] ${body}` : body;
+}
+
+/** Infinity から min まで段階的に短くするタイトル上限の候補列 */
+function titleCapLadder(min) {
+  const caps = [Infinity];
+  for (let c = 120; c >= min; c -= 4) caps.push(c);
+  return caps;
 }
 
 function buildHeader(items, date, hashtags, nowMs) {
@@ -374,27 +610,49 @@ function buildHeader(items, date, hashtags, nowMs) {
   // 応募できるものが含まれるなら、リプ欄に直リンクがあることを明示する
   const canApply = items.some((it) => isApplyOpen(it, new Date(nowMs)));
   const cta = canApply ? '※リプ欄から直接応募できます👇' : 'くわしくはリプ欄に👇';
-  const tags = normalizeHashtags(hashtags);
+  const urgency = urgencyLine(items, nowMs);
+  const follow = followLine(date);
+  const tags = headerHashtags(items, hashtags);
 
-  const assemble = (titleCap, tagList) => {
+  const assemble = ({ cap, tagList, withFollow, withUrgency }) => {
     const lines = items.map((it, i) => {
-      const t = titleCap === Infinity ? headlineText(it) : truncateToWeight(headlineText(it), titleCap);
+      const t = cap === Infinity ? headlineText(it) : truncateToWeight(headlineText(it), cap);
       return `${medal(i)} ${t}`.trimEnd();
     });
-    const footer = tagList.length ? [cta, tagList.join(' ')] : [cta];
-    return [head, '', ...lines, '', ...footer].join('\n');
+    const blocks = [head];
+    if (withUrgency && urgency) blocks.push(urgency);
+    blocks.push(lines.join('\n'));
+    const footer = [];
+    if (withFollow) footer.push(follow);
+    footer.push(cta);
+    if (tagList.length) footer.push(tagList.join(' '));
+    blocks.push(footer.join('\n'));
+    return blocks.join('\n\n');
   };
 
-  // タイトルを段階的に短くしながら 280weight 以内を目指す
-  for (const tagList of [tags, tags.slice(0, 2), []]) {
-    for (let cap = Infinity; ; cap = cap === Infinity ? 120 : cap - 4) {
-      const text = assemble(cap, tagList);
+  // 削る順番＝捨ててよいものの順番。
+  // 締切（urgency）は最後まで残す。この1行がこのツールの存在理由だから。
+  //   1. フォロー理由を落とす
+  //   2. ハッシュタグを2個 → 0個に減らす
+  //   3. タイトルをさらに短くする
+  const stages = [
+    { min: 64, tagList: tags, withFollow: true, withUrgency: true },
+    { min: 64, tagList: tags, withFollow: false, withUrgency: true },
+    { min: 40, tagList: tags.slice(0, 2), withFollow: false, withUrgency: true },
+    { min: MIN_TITLE_WEIGHT, tagList: [], withFollow: false, withUrgency: true },
+    { min: MIN_TITLE_WEIGHT, tagList: [], withFollow: false, withUrgency: false },
+  ];
+  for (const stage of stages) {
+    for (const cap of titleCapLadder(stage.min)) {
+      const text = assemble({ ...stage, cap });
       if (weightedLength(text) <= MAX_TWEET_WEIGHT) return text;
-      if (cap !== Infinity && cap <= MIN_TITLE_WEIGHT) break;
     }
   }
   // それでも入らない極端なケース（順位数が多すぎる等）は最終手段でハードに切る
-  return truncateToWeight(assemble(MIN_TITLE_WEIGHT, []), MAX_TWEET_WEIGHT);
+  return truncateToWeight(
+    assemble({ cap: MIN_TITLE_WEIGHT, tagList: [], withFollow: false, withUrgency: false }),
+    MAX_TWEET_WEIGHT,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -404,7 +662,7 @@ function buildHeader(items, date, hashtags, nowMs) {
 function buildDetail(item, index, nowMs) {
   const label = ipLabel(item);
   const head = `${medal(index)}${label ? ` ${label}` : ''}`;
-  const title = cleanText(item?.title);
+  const title = cleanTitle(item?.title);
   const summary = cleanSummary(item);
   // URLは重み23。応募ページがあるなら記事URLは載せず、応募ページ「だけ」を載せる。
   const dest = destUrl(item);
@@ -414,7 +672,14 @@ function buildDetail(item, index, nowMs) {
   // メタ行（後ろから削れるように優先度順で並べる）
   const metaLines = [];
   const when = formatDateTimeJst(item?.publishedAt);
-  const source = cleanText(item?.sourceName);
+  let source = cleanText(item?.sourceName);
+  // 🛒 に出す店名と同じものを 📅 にも書かない。
+  // 「📅 9/8 18:57 ／ ファミマオンライン ホビー（抽選商品）」＋「🛒 ファミマオンライン」は
+  // 同じ情報を2回読ませているだけで、そのぶん商品名が削られる。
+  const shopLabel = destLabel(item);
+  if (shopLabel && source && (source.startsWith(shopLabel) || shopLabel.startsWith(source))) {
+    source = '';
+  }
   if (when || source) metaLines.push(`📅 ${[when, source].filter(Boolean).join(' ／ ')}`);
   const tags = (Array.isArray(item?.intentTags) ? item.intentTags : [])
     .map((t) => cleanText(t))
@@ -502,22 +767,26 @@ export function buildSingle(top, { date = new Date(), hashtags = [] } = {}) {
   const dest = isApplyOpen(items[0], date) ? destUrl(items[0]) : '';
   const url = dest || itemUrl(items[0]);
   const urlCaption = dest ? '▼1位の応募ページ' : '▼1位の記事';
-  const tags = normalizeHashtags(hashtags);
+  const tags = headerHashtags(items, hashtags);
+  const urgency = urgencyLine(items, toMs(date, Date.now()));
 
-  const assemble = (titleCap, tagList, withUrl) => {
+  const assemble = (titleCap, tagList, withUrgency) => {
     const lines = items.map((it, i) => `${medal(i)} ${truncateToWeight(headlineText(it), titleCap)}`.trimEnd());
     const blocks = [[head, ...lines].join('\n')];
-    if (withUrl && url) blocks.push(`${urlCaption}\n${url}`);
+    if (withUrgency && urgency) blocks.push(urgency);
+    if (url) blocks.push(`${urlCaption}\n${url}`);
     if (tagList.length) blocks.push(tagList.join(' '));
     return blocks.join('\n\n');
   };
 
-  for (const tagList of [tags, tags.slice(0, 2), []]) {
-    for (let cap = 100; cap >= MIN_TITLE_WEIGHT; cap -= 4) {
-      const text = assemble(cap, tagList, true);
-      if (weightedLength(text) <= MAX_TWEET_WEIGHT) return text;
+  for (const withUrgency of [true, false]) {
+    for (const tagList of [tags, tags.slice(0, 2), []]) {
+      for (let cap = 100; cap >= MIN_TITLE_WEIGHT; cap -= 4) {
+        const text = assemble(cap, tagList, withUrgency);
+        if (weightedLength(text) <= MAX_TWEET_WEIGHT) return text;
+      }
     }
   }
-  const bare = assemble(MIN_TITLE_WEIGHT, [], true);
+  const bare = assemble(MIN_TITLE_WEIGHT, [], false);
   return truncateToWeight(bare, MAX_TWEET_WEIGHT);
 }

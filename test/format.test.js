@@ -14,6 +14,12 @@ import {
   formatDateTimeJst,
   isApplyOpen,
   isApplyUpcoming,
+  cleanTitle,
+  kindMarker,
+  urgencyLine,
+  followLine,
+  headerHashtags,
+  IP_LABELS,
   MAX_TWEET_WEIGHT,
   URL_WEIGHT,
 } from '../src/format.js';
@@ -551,4 +557,255 @@ test('buildThread: 受付開始前は締切ではなく「受付開始」を出�
   assert.ok(detail.includes('⏳'), '受付開始の表示が必要');
   assert.ok(detail.includes('受付開始'), '「受付開始」の文言が必要');
   assert.ok(!detail.includes('⏰'), '開始前に締切だけを出すと今応募できると誤解される');
+});
+
+// ---------------------------------------------------------------------------
+// 第3フェーズ: 読まれる文面にする
+//   - 商品名の前後に付く店側の定型ラベルを落とす
+//   - 抽選/予約の区別を [抽選] のマークで残す
+//   - 見出しに「いちばん近い締切」を出す
+//   - ハッシュタグはIPタグ優先で最大3個
+// ---------------------------------------------------------------------------
+
+test('cleanTitle: 先頭の店の定型ラベルを落とす', () => {
+  assert.equal(
+    cleanTitle('【抽選商品】ポケモンカードゲーム MEGA 拡張パック 30th CELEBRATION'),
+    'ポケモンカードゲーム MEGA 拡張パック 30th CELEBRATION',
+  );
+  assert.equal(
+    cleanTitle('※9月12日まで受付※【予約】[新品ボックス]DIVINE CROSS ブースターパック'),
+    'DIVINE CROSS ブースターパック',
+  );
+  assert.equal(
+    cleanTitle('【予約商品】 2026年11月14日発売 ホロビート HB-BP01 拡張パック第一弾'),
+    'ホロビート HB-BP01 拡張パック第一弾',
+  );
+});
+
+test('cleanTitle: 末尾の管理番号・購入制限を落とす', () => {
+  assert.equal(
+    cleanTitle('ONE PIECEカードゲーム ブースターパック 決戦の刻【OP-16】 [再販/2610]'),
+    'ONE PIECEカードゲーム ブースターパック 決戦の刻【OP-16】',
+  );
+  assert.equal(
+    cleanTitle('ホロビート HB-BP01 拡張パック第一弾 1BOX（お1人様 4 BOXまで）'),
+    'ホロビート HB-BP01 拡張パック第一弾 1BOX',
+  );
+});
+
+test('cleanTitle: 意味のある見出しは削らない', () => {
+  // ホワイトリストに無い語（速報・限定版のような中身のある語）は残す
+  assert.equal(cleanTitle('【速報】ポケカ新弾情報'), '【速報】ポケカ新弾情報');
+  assert.equal(cleanTitle('「テラスタルフェスex」抽選販売が受付開始'), '「テラスタルフェスex」抽選販売が受付開始');
+  assert.equal(cleanTitle('遊戯王 25th 再販'), '遊戯王 25th 再販');
+  // 全部が定型ラベルなら、消しすぎずに元のまま返す
+  assert.equal(cleanTitle('【予約】'), '【予約】');
+  assert.equal(cleanTitle(''), '');
+  assert.equal(cleanTitle(null), '');
+});
+
+test('kindMarker: 抽選/予約/再販を判定し、本文に既にあるなら付けない', () => {
+  assert.equal(kindMarker({ intentTags: ['抽選', '新弾'], title: '【抽選商品】ポケカ新弾' }, 'ポケカ新弾'), '抽選');
+  assert.equal(kindMarker({ intentTags: ['予約'], title: '【予約】ワンピ新弾' }, 'ワンピ新弾'), '予約');
+  // 整形後のタイトルに既に「再販」があるので二重表記にしない
+  assert.equal(kindMarker({ intentTags: [], title: '遊戯王 25th 再販' }, '遊戯王 25th 再販'), '');
+  assert.equal(kindMarker({ intentTags: [], title: 'ただの新商品情報' }, 'ただの新商品情報'), '');
+  assert.equal(kindMarker({}, ''), '');
+});
+
+test('見出し: 抽選と予約が一目で区別できる', () => {
+  const tweets = buildThread(
+    [
+      makeItem({ title: '【抽選商品】ポケモンカードゲーム MEGA 拡張パック', ips: ['pokemon'], intentTags: ['抽選'] }),
+      makeItem({ title: '【予約】ONE PIECEカードゲーム 決戦の刻', ips: ['onepiece'], intentTags: ['予約'] }),
+    ],
+    { date: DATE },
+  );
+  const head = tweets[0].text;
+  // IPラベルと重複するシリーズ名（ポケモンカードゲーム / ONE PIECEカードゲーム）は見出しから落ちる
+  assert.ok(head.includes('🥇 [抽選] ポケカ MEGA 拡張パック'), head);
+  assert.ok(head.includes('🥈 [予約] ワンピカード 決戦の刻'), head);
+  // 店の定型ラベルは残らない
+  assert.equal(head.includes('【抽選商品】'), false, head);
+  assertAllWithinLimit(tweets);
+
+  // 詳細ツイート（2本目以降）には正式名称が残る＝情報は捨てていない
+  assert.ok(tweets[1].text.includes('ポケモンカードゲーム MEGA 拡張パック'), tweets[1].text);
+  assert.ok(tweets[2].text.includes('ONE PIECEカードゲーム 決戦の刻'), tweets[2].text);
+});
+
+test('見出し: シリーズ名の一部を誤って切らない', () => {
+  // 「ヴァイスシュヴァルツロゼ」は別シリーズ。「ヴァイスシュヴァルツ」を切ってはいけない
+  const rose = buildThread(
+    [makeItem({ title: 'ヴァイスシュヴァルツロゼ ブースターパック ぱれっと', ips: ['weiss'] })],
+    { date: DATE },
+  );
+  assert.ok(rose[0].text.includes('ヴァイスシュヴァルツロゼ ブースターパック ぱれっと'), rose[0].text);
+
+  // 落とすと何の商品か分からなくなる場合（残りが短すぎる）も落とさない
+  const short = buildThread([makeItem({ title: 'ポケモンカードゲーム 再販', ips: ['pokemon'] })], { date: DATE });
+  assert.ok(short[0].text.includes('ポケモンカードゲーム 再販'), short[0].text);
+});
+
+test('urgencyLine: 24時間以内は残り時間、7日以内は日時、それ以外は出さない', () => {
+  const now = DATE.getTime();
+  const open = (deadline) => ({ applyVerified: true, destUrl: 'https://p-bandai.jp/item/1/', deadline });
+
+  assert.match(urgencyLine([open(rel(3 * HOUR))], now), /^⏰ 最短の締切まで約3時間（8\/23 12:00）$/);
+  assert.match(urgencyLine([open(rel(30 * 60 * 1000))], now), /1時間以内/);
+  assert.equal(urgencyLine([open(rel(2 * DAY))], now), '⏰ 最短の締切 8/25 09:00');
+  // 8日先はまだ緊急ではない。見出しの場所を使わない
+  assert.equal(urgencyLine([open(rel(8 * DAY))], now), '');
+  // 締切が分からないものしか無ければ出さない（憶測で書かない）
+  assert.equal(urgencyLine([makeItem()], now), '');
+  assert.equal(urgencyLine([], now), '');
+});
+
+test('urgencyLine: 複数あるとき、いちばん近い締切を選ぶ', () => {
+  const now = DATE.getTime();
+  const open = (deadline) => ({ applyVerified: true, destUrl: 'https://p-bandai.jp/item/1/', deadline });
+  const line = urgencyLine([open(rel(5 * DAY)), open(rel(2 * HOUR)), open(rel(3 * DAY))], now);
+  assert.match(line, /約2時間/);
+});
+
+test('urgencyLine: 締切切れ・受付開始前は「いま応募できるもの」に数えない', () => {
+  const now = DATE.getTime();
+  // 締切切れ
+  assert.equal(
+    urgencyLine([{ applyVerified: true, destUrl: 'https://p-bandai.jp/item/1/', deadline: rel(-HOUR) }], now),
+    '',
+  );
+  // 受付開始前は締切ではなく開始日時を知らせる
+  const upcoming = urgencyLine(
+    [{ applyVerified: true, destUrl: 'https://p-bandai.jp/item/1/', startsAt: rel(2 * DAY), deadline: rel(5 * DAY) }],
+    now,
+  );
+  assert.equal(upcoming, '⏳ 受付開始 8/25 09:00');
+});
+
+test('見出し: 最短の締切が入り、280weight以内に収まる', () => {
+  const top = [
+    makeItem({
+      title: '【抽選商品】ポケモンカードゲーム MEGA 拡張パック 30th CELEBRATION',
+      ips: ['pokemon'],
+      intentTags: ['抽選'],
+      destUrl: 'https://famima-online.family.co.jp/item?itemCode=100162480879693930',
+      destLabel: 'ファミマオンライン',
+      deadline: rel(5 * HOUR),
+    }),
+    makeItem({ title: '【予約】ONE PIECEカードゲーム 決戦の刻', ips: ['onepiece'], intentTags: ['予約'] }),
+    makeItem({ title: 'ホロビート HB-BP01 拡張パック第一弾', ips: ['newtcg'] }),
+  ];
+  const tweets = buildThread(top, { date: DATE, hashtags: ['#抽選販売'] });
+  assertAllWithinLimit(tweets);
+  assert.ok(tweets[0].text.includes('⏰ 最短の締切まで約5時間'), tweets[0].text);
+  assert.equal(/https?:\/\//.test(tweets[0].text), false, '見出しにURLを入れてはいけない（重み23・課金13倍）');
+});
+
+test('見出し: 締切が分かるものが無い日は緊急行を出さない', () => {
+  const tweets = buildThread([makeItem(), makeItem()], { date: DATE });
+  assert.equal(tweets[0].text.includes('⏰'), false, tweets[0].text);
+  assert.equal(tweets[0].text.includes('⏳'), false, tweets[0].text);
+});
+
+test('headerHashtags: IPタグを優先し、合計3個まで', () => {
+  const items = [makeItem({ ips: ['pokemon'] }), makeItem({ ips: ['onepiece'] }), makeItem({ ips: ['yugioh'] })];
+  // IPタグは2個まで。残り1枠に呼び出し側のタグが入る
+  assert.deepEqual(headerHashtags(items, ['#抽選販売']), ['#ポケカ', '#ワンピカード', '#抽選販売']);
+  // 重複は除かれる
+  assert.deepEqual(headerHashtags(items, ['#ポケカ', '#抽選販売']), ['#ポケカ', '#ワンピカード', '#抽選販売']);
+  // 4個以上にはならない
+  assert.equal(headerHashtags(items, ['#a', '#b', '#c', '#d']).length, 3);
+  assert.deepEqual(headerHashtags([], []), []);
+});
+
+test('followLine: 同じ日付なら常に同じ・日付が変われば入れ替わる', () => {
+  assert.equal(followLine(DATE), followLine(new Date(DATE)));
+  const seen = new Set();
+  for (let i = 0; i < 8; i += 1) seen.add(followLine(new Date(DATE.getTime() + i * DAY)));
+  assert.ok(seen.size >= 2, '毎日まったく同じ文面だとXの重複判定に触れる');
+  assert.equal(typeof followLine(undefined), 'string');
+});
+
+test('詳細: 締切不明でも受付確認済みなら、締切が分からないことを隠さない', () => {
+  const verified = buildThread(
+    [makeItem({ destUrl: 'https://pao-onlineshop.com/view/item/1', destLabel: '通販のPAO', applyVerified: true })],
+    { date: DATE },
+  );
+  assert.ok(verified[1].text.includes('✅ 受付中（締切は店ページで確認）'), verified[1].text);
+
+  // 受付を確認できていないものに「受付中」とは書かない（誤情報は情報が無いことより有害）
+  const unverified = buildThread(
+    [makeItem({ destUrl: 'https://pao-onlineshop.com/view/item/1', destLabel: '通販のPAO', applyVerified: false })],
+    { date: DATE },
+  );
+  assert.equal(unverified[1].text.includes('✅'), false, unverified[1].text);
+});
+
+test('詳細: 🛒 と同じ店名を 📅 にも書かない', () => {
+  const tweets = buildThread(
+    [
+      makeItem({
+        sourceName: 'ファミマオンライン ホビー（抽選商品）',
+        destUrl: 'https://famima-online.family.co.jp/item?itemCode=1',
+        destLabel: 'ファミマオンライン',
+        deadline: rel(2 * DAY),
+      }),
+    ],
+    { date: DATE },
+  );
+  const detail = tweets[1].text;
+  assert.ok(detail.includes('📅 8/23 12:30'), detail);
+  assert.equal(detail.includes('📅 8/23 12:30 ／ ファミマオンライン'), false, detail);
+  assert.ok(detail.includes('🛒 ファミマオンライン'), detail);
+});
+
+test('IP_LABELS: 対象17IPすべてにラベルがある', () => {
+  const keys = [
+    'pokemon', 'onepiece', 'dragonball', 'gundam', 'hololive', 'yugioh', 'duelmasters',
+    'mtg', 'newtcg', 'digimon', 'battlespirits', 'aikatsu', 'carddass', 'vanguard',
+    'weiss', 'unionarena', 'lottery',
+  ];
+  for (const k of keys) assert.ok(IP_LABELS[k], `${k} のラベルが無い`);
+  assert.equal(ipLabel({ ips: ['unionarena'] }), 'ユニオンアリーナ');
+});
+
+test('buildSingle: 締切が分かるなら1ツイート版にも入れ、280weight以内', () => {
+  const top = [
+    makeItem({
+      title: '【抽選商品】ポケモンカードゲーム MEGA 拡張パック',
+      ips: ['pokemon'],
+      intentTags: ['抽選'],
+      destUrl: 'https://famima-online.family.co.jp/item?itemCode=1',
+      deadline: rel(4 * HOUR),
+    }),
+    makeItem({ title: '【予約】ONE PIECEカードゲーム 決戦の刻', ips: ['onepiece'] }),
+  ];
+  const text = buildSingle(top, { date: DATE, hashtags: ['#抽選販売'] });
+  assert.ok(weightedLength(text) <= MAX_TWEET_WEIGHT, `weight=${weightedLength(text)}`);
+  assert.ok(text.includes('⏰ 最短の締切まで約4時間'), text);
+  assert.ok(text.includes('#ポケカ'), text);
+});
+
+test('誇張表現を文面に混ぜない（抽選情報は信頼が生命線）', () => {
+  const banned = ['絶対', '確実に当た', '今すぐ', '激アツ', '爆買い', '神'];
+  const top = [
+    makeItem({
+      title: '【抽選商品】ポケモンカードゲーム MEGA 拡張パック',
+      intentTags: ['抽選'],
+      destUrl: 'https://famima-online.family.co.jp/item?itemCode=1',
+      destLabel: 'ファミマオンライン',
+      deadline: rel(2 * HOUR),
+    }),
+    makeItem({ title: '【予約】ONE PIECEカードゲーム 決戦の刻', ips: ['onepiece'], intentTags: ['予約'] }),
+  ];
+  const texts = [
+    ...buildThread(top, { date: DATE, hashtags: ['#抽選販売'] }).map((t) => t.text),
+    buildSingle(top, { date: DATE, hashtags: ['#抽選販売'] }),
+  ];
+  for (const text of texts) {
+    for (const word of banned) {
+      assert.equal(text.includes(word), false, `煽り表現「${word}」が入っている:\n${text}`);
+    }
+  }
 });

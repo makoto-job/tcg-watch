@@ -154,7 +154,11 @@
 
     <div class="cards" id="cards"></div>
 
-    <p class="empty" id="empty" hidden>該当する情報がありません</p>
+    <!-- 0件のときも行き止まりにしない。理由と、そこから戻る道を必ず出す -->
+    <div class="empty" id="empty" hidden>
+      <p class="empty__text" id="emptyText">該当する情報がありません</p>
+      <button type="button" class="empty__clear" id="btnEmptyClear" hidden>絞り込みを解除する</button>
+    </div>
 
     <button type="button" class="btn-more" id="btnMore" hidden>もっと見る</button>
   </section>

@@ -50,6 +50,7 @@
   --ip-carddass:    #5e7a1e;
   --ip-vanguard: #C8541E;
   --ip-weiss: #4A4A8C;
+  --ip-unionarena:  #0f8a80;
   --ip-lottery:     #d13a86;
   --ip-default:     #6b7280;
 
@@ -109,6 +110,7 @@
     --ip-carddass:    #a8c95c;
     --ip-vanguard: #F09A66;
     --ip-weiss: #9A9AD8;
+    --ip-unionarena:  #49c9bd;
     --ip-lottery:     #ff85c2;
     --ip-default:     #9aa5b8;
   }
@@ -217,6 +219,8 @@ button {
   margin-top: 2px;
   padding-left: 30px;
 }
+/* フィード自体が古いとき。全項目に関わるのでヘッダーで一度だけ知らせる */
+.hdr__updated.is-stale { color: var(--dl-near-fg); font-weight: 600; }
 
 /* 並び替えはヘッダーに常駐させる。
    一覧の途中で「締切順に見たい」と思ったときに、
@@ -455,7 +459,7 @@ button {
 
 /* ジャンルの絞り込みチップもヘッダーに常駐させる。
    一覧のどこを見ていても「ポケカだけ」に切り替えられるようにするため。
-   16ジャンルあるので横スクロールで収める。 */
+   17ジャンルあるので横スクロールで収める。 */
 .hdr__chips[hidden] { display: none; }
 .hdr__chips {
   display: flex;
@@ -513,6 +517,31 @@ button {
   .chip[aria-pressed="true"] { color: #0b1220; }
 }
 .chip[aria-pressed="true"] .chip__dot { background: currentColor; opacity: 0.75; }
+
+/* チップの件数。押す前に「何件あるか」が分かるようにする */
+.chip__count {
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-mute);
+}
+.chip[aria-pressed="true"] .chip__count { color: inherit; opacity: 0.8; }
+
+/* 0件のジャンル。チップ自体は消さない。
+   消えると「バッジが無くなった＝壊れた」と誤解されるため、
+   淡色＋件数0で「今は情報が無いだけ」と分かるようにしている。
+   押しても選択はさせず、理由をトーストで出す（行き止まりを作らない）。 */
+.chip.is-empty {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--border-strong);
+  color: var(--text-mute);
+}
+/* 全体の不透明度は下げない。淡く見せるのは「塗りを外す・破線にする」までにして、
+   文字と件数は読める濃さを保つ（読めない0件表示は、消えているのと変わらない） */
+.chip.is-empty .chip__dot { opacity: 0.4; }
+/* 件数「0」はこのチップの状態そのものなので、淡くしすぎず読める濃さにする */
+.chip.is-empty .chip__count { color: var(--text-sub); }
 
 .filters__toggle {
   display: flex;
@@ -683,6 +712,8 @@ button {
 }
 .card__sep { opacity: 0.5; flex: none; }
 .card__time { flex: none; }
+/* 店の情報は「取得した時刻」。古いものだけ色を変えて気づけるようにする */
+.card__time--stale { color: var(--dl-near-fg); font-weight: 700; }
 
 .card__share {
   flex: none;
@@ -743,6 +774,22 @@ button {
   font-size: 13.5px;
 }
 .empty[hidden] { display: none; }
+.empty__text { margin: 0; }
+/* 絞り込みで0件になったときの戻り道。「もっと見る」と同じ形にそろえる */
+.empty__clear {
+  margin-top: 14px;
+  min-height: var(--tap);
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-elev);
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+.empty__clear[hidden] { display: none; }
+.empty__clear:active { background: var(--bg-sunken); }
 
 .error {
   margin-top: 20px;
@@ -901,6 +948,15 @@ button {
   color: var(--dl-exp-fg);
   border: 1px dashed currentColor;
   font-weight: 600;
+}
+/* 取得から時間がたった店の情報。
+   締切バッジと同じ寸法だが、締切ではないので塗りつぶさず破線にする
+   （受付終了バッジと同じ表現の系統） */
+.dl--stale {
+  background: transparent;
+  color: var(--dl-near-fg);
+  border: 1px dashed currentColor;
+  font-weight: 700;
 }
 @keyframes dlpulse { 50% { opacity: 0.75; } }
 @media (prefers-reduced-motion: reduce) { .dl--urgent { animation: none; } }

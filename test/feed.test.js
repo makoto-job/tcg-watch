@@ -16,8 +16,10 @@ import {
   detectKind,
   truncate,
   writeFeedJson,
+  ensureIpCoverage,
   FEED_VERSION,
   SUMMARY_MAX,
+  URGENT_KEEP_HOURS,
 } from '../src/feed.js';
 
 /** CONTRACT.md の FeedItem のキー（過不足なく一致すること） */
@@ -300,4 +302,154 @@ test('toFeedItem: http(s) 以外の destUrl はフィードに載せない', () 
 test('toFeedItem: 壊れた日時の deadline は null になる', () => {
   const fi = toFeedItem(ranked({ deadline: 'いつか' }));
   assert.equal(fi.deadline, null);
+});
+
+// ────────────────────────────────────────────────────────────
+// ジャンルの取りこぼし（利用者から「ドラゴンボールが出ない」と指摘のあった件）
+//
+// 収集段階では全ジャンル揃っているのに、フィード50件を組む時点で
+// 受付中の抽選（数が多い）が枠を食い尽くし、少数ジャンルが丸ごと消えていた。
+// ここで守るのは3つ。優先度の高い順に:
+//   1. 24時間以内が締切の受付中案件は必ず残る（アプリの存在意義）
+//   2. ジャンルが丸ごと消えない
+//   3. 1つの情報源が枠の40%を超えて占領しない
+// ────────────────────────────────────────────────────────────
+
+/** CONTRACT.md の対象IP（lottery は横断タグなので除く） */
+const IP_KEYS = [
+  'pokemon', 'onepiece', 'dragonball', 'gundam', 'hololive', 'yugioh',
+  'duelmasters', 'mtg', 'newtcg', 'digimon', 'battlespirits', 'aikatsu',
+  'carddass', 'vanguard', 'weiss', 'unionarena',
+];
+
+const NOW = new Date('2026-09-06T11:24:00.000Z');
+
+/**
+ * 2026-09-06 の実測（収集396件）に近い偏りのデータを作る。
+ * ポケカ・新作が大量にあり、少数ジャンルは1〜10件しかない状態。
+ */
+function skewedCollection(now = NOW) {
+  const counts = {
+    pokemon: 120, newtcg: 76, mtg: 32, weiss: 24, hololive: 23, onepiece: 18,
+    battlespirits: 16, digimon: 12, gundam: 11, yugioh: 10, duelmasters: 10,
+    dragonball: 10, vanguard: 10, aikatsu: 9, unionarena: 7, carddass: 1,
+  };
+  const sources = ['抽選まとめ', 'カードラボ', 'ファミマ', '4Gamer', 'ミントモール', '電ホビ'];
+  const out = [];
+  let n = 0;
+  for (const [ip, count] of Object.entries(counts)) {
+    for (let i = 0; i < count; i++) {
+      n++;
+      // 多いジャンルほど特定の情報源に偏る（現実と同じ形）
+      const src = ip === 'pokemon' ? sources[0] : ip === 'newtcg' ? sources[1] : sources[n % sources.length];
+      const isLottery = ip === 'pokemon' || ip === 'newtcg' || n % 2 === 0;
+      const hasDeadline = isLottery && i % 3 === 0;
+      const hours = 2 + (i % 40) * 6;
+      out.push(ranked({
+        id: `${ip}-${i}`,
+        url: `https://example.com/${ip}/${i}`,
+        sourceName: src,
+        sourceId: src,
+        publishedAt: new Date(now.getTime() - n * 60_000).toISOString(),
+        ips: isLottery ? ['lottery', ip] : [ip],
+        intentTags: isLottery ? ['抽選'] : [],
+        tier: 'shop',
+        destUrl: hasDeadline ? `https://shop.example.com/${ip}/${i}` : null,
+        deadline: hasDeadline ? new Date(now.getTime() + hours * 3600_000).toISOString() : null,
+      }));
+    }
+  }
+  return out.sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
+}
+
+test('buildFeedJson: 収集にあるジャンルが50件の中から丸ごと消えない', () => {
+  const feed = buildFeedJson({ ranked: skewedCollection(), now: NOW, maxItems: 50 });
+  assert.equal(feed.items.length, 50);
+
+  const present = new Set();
+  for (const it of feed.items) for (const ip of it.ips) present.add(ip);
+  const missing = IP_KEYS.filter((k) => !present.has(k));
+  assert.deepEqual(missing, [], `フィードから消えたジャンル: ${missing.join(', ')}`);
+});
+
+test('buildFeedJson: 24時間以内が締切の受付中案件は1件も落とさない', () => {
+  const all = skewedCollection();
+  const feed = buildFeedJson({ ranked: all, now: NOW, maxItems: 50 });
+  const kept = new Set(feed.items.map((i) => i.id));
+
+  const urgent = all.filter((it) => {
+    const dl = Date.parse(it.deadline);
+    return it.destUrl && Number.isFinite(dl)
+      && dl > NOW.getTime() && dl <= NOW.getTime() + URGENT_KEEP_HOURS * 3600_000;
+  });
+  assert.ok(urgent.length > 0, 'テストデータに今日締切が無い');
+  const lost = urgent.filter((it) => !kept.has(it.id)).map((it) => it.id);
+  assert.deepEqual(lost, [], `今日締切が落ちた: ${lost.join(', ')}`);
+});
+
+test('buildFeedJson: 1つの情報源が枠の40%を超えて占領しない', () => {
+  const feed = buildFeedJson({ ranked: skewedCollection(), now: NOW, maxItems: 50 });
+  const bySource = new Map();
+  for (const it of feed.items) bySource.set(it.sourceName, (bySource.get(it.sourceName) || 0) + 1);
+  for (const [name, n] of bySource) {
+    assert.ok(n <= 20, `${name} が ${n}件で40%(20件)を超えた`);
+  }
+});
+
+test('ensureIpCoverage: そのジャンルが1つの情報源にしか無くても、情報源の上限で消さない', () => {
+  const now = NOW.getTime();
+  const many = Array.from({ length: 60 }, (_, i) => ranked({
+    id: `big-${i}`,
+    sourceName: 'まとめサイト',
+    ips: ['lottery', 'pokemon'],
+    publishedAt: new Date(now - i * 60_000).toISOString(),
+  }));
+  // ドラゴンボールは同じ情報源に1件だけ（上限に達したあとに出てくる）
+  const rare = ranked({
+    id: 'db-1',
+    sourceName: 'まとめサイト',
+    ips: ['dragonball'],
+    publishedAt: new Date(now - 999 * 60_000).toISOString(),
+  });
+  const out = ensureIpCoverage([...many, rare], [], {
+    maxItems: 20, minPerIp: 4, perSourceCap: 8, now,
+  });
+  assert.ok(out.some((i) => i.id === 'db-1'), '唯一のドラゴンボール記事が落ちた');
+});
+
+test('ensureIpCoverage: 今日締切が枠より多いときは、締切をジャンル確保より優先する', () => {
+  const now = NOW.getTime();
+  const urgent = Array.from({ length: 12 }, (_, i) => ranked({
+    id: `u-${i}`,
+    sourceName: `店${i}`,
+    ips: ['lottery', 'pokemon'],
+    destUrl: `https://shop.example.com/${i}`,
+    deadline: new Date(now + (i + 1) * 3600_000).toISOString(),
+    publishedAt: new Date(now - i * 60_000).toISOString(),
+  }));
+  const others = Array.from({ length: 30 }, (_, i) => ranked({
+    id: `o-${i}`,
+    sourceName: 'ニュース',
+    ips: [IP_KEYS[i % IP_KEYS.length]],
+    publishedAt: new Date(now - (100 + i) * 60_000).toISOString(),
+  }));
+  const out = ensureIpCoverage([...urgent, ...others], [], {
+    maxItems: 10, minPerIp: 4, mustKeep: urgent, now,
+  });
+  assert.equal(out.length, 10);
+  // 締切が近い10件がそのまま残る
+  assert.deepEqual(
+    out.map((i) => i.id).sort(),
+    urgent.slice(0, 10).map((i) => i.id).sort(),
+  );
+});
+
+test('ensureIpCoverage: minPerIp:0 でも従来どおり新しい順で埋まる', () => {
+  const now = NOW.getTime();
+  const list = Array.from({ length: 30 }, (_, i) => ranked({
+    id: `n-${i}`,
+    publishedAt: new Date(now - i * 60_000).toISOString(),
+  }));
+  const out = ensureIpCoverage(list, [], { maxItems: 5, minPerIp: 0, now });
+  assert.deepEqual(out.map((i) => i.id), ['n-0', 'n-1', 'n-2', 'n-3', 'n-4']);
 });

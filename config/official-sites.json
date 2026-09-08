@@ -194,8 +194,27 @@
       "itemPattern": "<div class=\"article_area\">([\\s\\S]*?)<!-- / article_area -->",
       "linkPattern": "<p class=\"article_title\"><a href=\"([^\"]+)\"",
       "titlePattern": "<p class=\"article_title\"><a[^>]*>([\\s\\S]*?)</a>",
-      "note": "抽選販売の一次情報そのもの。/lottery/ や /lotterysales/ は404で、正しくはジャンル配下の https://p-bandai.jp/hobby/lotterysales/ （ホビーオンラインショップ＞抽選販売）。/chara/lotterysales/ も200だがバナーだけで商品リストが無い。1件は <div class=\"article_area\"> … <ul class=\"icon\"><li><img alt=\"抽選販売\"></li></ul> … <p class=\"article_title\"><a href=\"/item/item-1000224338/\">【抽選販売】…</a></p>。ページに日付が無いので pubDate は空（呼び出し側が現在時刻を入れる）。文字コードは Shift_JIS（Content-Type ヘッダが charset=Shift_JIS。metaタグは UTF-8 と書いてあるが嘘）。",
+      "note": "抽選販売の一次情報そのもの。/lottery/ や /lotterysales/ は404で、正しくはジャンル配下の https://p-bandai.jp/hobby/lotterysales/ （ホビーオンラインショップ＞抽選販売）。/chara/lotterysales/ も200だがバナーだけで商品リストが無い。1件は <div class=\"article_area\"> … <ul class=\"icon\"><li><img alt=\"抽選販売\"></li></ul> … <p class=\"article_title\"><a href=\"/item/item-1000224338/\">【抽選販売】…</a></p>。ページに日付が無いので pubDate は空（呼び出し側が現在時刻を入れる）。文字コードは Shift_JIS（Content-Type ヘッダが charset=Shift_JIS。metaタグは UTF-8 と書いてあるが嘘）。【2026-09-08 実測・「サイト構造が変わった可能性」警告の原因判明】セレクタは全く壊れていない。HTTP 200・article_area は 16 ブロック取れており、itemPattern / linkPattern / titlePattern はそのまま一致する。0件になるのは titleFilter の側で、この日の掲載16件が『【抽選販売】ＭＧ 1/100 RX78FRGMT GUNDAM』『【抽選販売】30MS …』のようなガンプラ・30MSばかりでカード商品が1件も無かったため（全1ページ・16件で全部）。/hobby/ はガンプラ／フィギュアのジャンルで、カード商品はプレミアムバンダイでは /carddas/ 配下（→ 別エントリ p-bandai-carddas）に置かれる。したがってこのページが0件なのは異常ではなく、カードの抽選が hobby ジャンルに出た時だけ拾う保険。／ expectEmpty:true にしている理由: 毎日「構造が変わった可能性」が出ると本物の構造変更を見逃す。再検証は `curl -A 'Mozilla/5.0 (compatible; TCGNewsBot/1.0)' https://p-bandai.jp/hobby/lotterysales/ | iconv -f CP932 -t UTF-8 | grep -c 'class=\"article_area\"'` が0になったら本当に壊れている（2026-09-08 は 16）。",
       "titleFilter": "カードゲーム|カードダス|トレーディングカード|トレカ|カードコレクション|カードパック|カードバインダー|バトルスピリッツ|バトスピ|デジモンカード|アイカツ|遊戯王|ポケモンカード|ワンピースカード|フュージョンワールド|TCG|カードスリーブ|カードローダー|プレミアムカード",
+      "deadlinePattern": "TimerEnd\"\\s+value=\"([^\"]+)\"",
+      "expectEmpty": true
+    },
+    {
+      "id": "p-bandai-carddas",
+      "name": "プレミアムバンダイ カードダス 新着",
+      "url": "https://p-bandai.jp/carddas/list-da10-n0/",
+      "baseUrl": "https://p-bandai.jp",
+      "ips": [
+        "lottery"
+      ],
+      "weight": 1.45,
+      "enabled": true,
+      "type": "html",
+      "charset": "shift_jis",
+      "itemPattern": "<div class=\"article_area\">([\\s\\S]*?)<!-- / article_area -->",
+      "linkPattern": "<p class=\"article_title\"><a href=\"([^\"]+)\"",
+      "titlePattern": "<p class=\"article_title\"><a[^>]*>([\\s\\S]*?)</a>",
+      "note": "【2026-09-08 追加・p-bandai-lotterysales が0件だった穴を埋めるエントリ】プレミアムバンダイのカード専門ショップ「カードダス」の商品一覧（新着順）。/hobby/lotterysales/ がガンプラしか載せないのに対し、こちらはカード商品しか載らない。/carddas/lotterysales/ は404なのでショップ全体の一覧 list-da10-n0 を使う（トップ /carddas/ は特集バナー主体で商品が7件しか出ない）。HTMLの作りは /hobby/lotterysales/ と同一（article_area / article_title）なので同じセレクタで取れる。実測20件・うち12件が【抽選販売】で、ONE PIECEカードゲーム・UNION ARENA・ガンダムカードゲーム・デジモンカードゲーム・ドラゴンボールスーパーカードゲームが並ぶ。商品名は一覧上で切られない（p-bandai-new / p-bandai-deadline の itemslist_name は20字で切れるが、ここは全文）ので IP 判定の精度が高い。titleFilter は付けない（このショップは全件カード商品のため）。ips は lottery だけにしてあり、実際のIPは collect.js がタイトルから補う。ページに日付が無いので pubDate は空（呼び出し側が現在時刻を入れる）。TimerEnd はこの一覧には出ない（締切は p-bandai-deadline 側で取る）が、出た場合に備えて deadlinePattern は残す。robots.txt の Disallow は /mypage/ /order_info/ /newregist/ /enquete/ /search/ /search_bst/ /mobile/... /inbound_auth/ /access/ のみで /carddas/ は対象外、AIクローラ拒否も Crawl-delay も無い（2026-09-08 実測）。",
       "deadlinePattern": "TimerEnd\"\\s+value=\"([^\"]+)\""
     },
     {

@@ -16,6 +16,8 @@ import {
   IP_ORDER,
   LOTTERY_TAGS,
   PAGE_SIZE,
+  STALE_HOURS,
+  freshnessLevel,
   SHOPS_URL,
   SHOPS_CONFIG,
 } from './config.js';
@@ -82,6 +84,8 @@ const el = {
   skeleton: $('skeleton'),
   cards: $('cards'),
   empty: $('empty'),
+  emptyText: $('emptyText'),
+  btnEmptyClear: $('btnEmptyClear'),
   btnMore: $('btnMore'),
 
   errorBox: $('errorBox'),
@@ -151,6 +155,8 @@ const state = {
   items: [],
   /** @type {Set<string>} 選択中のIPキー */
   selectedIps: new Set(),
+  /** @type {{visible:Map<string,number>, total:Map<string,number>}|null} ジャンル別の件数 */
+  ipCounts: null,
   lotteryOnly: false,
   /** 'latest'（既定） | 'deadline' */
   sortMode: 'latest',
@@ -331,6 +337,59 @@ function buildDeadlineBadge(item) {
   span.className = `dl dl--${b.state}`;
   span.textContent = b.text;
   if (item.deadline) span.title = `締切 ${formatShortDateTime(item.deadline)}`;
+  return span;
+}
+
+/* ---------------------------------------------------------------
+   情報の鮮度（いつ時点の情報か）
+
+   店の商品ページは中身が変わる。実際に、店が購入制限を 6BOX → 4BOX に
+   変えたのに、こちらは 6BOX のまま出していたことがある。
+   店由来の項目は「取得してから何時間たったか」を必ず添え、
+   一定時間を過ぎたものは押す前に注意できるようにする。
+   ニュース記事は publishedAt が「書かれた日」なので、この扱いはしない。
+   --------------------------------------------------------------- */
+
+/**
+ * 店由来の項目の鮮度。対象外なら null。
+ * @param {any} item
+ * @param {Date} [now]
+ * @returns {{level:'fresh'|'aging'|'stale', hours:number, text:string, note:string}|null}
+ */
+export function freshness(item, now = new Date()) {
+  if (!item || item.tier !== 'shop') return null;
+  const t = Date.parse(item.publishedAt);
+  if (!Number.isFinite(t)) return null;
+
+  const nowMs = now instanceof Date ? now.getTime() : Number(now) || Date.now();
+  const hours = (nowMs - t) / HOUR_MS;
+  // 時計ズレなどで未来になっている場合は「取得したて」と同じ扱い
+  const level = freshnessLevel(hours);
+  const rel = formatRelative(item.publishedAt, now) || 'たった今';
+  const asOf = `${formatDateTime(item.publishedAt)} 時点の店の情報です`;
+
+  return {
+    level,
+    hours,
+    text: level === 'fresh' ? `${rel}に取得` : `${rel}の情報`,
+    note:
+      level === 'stale'
+        ? `${asOf}。購入制限や在庫が変わっている可能性があります。押す前に店のページで確認してください`
+        : asOf,
+  };
+}
+
+/**
+ * 取得から時間がたった店の情報につける注意バッジ。
+ * 新しいうちは出さない（毎回出ると読み飛ばされ、肝心なときに効かなくなる）。
+ */
+function buildFreshnessBadge(item, now = new Date()) {
+  const f = freshness(item, now);
+  if (!f || f.level !== 'stale') return null;
+  const span = document.createElement('span');
+  span.className = 'dl dl--stale';
+  span.textContent = `${f.text}・要確認`;
+  span.title = f.note;
   return span;
 }
 
@@ -562,9 +621,26 @@ function renderAll() {
 
 function renderHeader() {
   const gen = state.feed && state.feed.generatedAt;
-  const label = gen ? `最終更新 ${formatDateTime(gen)}` : '最終更新 —';
+  const t = Date.parse(gen);
+  const ageMs = Number.isFinite(t) ? Date.now() - t : NaN;
+  const stale = Number.isFinite(ageMs) && ageMs >= STALE_HOURS * HOUR_MS;
+
+  // 日時だけだと「それが古いのか」が分からないので、経過時間も添える。
+  // ヘッダーは幅が狭く、長いと右端で切れて肝心の警告が消えるため、
+  // 古いときは日時を落として「いつの情報か」と警告だけを残す（日時は title に）。
+  const age = gen ? formatRelative(gen) : '';
+  const label = !gen
+    ? '最終更新 —'
+    : stale
+      ? `最終更新 ${age} · 情報が古い可能性`
+      : `最終更新 ${formatDateTime(gen)}${age ? `（${age}）` : ''}`;
   const suffix = state.origin === 'cache' ? '（保存済み）' : state.origin === 'sample' ? '（サンプル）' : '';
+
   el.hdrUpdated.textContent = label + suffix;
+  el.hdrUpdated.classList.toggle('is-stale', stale);
+  el.hdrUpdated.title = stale
+    ? `${formatDateTime(gen)} に取得。時間がたっています。右上の更新ボタンで取り直せます`
+    : '';
 }
 
 function renderFooter() {
@@ -616,6 +692,8 @@ function buildRankCard(item, rank) {
   if (dl) head.appendChild(dl);
   const st = buildStartsBadge(item);
   if (st) head.appendChild(st);
+  const stale = buildFreshnessBadge(item);
+  if (stale) head.appendChild(stale);
 
   for (const label of ipLabels(item.ips).slice(0, 2)) {
     const badge = document.createElement('span');
@@ -635,7 +713,8 @@ function buildRankCard(item, rank) {
   meta.className = 'rank-card__meta';
   meta.appendChild(textSpan(item.sourceName || '出典不明'));
   meta.appendChild(sep());
-  meta.appendChild(textSpan(formatRelative(item.publishedAt)));
+  const rankFresh = freshness(item);
+  meta.appendChild(textSpan(rankFresh ? rankFresh.text : formatRelative(item.publishedAt)));
 
   card.append(head, title, meta);
 
@@ -663,16 +742,29 @@ function attachCardTap(root, item) {
 }
 
 /* ---------- フィルタチップ ---------- */
-function renderChips() {
-  // フィードに実際に含まれるIPだけを出す（全部無い場合は定義順すべて）
-  const present = new Set();
-  for (const item of state.items) {
-    for (const ip of item.ips || []) present.add(ip);
-  }
-  const keys = IP_ORDER.filter((k) => present.has(k));
-  const list = keys.length ? keys : IP_ORDER;
 
-  el.ipChips.replaceChildren(...list.map((key) => {
+/**
+ * 生成済みのチップ要素。key -> { btn, count }
+ *
+ * チップは毎回作り直さず、件数と状態だけ書き換える。
+ * 作り直すと横スクロールの位置が先頭に戻ってしまい、
+ * 「押した拍子に見ていた場所が飛ぶ」ことになるため。
+ */
+const chipEls = new Map();
+
+/**
+ * ジャンルのチップを描く。
+ *
+ * ここは以前「フィードに含まれるジャンルだけ」を出していた。
+ * その結果「今日はドラゴンボールの記事が無い」だけでバッジ自体が消え、
+ * 利用者からは機能が壊れたように見えていた。
+ * いまは全17ジャンル（CONTRACT.md の対象IP）を常に出し、
+ * 0件は淡色＋件数「0」で「今は情報が無いだけ」と分かるようにしている。
+ */
+function renderChips() {
+  chipEls.clear();
+
+  el.ipChips.replaceChildren(...IP_ORDER.map((key) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'chip';
@@ -682,22 +774,104 @@ function renderChips() {
 
     const dot = document.createElement('span');
     dot.className = 'chip__dot';
-    btn.appendChild(dot);
-    btn.appendChild(document.createTextNode(IP_LABELS[key] || key));
+    const label = document.createElement('span');
+    label.className = 'chip__label';
+    label.textContent = IP_LABELS[key] || key;
+    const count = document.createElement('span');
+    count.className = 'chip__count';
+    count.textContent = '0';
+    btn.append(dot, label, count);
 
     btn.addEventListener('click', () => {
+      // 0件のチップは押しても一覧が空になるだけなので、選択させず理由を出す。
+      // 「押したのに何も出ない」という行き止まりを作らないため。
+      if (!state.selectedIps.has(key) && ipCount(key).visible === 0) {
+        toast(emptyChipMessage(key));
+        return;
+      }
       if (state.selectedIps.has(key)) state.selectedIps.delete(key);
       else state.selectedIps.add(key);
-      btn.setAttribute('aria-pressed', String(state.selectedIps.has(key)));
       state.visibleCount = PAGE_SIZE;
       saveFilters();
       renderFilterDependent();
     });
 
+    chipEls.set(key, { btn, count });
     return btn;
   }));
 
+  updateChips();
+
   updateClearButton();
+}
+
+/**
+ * 各ジャンルの件数を数える。
+ *   visible … いまの絞り込み（抽選・予約のみ / 終了分）で実際に出る件数＝チップに出す数
+ *   total   … その絞り込みを外したときの件数＝0件の理由を説明するための数
+ * ジャンルの選択自体は数えない。チップは足し算なので、他を選んでも件数は減らないため。
+ */
+function countIps() {
+  const now = new Date();
+  const visible = new Map();
+  const total = new Map();
+  for (const item of state.items) {
+    const ok = passesNonIpFilters(item, now);
+    for (const ip of item.ips || []) {
+      total.set(ip, (total.get(ip) || 0) + 1);
+      if (ok) visible.set(ip, (visible.get(ip) || 0) + 1);
+    }
+  }
+  return { visible, total };
+}
+
+/** そのジャンルの件数（updateChips で数えた最新の値） */
+function ipCount(key) {
+  const c = state.ipCounts;
+  return {
+    visible: (c && c.visible.get(key)) || 0,
+    total: (c && c.total.get(key)) || 0,
+  };
+}
+
+/** 0件のチップを押したときの説明。行き止まりにしないための文言 */
+function emptyChipMessage(key) {
+  const label = IP_LABELS[key] || key;
+  const { total } = ipCount(key);
+  if (total > 0) {
+    const why = state.lotteryOnly ? '「抽選・予約のみ」' : '「終了分を隠す」設定';
+    return `${label}は${why}のため0件です。外すと${total}件あります`;
+  }
+  return `${label}は今回の更新に情報がありません`;
+}
+
+/** チップの件数・押せるかどうかを更新する（要素は作り直さない） */
+function updateChips() {
+  if (!chipEls.size) return;
+  const counts = countIps();
+  state.ipCounts = counts;
+
+  for (const [key, refs] of chipEls) {
+    const label = IP_LABELS[key] || key;
+    const n = counts.visible.get(key) || 0;
+    const total = counts.total.get(key) || 0;
+    const selected = state.selectedIps.has(key);
+
+    refs.count.textContent = String(n);
+    refs.btn.setAttribute('aria-pressed', String(selected));
+
+    // 0件でもチップは消さない（消えると「壊れた」ように見える）。
+    // 淡色＋件数0で状態を示し、押しても選択はさせない。
+    const empty = n === 0 && !selected;
+    refs.btn.classList.toggle('is-empty', empty);
+    if (empty) refs.btn.setAttribute('aria-disabled', 'true');
+    else refs.btn.removeAttribute('aria-disabled');
+
+    refs.btn.setAttribute('aria-label', `${label} ${n}件`);
+    refs.btn.title = empty
+      ? (total > 0 ? `${label}: いまの絞り込みでは0件（外すと${total}件）` : `${label}: 今回の更新には情報がありません`)
+      : `${label} ${n}件`;
+  }
 }
 
 function updateClearButton() {
@@ -705,6 +879,18 @@ function updateClearButton() {
 }
 
 /* ---------- カード一覧 ---------- */
+
+/** ジャンル以外の絞り込み（抽選・予約のみ / 終了分を隠す）を通るか */
+function passesNonIpFilters(item, now = new Date()) {
+  if (state.lotteryOnly) {
+    const tags = item.intentTags || [];
+    if (!tags.some((t) => LOTTERY_TAGS.includes(t))) return false;
+  }
+  // 締切切れは既定で非表示（「終了分も表示」でオンにできる）
+  if (!state.showExpired && isExpired(item, now)) return false;
+  return true;
+}
+
 function filteredItems() {
   const now = new Date();
   const list = state.items.filter((item) => {
@@ -712,13 +898,7 @@ function filteredItems() {
       const ips = item.ips || [];
       if (!ips.some((ip) => state.selectedIps.has(ip))) return false;
     }
-    if (state.lotteryOnly) {
-      const tags = item.intentTags || [];
-      if (!tags.some((t) => LOTTERY_TAGS.includes(t))) return false;
-    }
-    // 締切切れは既定で非表示（「終了分も表示」でオンにできる）
-    if (!state.showExpired && isExpired(item, now)) return false;
-    return true;
+    return passesNonIpFilters(item, now);
   });
 
   if (state.sortMode === 'deadline') {
@@ -792,6 +972,18 @@ function applicableItems() {
 function renderApply() {
   const list = applicableItems();
   if (!list.length) {
+    // 絞り込みの結果0件になった場合は、黙って消さずに理由を伝える。
+    // セクションごと消すと、古い件数表示が残って矛盾して見えるうえ、
+    // 利用者は「壊れた」のか「該当が無い」のか区別できない。
+    if (state.selectedIps.size) {
+      el.secApply.hidden = false;
+      el.applyCount.textContent = '絞り込み中 · 0件';
+      const p = document.createElement('p');
+      p.className = 'empty';
+      p.textContent = '選んだジャンルに、いま応募できるものはありません。';
+      el.applyList.replaceChildren(p);
+      return;
+    }
     el.secApply.hidden = true;
     el.applyList.replaceChildren();
     return;
@@ -825,6 +1017,7 @@ function renderCards() {
   el.cards.replaceChildren(...shown.map(buildCard));
   el.cards.hidden = shown.length === 0;
   el.empty.hidden = list.length !== 0;
+  if (list.length === 0) renderEmptyState();
   el.btnMore.hidden = list.length <= state.visibleCount;
 
   const remaining = list.length - shown.length;
@@ -836,7 +1029,49 @@ function renderCards() {
     ? `${state.items.length}件`
     : `${list.length} / ${state.items.length}件`;
 
+  // チップの件数は「抽選・予約のみ」「終了分」の切り替えでも変わるので、
+  // 一覧を描き直すたびに合わせて更新する。
+  updateChips();
   updateClearButton();
+}
+
+/**
+ * 0件のときの表示。
+ * 「該当する情報がありません」で終わると行き止まりになるので、
+ * 絞り込みが原因なら、そう書いたうえで解除ボタンを出す。
+ */
+function renderEmptyState() {
+  const filtering = state.selectedIps.size > 0 || state.lotteryOnly || !state.showExpired;
+  if (state.selectedIps.size) {
+    const names = [...state.selectedIps].map((k) => IP_LABELS[k] || k).join('・');
+    el.emptyText.textContent = `${names}は、いまの条件では0件です`;
+  } else if (state.lotteryOnly) {
+    el.emptyText.textContent = '「抽選・予約のみ」に当てはまる情報がありません';
+  } else if (!state.showExpired) {
+    el.emptyText.textContent = '受付中の情報がありません（終了分は隠れています）';
+  } else {
+    el.emptyText.textContent = '該当する情報がありません';
+  }
+  el.btnEmptyClear.hidden = !filtering;
+  el.btnEmptyClear.textContent = state.showExpired || state.selectedIps.size || state.lotteryOnly
+    ? '絞り込みを解除する'
+    : '終了分も表示する';
+}
+
+/** 絞り込みを全部外す（チップの「クリア」と0件表示のボタンで共有） */
+function clearAllFilters({ showExpired = false } = {}) {
+  state.selectedIps.clear();
+  state.lotteryOnly = false;
+  el.lotteryOnly.checked = false;
+  if (showExpired) {
+    state.showExpired = true;
+    el.showExpired.checked = true;
+  }
+  state.visibleCount = PAGE_SIZE;
+  saveFilters();
+  // チップは作り直さない（横スクロール位置が戻ってしまうため）。
+  // 押された状態と件数の更新は renderCards → updateChips が行う。
+  renderFilterDependent();
 }
 
 function buildCard(item) {
@@ -863,6 +1098,10 @@ function buildCard(item) {
     entry.title = '商品ページへ直接飛べないため、お店の入口を案内しています';
     tags.appendChild(entry);
   }
+
+  // 取得から時間がたった店の情報。押す前に「変わっているかも」と分かるようにする
+  const stale = buildFreshnessBadge(item);
+  if (stale) tags.appendChild(stale);
 
   if (item.isRanked && item.rank) {
     const medal = document.createElement('span');
@@ -915,8 +1154,17 @@ function buildCard(item) {
   src.textContent = item.sourceName || '出典不明';
   const time = document.createElement('span');
   time.className = 'card__time';
-  time.textContent = formatRelative(item.publishedAt);
-  time.title = formatDateTime(item.publishedAt);
+  // 店の情報は「記事の日付」ではなく「いつ取得したか」。
+  // 同じ見た目で意味だけ違うと誤読されるので、文言で言い分ける。
+  const fresh = freshness(item);
+  if (fresh) {
+    time.classList.add(`card__time--${fresh.level}`);
+    time.textContent = fresh.text;
+    time.title = fresh.note;
+  } else {
+    time.textContent = formatRelative(item.publishedAt);
+    time.title = formatDateTime(item.publishedAt);
+  }
   meta.append(src, sep(), time);
 
   foot.appendChild(meta);
@@ -1977,14 +2225,12 @@ function init() {
   el.sortLatest.addEventListener('click', () => setSortMode('latest'));
   el.sortDeadline.addEventListener('click', () => setSortMode('deadline'));
 
-  el.btnClearFilters.addEventListener('click', () => {
-    state.selectedIps.clear();
-    state.lotteryOnly = false;
-    el.lotteryOnly.checked = false;
-    state.visibleCount = PAGE_SIZE;
-    saveFilters();
-    renderChips();
-    renderFilterDependent();
+  el.btnClearFilters.addEventListener('click', () => clearAllFilters());
+
+  // 0件表示からの戻り道。絞り込みが「終了分を隠す」だけなら、それを外す
+  el.btnEmptyClear.addEventListener('click', () => {
+    const onlyExpiredHidden = !state.selectedIps.size && !state.lotteryOnly && !state.showExpired;
+    clearAllFilters({ showExpired: onlyExpiredHidden });
   });
 
   setupPullToRefresh();

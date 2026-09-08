@@ -525,7 +525,13 @@ export async function fetchOfficialItems(config, opts = {}) {
 
     const entries = Array.isArray(r.value) ? r.value : [];
     if (entries.length === 0) {
-      console.warn(`[official] 取得0件 ${site.id} (${site.url}) — サイト構造が変わった可能性`);
+      // 対象商品が無い日が普通にあるサイトは警告しない。
+      // 毎日warnが出ると、本物の構造変更を見逃すようになる。
+      if (site.expectEmpty) {
+        if (verbose) console.log(`[official] ${site.id}: 対象0件（このサイトでは正常）`);
+      } else {
+        console.warn(`[official] 取得0件 ${site.id} (${site.url}) — サイト構造が変わった可能性`);
+      }
       continue;
     }
 

@@ -18,6 +18,13 @@ export const FEED_VERSION = 1;
 export const SUMMARY_MAX = 200;
 
 /**
+ * 「今日締切」とみなす時間。
+ * この時間内に締切を迎える受付中の案件は、他の何よりも優先して枠を確保する。
+ * ここを削ると「間に合わせる」というアプリの目的そのものが崩れる。
+ */
+export const URGENT_KEEP_HOURS = 24;
+
+/**
  * 情報の出所種別を判定する。
  *  - sourceId が `x-` で始まる                       -> 'x'
  *  - sourceName に「公式」を含む / sourceId が `official-` で始まる -> 'official'
@@ -110,59 +117,130 @@ export function isHttpUrl(v) {
  * 利用者から見ると「自分の推しの情報が無いアプリ」になるため、
  * まず各IPの最新 minPerIp 件を確保し、残り枠を全体の新しい順で埋める。
  *
+ * 選ぶ順番（先に入れたものが必ず残る）:
+ *   0. 24時間以内に締切を迎える受付中の案件 … このアプリの存在意義。無条件で確保
+ *   1. 各ジャンル1件 … ジャンルが丸ごと消えるのを防ぐ。可能なら締切付きの案件を充てる
+ *   2. 残りの受付中案件（締切が近い順）
+ *   3. 各ジャンル minPerIp 件まで
+ *   4. 残り枠を全体の新しい順で
+ * 1件確保に使う枠は最大でもジャンル数（17）なので、締切案件の枠を大きく削らない。
+ *
  * @param {Array<object>} all       publishedAt 降順に並んだ全件
  * @param {Array<object>} base      単純に上位を切ったもの（最低限これを尊重する）
- * @param {{maxItems:number, minPerIp:number}} opts
+ * @param {{maxItems:number, minPerIp:number, mustKeep?:Array<object>, perSourceCap?:number, now?:Date|number}} opts
  * @returns {Array<object>} publishedAt 降順
  */
-export function ensureIpCoverage(all, base, { maxItems = 50, minPerIp = 4, mustKeep = [] } = {}) {
+export function ensureIpCoverage(all, base, {
+  maxItems = 50,
+  minPerIp = 4,
+  mustKeep = [],
+  perSourceCap = 0,
+  now = Date.now(),
+} = {}) {
   const list = Array.isArray(all) ? all : [];
   const cap = Math.max(0, maxItems);
   if (list.length <= cap) return list.slice();
 
+  const nowMs = now instanceof Date ? now.getTime() : Number(now) || Date.now();
   const picked = new Map();
-  const add = (it) => {
-    if (it && !picked.has(it.id)) picked.set(it.id, it);
+
+  // 1つの情報源が枠を占領しないための実測カウンタ。
+  // ただし「今日締切」と「ジャンル1件確保」だけは、この上限より優先する
+  // （その情報源にしか無いジャンルを、上限のせいで丸ごと落とさないため）。
+  const limit = perSourceCap > 0 ? perSourceCap : Infinity;
+  const usedBySource = new Map();
+  const sourceOf = (it) => (it && typeof it.sourceName === 'string' ? it.sourceName : '');
+  const sourceIsFull = (it) => (usedBySource.get(sourceOf(it)) || 0) >= limit;
+
+  /**
+   * @param {object} it
+   * @param {{ignoreSourceCap?:boolean}} [o]
+   * @returns {boolean} 実際に追加したら true
+   */
+  const add = (it, o = {}) => {
+    if (!it || picked.has(it.id)) return false;
+    if (picked.size >= cap) return false;
+    if (!o.ignoreSourceCap && sourceIsFull(it)) return false;
+    picked.set(it.id, it);
+    const key = sourceOf(it);
+    usedBySource.set(key, (usedBySource.get(key) || 0) + 1);
+    return true;
   };
 
-  // 0) 受付中の抽選（締切あり）を最優先で確保する。
-  //    締切が近い順に入れるので、枠が足りなくても急ぎのものから残る。
+  const ipsOf = (it) => (Array.isArray(it?.ips) ? it.ips : []).filter((ip) => ip !== 'lottery');
+
+  // 受付中の案件（締切が近い順）
   const keep = (Array.isArray(mustKeep) ? mustKeep : [])
     .slice()
     .sort((a, b) => (Date.parse(a.deadline) || 0) - (Date.parse(b.deadline) || 0));
+
+  // 0) 24時間以内が締切のものは無条件で確保する。
+  //    「間に合わせること」が目的なので、ここだけは他の都合より優先する。
+  const urgentUntil = nowMs + URGENT_KEEP_HOURS * 3600 * 1000;
+  for (const it of keep) {
+    const dl = Date.parse(it && it.deadline);
+    if (!Number.isFinite(dl) || dl > urgentUntil) continue;
+    add(it, { ignoreSourceCap: true });
+  }
+
+  if (minPerIp <= 0) {
+    for (const it of keep) add(it);
+    for (const it of list) {
+      if (picked.size >= cap) break;
+      add(it);
+    }
+    if (picked.size < cap) for (const it of list) { if (picked.size >= cap) break; add(it, { ignoreSourceCap: true }); }
+    return sortByPublished([...picked.values()].slice(0, cap));
+  }
+
+  // 1) 各ジャンル最低1件。ジャンルが丸ごと消えると「壊れている」ように見える。
+  //    代表は「締切がある受付中のもの」を優先し、無ければそのジャンルの最新記事。
+  const rep = new Map();
+  for (const it of picked.values()) {
+    for (const ip of ipsOf(it)) if (!rep.has(ip)) rep.set(ip, it);
+  }
+  for (const source of [keep, list]) {
+    for (const it of source) {
+      for (const ip of ipsOf(it)) if (!rep.has(ip)) rep.set(ip, it);
+    }
+  }
+  for (const it of rep.values()) add(it, { ignoreSourceCap: true });
+
+  // 2) 残りの受付中案件（締切が近い順）
   for (const it of keep) {
     if (picked.size >= cap) break;
     add(it);
   }
 
-  if (minPerIp <= 0) {
-    for (const it of list) {
-      if (picked.size >= cap) break;
-      add(it);
-    }
-    return sortByPublished([...picked.values()].slice(0, cap));
-  }
-
-  // 1) 各IPの最新 minPerIp 件を確保する（lottery は横断タグなので対象外）
+  // 3) 各ジャンル minPerIp 件まで
   const perIp = new Map();
+  for (const it of picked.values()) {
+    for (const ip of ipsOf(it)) perIp.set(ip, (perIp.get(ip) || 0) + 1);
+  }
   for (const it of list) {
-    for (const ip of Array.isArray(it.ips) ? it.ips : []) {
-      if (ip === 'lottery') continue;
-      const n = perIp.get(ip) || 0;
-      if (n >= minPerIp) continue;
-      perIp.set(ip, n + 1);
-      add(it);
-    }
     if (picked.size >= cap) break;
+    if (!ipsOf(it).some((ip) => (perIp.get(ip) || 0) < minPerIp)) continue;
+    if (add(it)) {
+      for (const ip of ipsOf(it)) perIp.set(ip, (perIp.get(ip) || 0) + 1);
+    }
   }
 
-  // 2) 残り枠を全体の新しい順で埋める
+  // 4) 残り枠を全体の新しい順で埋める
   for (const it of list) {
     if (picked.size >= cap) break;
     add(it);
   }
 
-  // 3) 確保のために入れた古い記事があるので、最後に必ず新しい順へ戻す
+  // 5) 情報源の上限で埋めきれなかった分は、上限を外して補う。
+  //    件数が減るくらいなら同じ情報源から足すほうがましなので、最後の手段として。
+  if (picked.size < cap) {
+    for (const it of list) {
+      if (picked.size >= cap) break;
+      add(it, { ignoreSourceCap: true });
+    }
+  }
+
+  // 6) 確保のために入れた古い記事があるので、最後に必ず新しい順へ戻す
   return sortByPublished([...picked.values()].slice(0, cap));
 }
 
@@ -282,6 +360,8 @@ export function buildFeedJson({ ranked = [], top = [], tweetUrl = null, now = ne
     maxItems,
     minPerIp,
     mustKeep: openNow,
+    perSourceCap,
+    now: nowMs,
   });
 
   // ranking.top: rank 昇順

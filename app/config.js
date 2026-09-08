@@ -29,6 +29,7 @@ export const IP_LABELS = {
   carddass: 'カードダス',
   vanguard: 'ヴァンガード',
   weiss: 'ヴァイス',
+  unionarena: 'ユニアリ',
   lottery: '抽選',
 };
 
@@ -49,6 +50,7 @@ export const IP_ORDER = [
   'carddass',
   'vanguard',
   'weiss',
+  'unionarena',
   'lottery',
 ];
 
@@ -57,6 +59,36 @@ export const LOTTERY_TAGS = ['抽選', '予約', '受付', '再販'];
 
 /** 1回に表示する件数 */
 export const PAGE_SIZE = 10;
+
+/* --------------------------------------------------------------------------
+   情報の鮮度
+
+   店の商品ページは中身が変わる（購入制限 6BOX → 4BOX のような変更が実際にあった）。
+   取得してから時間が経ったものは「いつ時点の情報か」を画面に出し、
+   古いものは注意を促す。ニュース記事は「書かれた日」がそのまま意味を持つので対象外。
+   -------------------------------------------------------------------------- */
+
+/** これを過ぎたら取得時刻を明示する（時間） */
+export const FRESH_HOURS = 6;
+
+/** これを過ぎたら「変わっているかも」と警告する（時間） */
+export const STALE_HOURS = 24;
+
+/**
+ * 取得からの経過時間を3段階に分ける。
+ *   fresh … 取れたて。時刻は添えるが警告はしない
+ *   aging … 少し前の情報。取得時刻を明示する
+ *   stale … 古い。押す前に注意を促す
+ * 時計ズレで負の値になっても fresh 扱いにする（未来の警告は意味がない）。
+ * @param {number} hours 取得からの経過時間
+ * @returns {'fresh'|'aging'|'stale'}
+ */
+export function freshnessLevel(hours) {
+  const h = Number.isFinite(hours) ? hours : 0;
+  if (h >= STALE_HOURS) return 'stale';
+  if (h >= FRESH_HOURS) return 'aging';
+  return 'fresh';
+}
 
 /* ==========================================================================
    ショップ登録チェックリストの店一覧
