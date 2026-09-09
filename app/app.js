@@ -5,6 +5,7 @@
 
 import {
   FEED_URL,
+  FEED_URLS,
   FALLBACK_FEED_URL,
   APP_NAME,
   APP_VERSION,
@@ -571,7 +572,7 @@ function normalizeFeed(raw) {
 }
 
 /**
- * FEED_URL → FALLBACK_FEED_URL → localStorage の順にフォールバック。
+ * FEED_URLS を上から順に試し、全部だめなら localStorage の保存分を使う。
  * 成功時は localStorage に保存する。
  */
 async function loadFeed({ silent = false } = {}) {
@@ -586,7 +587,9 @@ async function loadFeed({ silent = false } = {}) {
 
   const errors = [];
 
-  for (const [url, origin] of [[FEED_URL, 'network'], [FALLBACK_FEED_URL, 'sample']]) {
+  const sources = (Array.isArray(FEED_URLS) && FEED_URLS.length ? FEED_URLS : [FEED_URL, FALLBACK_FEED_URL])
+    .map((url) => [url, /sample/.test(url) ? 'sample' : 'network']);
+  for (const [url, origin] of sources) {
     try {
       const feed = normalizeFeed(await fetchJson(url));
       applyFeed(feed, origin);

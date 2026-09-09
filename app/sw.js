@@ -1,11 +1,11 @@
 /* ==========================================================================
    TCGウォッチ — Service Worker
    - アプリシェル: cache-first
-   - feed.json    : stale-while-revalidate
+   - feed.json    : network-first（3秒で諦めてキャッシュ）
    - その他       : network-first（失敗時キャッシュ）
    ========================================================================== */
 
-const VERSION = 'v2';
+const VERSION = 'v3';
 const CACHE_NAME = `tcg-watch-${VERSION}`;
 const RUNTIME_CACHE = `tcg-watch-runtime-${VERSION}`;
 
@@ -88,7 +88,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (isFeedRequest(url)) {
-    event.respondWith(staleWhileRevalidate(req));
+    event.respondWith(feedNetworkFirst(req));
     return;
   }
 
@@ -126,22 +126,40 @@ async function handleNavigate(event) {
   }
 }
 
-/** feed.json 用: キャッシュを即返しつつ裏で更新 */
-async function staleWhileRevalidate(req) {
+/**
+ * feed.json 用: **必ず先に通信を試す。**
+ *
+ * 以前はキャッシュを即返して裏で更新していた（stale-while-revalidate）。
+ * 速いが、開いた直後に見えるのは前回のデータになる。
+ * 「あと2時間で締切」が実は昨日の話だった、という事故を起こす作りであり、
+ * このアプリが存在する理由そのものと矛盾するので、鮮度を優先する形に変えた。
+ *
+ * ただし通信が遅い場所で待たせ続けるのも困るので、3秒で諦めてキャッシュを出す。
+ * 出したデータがいつのものかは、画面上部の「最終更新」で分かる。
+ */
+const FEED_NETWORK_TIMEOUT_MS = 3000;
+
+async function feedNetworkFirst(req) {
   const cache = await caches.open(RUNTIME_CACHE);
-  const cached = await cache.match(req, { ignoreSearch: true });
 
   const network = fetch(req)
     .then((res) => {
       if (res && res.ok) cache.put(req, res.clone()).catch(() => {});
-      return res;
+      return res && res.ok ? res : null;
     })
     .catch(() => null);
 
+  const timeout = new Promise((resolve) => setTimeout(() => resolve(null), FEED_NETWORK_TIMEOUT_MS));
+  const fresh = await Promise.race([network, timeout]);
+  if (fresh) return fresh;
+
+  const cached = await cache.match(req, { ignoreSearch: true });
   if (cached) return cached;
 
-  const fresh = await network;
-  if (fresh) return fresh;
+  // 時間切れで返せなかっただけかもしれないので、最後にもう一度待つ
+  const late = await network;
+  if (late) return late;
+
   return new Response(JSON.stringify({ error: 'offline' }), {
     status: 503,
     headers: { 'Content-Type': 'application/json; charset=utf-8' },

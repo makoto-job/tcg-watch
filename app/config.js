@@ -1,6 +1,21 @@
 // 公開後、この1行を GitHub Pages などの feed.json のURLに書き換えてください
 export const FEED_URL = './feed.json';
-// ローカル開発時のフォールバック
+
+/**
+ * 上から順に試し、最初に読めたものを使う。
+ *
+ * 2番目がある理由:
+ *   収集プログラムが書き出すのは public/feed.json 1か所だけ。
+ *   本番では Pages が index.html の隣に置き直すので ./feed.json で読める。
+ *   手元で確認するときは置き直しが無いので、収集した本物をそのまま読ませる。
+ *   （以前は app/feed.json に手でコピーする運用だったため、コピーを忘れると
+ *     「更新を押しても古いまま」になっていた。写しを持たない形にして直した）
+ *
+ * 3番目は、一度も収集していない状態でも画面が出るようにするための見本データ。
+ */
+export const FEED_URLS = ['./feed.json', '../public/feed.json', '../public/feed.sample.json'];
+
+// 後方互換（既存の参照用）
 export const FALLBACK_FEED_URL = '../public/feed.sample.json';
 export const APP_NAME = 'TCGウォッチ';
 export const REFRESH_INTERVAL_MS = 10 * 60 * 1000;

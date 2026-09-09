@@ -123,6 +123,49 @@ if ('serviceWorker' in navigator) {
 
 ${configInline}
 ${appInline}
+
+/* --- 単一ファイル版であることを画面に明示する ---
+   この版はデータを中に抱えているので、更新ボタンを押しても中身は変わらない。
+   黙っていると「更新しても古いまま」に見えるだけなので、理由を先に出しておく。 */
+(function () {
+  const stamp = ${JSON.stringify(JSON.parse(feed).generatedAt)};
+  const when = stamp ? new Date(stamp).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '不明';
+
+  function mount() {
+    if (document.getElementById('single-note')) return;
+    const host = document.querySelector('main') || document.body;
+    const note = document.createElement('p');
+    note.id = 'single-note';
+    note.setAttribute('role', 'note');
+    note.style.cssText =
+      'margin:8px 12px;padding:10px 12px;border-radius:10px;font-size:12.5px;line-height:1.6;' +
+      'background:var(--bg-sunken,#f1f2f6);color:var(--text-sub,#555);border:1px dashed var(--border,#ccd);';
+    note.textContent =
+      'この1枚版は ' + when + ' 時点の見本です。中にデータを抱えているため、' +
+      '更新ボタンを押しても新しくなりません。最新の情報は公開版でご覧ください。';
+    host.insertBefore(note, host.firstChild);
+  }
+
+  function arm() {
+    mount();
+    const btn = document.getElementById('btnRefresh');
+    if (btn && !btn.dataset.singleNoted) {
+      btn.dataset.singleNoted = '1';
+      btn.addEventListener('click', () => {
+        const n = document.getElementById('single-note');
+        if (!n) return;
+        n.style.transition = 'background 200ms';
+        const orig = n.style.background;
+        n.style.background = 'var(--warn-bg,#fdf0d5)';
+        n.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        setTimeout(() => { n.style.background = orig; }, 900);
+      }, { capture: true });
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arm);
+  else arm();
+})();
 </script>`;
 
 s = s.replace(/^.*<script type="module" src="\.\/app\.js"><\/script>.*$/gm, bootstrap);
