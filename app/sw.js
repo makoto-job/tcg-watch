@@ -1,11 +1,11 @@
 /* ==========================================================================
    TCGウォッチ — Service Worker
-   - アプリシェル: cache-first
+   - アプリシェル: network-first（3秒で諦めてキャッシュ）
    - feed.json    : network-first（3秒で諦めてキャッシュ）
    - その他       : network-first（失敗時キャッシュ）
    ========================================================================== */
 
-const VERSION = 'v3';
+const VERSION = 'v4';
 const CACHE_NAME = `tcg-watch-${VERSION}`;
 const RUNTIME_CACHE = `tcg-watch-runtime-${VERSION}`;
 
@@ -93,7 +93,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (isAppShell(url)) {
-    event.respondWith(cacheFirst(req));
+    event.respondWith(shellNetworkFirst(req));
     return;
   }
 
@@ -166,21 +166,42 @@ async function feedNetworkFirst(req) {
   });
 }
 
-/** アプリシェル用 */
-async function cacheFirst(req) {
+/**
+ * アプリシェル（app.js / style.css など）用: **先に通信を試す。**
+ *
+ * 以前はキャッシュを即返して裏で更新していた（cache-first）。
+ * 速いが、直したはずの不具合が利用者に届くのが1回分遅れる。
+ *
+ * 実際にそうなった: 「7月に終わった抽選を新着9分前と出す」不具合を直して
+ * 配信したのに、開いた画面は古い app.js のままで、間違った表示が残っていた。
+ * 誤った情報を出さないことが最優先のアプリで、修正が1回遅れて届くのは許容できない。
+ *
+ * feed.json と同じく3秒で諦めてキャッシュに落とすので、
+ * 通信が遅い場所でも待たされ続けず、圏外でも起動する。
+ */
+async function shellNetworkFirst(req) {
   const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(req, { ignoreSearch: true });
-  if (cached) {
-    // 裏で静かに更新しておく
-    fetch(req).then((res) => {
+
+  const network = fetch(req)
+    .then((res) => {
       if (res && res.ok) cache.put(req, res.clone()).catch(() => {});
-    }).catch(() => {});
-    return cached;
-  }
-  const res = await fetch(req);
-  if (res && res.ok) cache.put(req, res.clone()).catch(() => {});
-  return res;
+      return res && res.ok ? res : null;
+    })
+    .catch(() => null);
+
+  const timeout = new Promise((resolve) => setTimeout(() => resolve(null), SHELL_NETWORK_TIMEOUT_MS));
+  const fresh = await Promise.race([network, timeout]);
+  if (fresh) return fresh;
+
+  const cached = await cache.match(req, { ignoreSearch: true });
+  if (cached) return cached;
+
+  const late = await network;
+  if (late) return late;
+  return fetch(req);
 }
+
+const SHELL_NETWORK_TIMEOUT_MS = 3000;
 
 /** その他 */
 async function networkFirst(req) {

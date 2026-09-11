@@ -80,7 +80,7 @@ async function loadSw({ fetchImpl }) {
   sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
   // 末尾で内部関数を取り出せるようにする
-  vm.runInContext(`${src}\n;globalThis.__exports = { feedNetworkFirst, isFeedRequest, cacheFirst, networkFirst };`, sandbox);
+  vm.runInContext(`${src}\n;globalThis.__exports = { feedNetworkFirst, shellNetworkFirst, isFeedRequest, isAppShell, networkFirst };`, sandbox);
   return { ...sandbox.__exports, sandbox, listeners };
 }
 
@@ -100,7 +100,7 @@ test('通信できるときは、キャッシュがあっても新しいほう�
   const req = { url: 'https://example.test/feed.json' };
 
   // 先にキャッシュへ古いものを入れておく
-  const cache = await sandbox.caches.open('tcg-watch-runtime-v3');
+  const cache = await sandbox.caches.open('tcg-watch-runtime-v4');
   await cache.put(req, new FakeResponse('{"generatedAt":"old"}'));
 
   const res = await feedNetworkFirst(req);
@@ -114,7 +114,7 @@ test('通信できたら、そのままキャッシュを新しくする', async
   });
   const req = { url: 'https://example.test/feed.json' };
   await feedNetworkFirst(req);
-  const cache = await sandbox.caches.open('tcg-watch-runtime-v3');
+  const cache = await sandbox.caches.open('tcg-watch-runtime-v4');
   const stored = await cache.match(req);
   assert.ok(stored, 'キャッシュに入っていない');
   assert.equal(await stored.text(), '{"generatedAt":"new"}');
@@ -125,7 +125,7 @@ test('圏外ならキャッシュを返す（画面を真っ白にしない）',
     fetchImpl: async () => { throw new Error('offline'); },
   });
   const req = { url: 'https://example.test/feed.json' };
-  const cache = await sandbox.caches.open('tcg-watch-runtime-v3');
+  const cache = await sandbox.caches.open('tcg-watch-runtime-v4');
   await cache.put(req, new FakeResponse('{"generatedAt":"old"}'));
 
   const res = await feedNetworkFirst(req);
@@ -145,7 +145,7 @@ test('サーバーが404を返したらキャッシュに落とす（404を配�
     fetchImpl: async () => new FakeResponse('not found', { status: 404 }),
   });
   const req = { url: 'https://example.test/feed.json' };
-  const cache = await sandbox.caches.open('tcg-watch-runtime-v3');
+  const cache = await sandbox.caches.open('tcg-watch-runtime-v4');
   await cache.put(req, new FakeResponse('{"generatedAt":"old"}'));
   const res = await feedNetworkFirst(req);
   assert.equal(await res.text(), '{"generatedAt":"old"}');
@@ -157,7 +157,7 @@ test('通信が遅すぎるときは待ち続けずキャッシュを出す', as
     fetchImpl: () => new Promise((resolve) => setTimeout(() => resolve(new FakeResponse('{"generatedAt":"slow"}')), 5000)),
   });
   const req = { url: 'https://example.test/feed.json' };
-  const cache = await sandbox.caches.open('tcg-watch-runtime-v3');
+  const cache = await sandbox.caches.open('tcg-watch-runtime-v4');
   await cache.put(req, new FakeResponse('{"generatedAt":"old"}'));
 
   const started = Date.now();
@@ -166,4 +166,47 @@ test('通信が遅すぎるときは待ち続けずキャッシュを出す', as
 
   assert.equal(await res.text(), '{"generatedAt":"old"}');
   assert.ok(waited < 4500, `待ちすぎている: ${waited}ms`);
+});
+
+/* ------------------------------------------------------------------
+   アプリシェル（app.js など）も通信優先であること。
+   cache-first だったころ、直した不具合が利用者に1回分遅れて届いた。
+   ------------------------------------------------------------------ */
+
+test('アプリシェルは、キャッシュがあっても新しいほうを返す', async () => {
+  const { shellNetworkFirst, sandbox } = await loadSw({
+    fetchImpl: async () => new FakeResponse('// 修正ずみ'),
+  });
+  const req = { url: 'https://example.test/app/app.js' };
+  const cache = await sandbox.caches.open('tcg-watch-v4');
+  await cache.put(req, new FakeResponse('// 古い'));
+
+  const res = await shellNetworkFirst(req);
+  assert.equal(await res.text(), '// 修正ずみ');
+});
+
+test('アプリシェル: 圏外ならキャッシュで起動する', async () => {
+  const { shellNetworkFirst, sandbox } = await loadSw({
+    fetchImpl: async () => { throw new Error('offline'); },
+  });
+  const req = { url: 'https://example.test/app/app.js' };
+  const cache = await sandbox.caches.open('tcg-watch-v4');
+  await cache.put(req, new FakeResponse('// 古い'));
+
+  const res = await shellNetworkFirst(req);
+  assert.equal(await res.text(), '// 古い');
+});
+
+test('アプリシェル: 通信が遅すぎるときは待ち続けずキャッシュで起動する', async () => {
+  const { shellNetworkFirst, sandbox } = await loadSw({
+    fetchImpl: () => new Promise((resolve) => setTimeout(() => resolve(new FakeResponse('// おそい')), 5000)),
+  });
+  const req = { url: 'https://example.test/app/app.js' };
+  const cache = await sandbox.caches.open('tcg-watch-v4');
+  await cache.put(req, new FakeResponse('// 古い'));
+
+  const started = Date.now();
+  const res = await shellNetworkFirst(req);
+  assert.equal(await res.text(), '// 古い');
+  assert.ok(Date.now() - started < 4500);
 });
