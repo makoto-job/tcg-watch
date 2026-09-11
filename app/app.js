@@ -763,7 +763,11 @@ function buildRankCard(item, rank) {
   meta.appendChild(textSpan(item.sourceName || '出典不明'));
   meta.appendChild(sep());
   const rankFresh = freshness(item);
-  meta.appendChild(textSpan(rankFresh ? rankFresh.text : formatRelative(item.publishedAt)));
+  meta.appendChild(textSpan(
+    item.publishedAtKnown === false
+      ? '掲載日不明'
+      : rankFresh ? rankFresh.text : formatRelative(item.publishedAt),
+  ));
 
   card.append(head, title, meta);
 
@@ -1237,7 +1241,14 @@ function buildCard(item) {
   // 店の情報は「記事の日付」ではなく「いつ取得したか」。
   // 同じ見た目で意味だけ違うと誤読されるので、文言で言い分ける。
   const fresh = freshness(item);
-  if (fresh) {
+  if (item.publishedAtKnown === false) {
+    // 情報源が掲載日を持っていない。ここで「◯分前」と出すと、
+    // 7月に終わった抽選が今日の新着に見える（実際に起きた）。
+    // 持っていない日付を作らず、いつ見に行ったかだけを言う。
+    time.classList.add('card__time--unknown');
+    time.textContent = '掲載日不明';
+    time.title = `情報源に掲載日がないため、新しさは分かりません（${formatDateTime(item.publishedAt)}に取得）`;
+  } else if (fresh) {
     time.classList.add(`card__time--${fresh.level}`);
     time.textContent = fresh.text;
     time.title = fresh.note;

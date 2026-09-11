@@ -83,6 +83,10 @@ export function toFeedItem(rankedItem, opts = {}) {
     url: typeof it.url === 'string' ? it.url : '',
     sourceName: typeof it.sourceName === 'string' ? it.sourceName : '',
     publishedAt: toIso(it.publishedAt),
+    // false のとき publishedAt は「取得した時刻」であって掲載日ではない。
+    // 情報源が日付を持たないカタログ型の一覧が該当する。
+    // これを無視すると、7月に終わった抽選を「新着9分前」と出してしまう。
+    publishedAtKnown: it.publishedAtKnown !== false,
     summary: truncate(it.summary, SUMMARY_MAX),
     ips: Array.isArray(it.ips) ? it.ips.filter((v) => typeof v === 'string') : [],
     intentTags: Array.isArray(it.intentTags) ? it.intentTags.filter((v) => typeof v === 'string') : [],

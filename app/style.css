@@ -1712,6 +1712,12 @@ body.is-locked { overflow: hidden; }
   border-style: dashed;
 }
 
+/* 情報源が掲載日を持っていないもの。新しそうに見せない */
+.card__time--unknown {
+  color: var(--text-mute);
+  font-style: italic;
+}
+
 /* 同じ商品を扱う他の店。既定は閉じておき、必要な人だけ開く */
 .others { margin-top: 6px; font-size: 12.5px; }
 .others summary {

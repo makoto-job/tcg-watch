@@ -201,7 +201,7 @@
     },
     {
       "id": "p-bandai-carddas",
-      "name": "プレミアムバンダイ カードダス 新着",
+      "name": "プレミアムバンダイ カードダス",
       "url": "https://p-bandai.jp/carddas/list-da10-n0/",
       "baseUrl": "https://p-bandai.jp",
       "ips": [
@@ -214,8 +214,11 @@
       "itemPattern": "<div class=\"article_area\">([\\s\\S]*?)<!-- / article_area -->",
       "linkPattern": "<p class=\"article_title\"><a href=\"([^\"]+)\"",
       "titlePattern": "<p class=\"article_title\"><a[^>]*>([\\s\\S]*?)</a>",
-      "note": "【2026-09-08 追加・p-bandai-lotterysales が0件だった穴を埋めるエントリ】プレミアムバンダイのカード専門ショップ「カードダス」の商品一覧（新着順）。/hobby/lotterysales/ がガンプラしか載せないのに対し、こちらはカード商品しか載らない。/carddas/lotterysales/ は404なのでショップ全体の一覧 list-da10-n0 を使う（トップ /carddas/ は特集バナー主体で商品が7件しか出ない）。HTMLの作りは /hobby/lotterysales/ と同一（article_area / article_title）なので同じセレクタで取れる。実測20件・うち12件が【抽選販売】で、ONE PIECEカードゲーム・UNION ARENA・ガンダムカードゲーム・デジモンカードゲーム・ドラゴンボールスーパーカードゲームが並ぶ。商品名は一覧上で切られない（p-bandai-new / p-bandai-deadline の itemslist_name は20字で切れるが、ここは全文）ので IP 判定の精度が高い。titleFilter は付けない（このショップは全件カード商品のため）。ips は lottery だけにしてあり、実際のIPは collect.js がタイトルから補う。ページに日付が無いので pubDate は空（呼び出し側が現在時刻を入れる）。TimerEnd はこの一覧には出ない（締切は p-bandai-deadline 側で取る）が、出た場合に備えて deadlinePattern は残す。robots.txt の Disallow は /mypage/ /order_info/ /newregist/ /enquete/ /search/ /search_bst/ /mobile/... /inbound_auth/ /access/ のみで /carddas/ は対象外、AIクローラ拒否も Crawl-delay も無い（2026-09-08 実測）。",
-      "deadlinePattern": "TimerEnd\"\\s+value=\"([^\"]+)\""
+      "note": "【カタログ型】このURLは「新着」ではなく商品一覧。終了済みの抽選がそのまま並び続ける。2026-09-11 実測: 20件中、発売日7月中旬2件・7月下旬5件が終了済みのまま掲載されていた。アイコンの alt に 抽選販売/予約終了/在庫無し が入るが、★抽選の受付終了を示すアイコンは無い★ （GD05は7月に終了済みだが 抽選販売 アイコンのまま）。したがってアイコンだけでは受付中か判別できない。商品ページ側は Akamai のbot対策で中身が空のシェルしか返らず、TimerEnd も読めない（deadlinePattern は事実上不発）。各商品に日付は無いが「発売日：7月下旬」がHTMLコメントとして残っているので、releasePattern で拾い maxReleaseAgeDays=21 で古いものを落としている。コメントアウトされた値に頼るのは脆いが、これ以外に古さを知る手段が無い。この一覧が構造変更でコメントを消したら releasePattern が不発になり、publishedAtKnown=false のまま古い商品が残るので、定期的に確認すること。",
+      "deadlinePattern": "TimerEnd\"\\s+value=\"([^\"]+)\"",
+      "releasePattern": "<p class=\"release\">\\s*発売日：([^<]+)</p>",
+      "maxReleaseAgeDays": 21,
+      "stockExcludePattern": "alt=\"(?:予約終了|販売終了|在庫無し|受付終了)\""
     },
     {
       "id": "p-bandai-new",

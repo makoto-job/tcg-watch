@@ -29,6 +29,7 @@ const FEED_ITEM_KEYS = [
   'url',
   'sourceName',
   'publishedAt',
+  'publishedAtKnown',
   'summary',
   'ips',
   'intentTags',

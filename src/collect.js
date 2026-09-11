@@ -556,6 +556,8 @@ export async function collectAll(config, opts = {}) {
       destIsEntry: item.destIsEntry === true,
       prefecture: item.prefecture || '',
       deliveryType: item.deliveryType || '',
+      // 掲載日が情報源に書かれていたか。false なら publishedAt は取得時刻。
+      publishedAtKnown: item.publishedAtKnown !== false,
     });
   }
 

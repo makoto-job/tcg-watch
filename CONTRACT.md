@@ -149,6 +149,11 @@ export async function savePosted(store)            // 30日より古いエント
  * @property {string} url
  * @property {string} sourceName
  * @property {string} publishedAt   // ISO8601
+ * @property {boolean} publishedAtKnown // 情報源が掲載日を持っていたか。
+ *   false のとき publishedAt は「取得した時刻」であって掲載日ではない。
+ *   日付を持たないカタログ型の一覧（プレミアムバンダイのカードダス一覧など）が該当する。
+ *   **表示側はこれが false の項目を「◯分前」と呼んではならない。**
+ *   無視すると、7月に終わった抽選が「新着9分前」として出る（2026-09-11 に実際に発生）。
  * @property {string} summary       // 最大200字
  * @property {string[]} ips
  * @property {string[]} intentTags  // ['抽選','予約'] など

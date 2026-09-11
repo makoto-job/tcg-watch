@@ -229,6 +229,7 @@ export function parseNewsList(html, siteConfig) {
   // 「オンラインか」「自分の県か」を判別できるようにする。
   const prefectureRe = toRegExp(site.prefecturePattern);
   const deliveryRe = toRegExp(site.deliveryPattern);
+  const releaseRe = toRegExp(site.releasePattern);
 
   /** 断片から1つ取り出す小道具 */
   const pick = (re, fragment) => {
@@ -270,6 +271,9 @@ export function parseNewsList(html, siteConfig) {
       pubDate: pubDate || '',
       deadline: pickDeadline(fragment),
       destLabel: pickDestLabel(fragment),
+      // 「発売日：7月下旬」のような、商品がいつ出るかの表示。
+      // 掲載日を持たないカタログ型の一覧で、古い商品を落とすための唯一の手がかり。
+      releaseText: pick(releaseRe, fragment),
       prefecture: pick(prefectureRe, fragment),
       deliveryType: pick(deliveryRe, fragment),
     });
@@ -511,6 +515,59 @@ export function hasLotteryIntent(text) {
  * @param {{now?:Date, maxAgeHours?:number, concurrency?:number, verbose?:boolean}} [opts]
  * @returns {Promise<Array<Object>>} RawItem[]
  */
+/**
+ * 「発売日：7月下旬」のような、年の無いおおまかな発売時期を日付に直す。
+ *
+ * なぜ必要か:
+ *   プレミアムバンダイのカードダス一覧のような「カタログ型」のページは、
+ *   記事の掲載日を持たない。そこに終了済みの抽選がそのまま並び続ける。
+ *   日付が無いと古さを判定できず、7月に終わった抽選を今日の新着として
+ *   出してしまう（実際に出してしまった）。
+ *   発売時期だけは書かれているので、それを古さの手がかりに使う。
+ *
+ * 上旬=5日 / 中旬=15日 / 下旬=25日 とみなす。
+ * 年は書かれていないので、基準日から見て最も近い年を選ぶ。
+ * 12月の表記を1月に見ているとき、前年と解釈できるようにするため。
+ *
+ * @param {string} text 例: '発売日：7月下旬' / '2026年9月中旬'
+ * @param {Date} now 基準日
+ * @returns {number|null} エポックミリ秒。読めなければ null
+ */
+export function parseReleaseTime(text, now = new Date()) {
+  const raw = String(text || '').normalize('NFKC');
+  if (!raw) return null;
+
+  const m = /(?:(\d{4})年\s*)?(\d{1,2})月(?:\s*(\d{1,2})日|\s*(上旬|中旬|下旬))?/.exec(raw);
+  if (!m) return null;
+
+  const [, yy, mm, dd, part] = m;
+  const month = Number(mm);
+  if (!(month >= 1 && month <= 12)) return null;
+
+  let day;
+  if (dd) day = Number(dd);
+  else if (part === '上旬') day = 5;
+  else if (part === '中旬') day = 15;
+  else if (part === '下旬') day = 25;
+  else day = 15; // 「7月」だけなら月の真ん中とみなす
+  if (!(day >= 1 && day <= 31)) return null;
+
+  // JSTの正午として扱う（時差で日付が前後しても判定が変わらないように）
+  const at = (year) => Date.UTC(year, month - 1, day, 3, 0, 0);
+
+  if (yy) return at(Number(yy));
+
+  // 年が無い場合、基準日にいちばん近い年を選ぶ
+  const base = now.getTime();
+  const thisYear = now.getUTCFullYear();
+  let best = null;
+  for (const y of [thisYear - 1, thisYear, thisYear + 1]) {
+    const ms = at(y);
+    if (best === null || Math.abs(ms - base) < Math.abs(best - base)) best = ms;
+  }
+  return best;
+}
+
 export async function fetchOfficialItems(config, opts = {}) {
   const { now = new Date(), maxAgeHours = 168, concurrency = 4, verbose = false } = opts || {};
 
@@ -560,6 +617,11 @@ export async function fetchOfficialItems(config, opts = {}) {
 
     const weight = typeof site.weight === 'number' ? site.weight : Number(defaults.weight) || DEFAULT_WEIGHT;
     const baseIps = Array.isArray(site.ips) ? site.ips.filter(Boolean) : [];
+    // 掲載日を持たない一覧で、発売から何日過ぎたものを捨てるか。
+    // 設定が無ければ捨てない（既定では今までどおりの挙動）。
+    const maxReleaseAgeMs = Number.isFinite(Number(site.maxReleaseAgeDays)) && Number(site.maxReleaseAgeDays) > 0
+      ? Number(site.maxReleaseAgeDays) * 86400 * 1000
+      : null;
     let accepted = 0;
 
     for (const entry of entries) {
@@ -567,9 +629,21 @@ export async function fetchOfficialItems(config, opts = {}) {
       const rawUrl = String(entry.link || '').trim();
       if (!title || !rawUrl) continue;
 
+      // 一覧に掲載日が書かれていたか。
+      // 書かれていない場合、以降 publishedAt には取得時刻が入るが、
+      // それは「いま公開された」という意味ではない。取り違えると
+      // 7月に終わった抽選を「新着9分前」として出すことになる（実際に起きた）。
+      const publishedAtKnown = Boolean(entry.pubDate);
       const publishedAt = entry.pubDate || nowIso;
       const t = new Date(publishedAt).getTime();
-      if (Number.isFinite(t) && t < minMs) continue;
+      if (publishedAtKnown && Number.isFinite(t) && t < minMs) continue;
+
+      // 掲載日が無いカタログ型の一覧では、発売時期だけが古さの手がかりになる。
+      // 発売がとうに過ぎた抽選は、受付も終わっているとみなして落とす。
+      if (!publishedAtKnown && maxReleaseAgeMs !== null) {
+        const rel = parseReleaseTime(entry.releaseText, now);
+        if (rel !== null && nowMs - rel > maxReleaseAgeMs) continue;
+      }
 
       const url = canonicalizeUrl(rawUrl);
       const ips = baseIps.slice();
@@ -589,6 +663,9 @@ export async function fetchOfficialItems(config, opts = {}) {
         sourceWeight: weight,
         summary: '',
         publishedAt: Number.isFinite(t) ? new Date(t).toISOString() : nowIso,
+        // false のとき publishedAt は取得時刻であって掲載日ではない。
+        // 表示側はこれを見て「◯分前」と言わないこと。
+        publishedAtKnown,
         ips,
         feedUrl: site.url,
         // 第2フェーズの拡張フィールド（区画Gが後から付与する）
