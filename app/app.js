@@ -1183,6 +1183,16 @@ function buildCard(item) {
   const place = buildPlaceBadge(item);
   if (place) tags.appendChild(place);
 
+  // 情報源が受付中かを教えてくれない抽選。押す前にそれと分かるようにする。
+  // 黙って並べると、終了済みの抽選に飛ばして時間を奪う（楽天ブックスで実際に起きた）。
+  if (item.applyStatusUnknown) {
+    const unk = document.createElement('span');
+    unk.className = 'tag tag--unknown';
+    unk.textContent = '受付状況 未確認';
+    unk.title = 'この情報源は受付中かどうかを公開していません。すでに終了している場合があります。応募先のページでご確認ください。';
+    tags.appendChild(unk);
+  }
+
   // 取得から時間がたった店の情報。押す前に「変わっているかも」と分かるようにする
   const stale = buildFreshnessBadge(item);
   if (stale) tags.appendChild(stale);

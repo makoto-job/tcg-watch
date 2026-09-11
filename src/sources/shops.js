@@ -441,6 +441,9 @@ export async function fetchShopItems(config, opts = {}) {
         // 一覧に載っていても、抽選エントリーが既に締め切られていることがある。
         // 「応募できる」と断定せず、確認を促す表示にするための印。
         applyVerified: site.applyVerified === true,
+        // 情報源が「抽選商品か」しか教えてくれず、受付中かを判断できない場合。
+        // 黙って並べると、終了済みの抽選に飛ばして時間を奪う。
+        applyStatusUnknown: site.applyStatusUnknown === true,
       });
       accepted += 1;
     }

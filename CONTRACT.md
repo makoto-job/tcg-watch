@@ -154,6 +154,10 @@ export async function savePosted(store)            // 30日より古いエント
  *   日付を持たないカタログ型の一覧（プレミアムバンダイのカードダス一覧など）が該当する。
  *   **表示側はこれが false の項目を「◯分前」と呼んではならない。**
  *   無視すると、7月に終わった抽選が「新着9分前」として出る（2026-09-11 に実際に発生）。
+ * @property {boolean} applyStatusUnknown // 情報源が「受付中か」を教えてくれない項目。
+ *   true のとき、その抽選はすでに終了している可能性がある。
+ *   例: 楽天ブックスの抽選APIは lucky_draw_flg しか持たず、終了済みも返し続ける。
+ *   **表示側はこれが true の項目に「受付状況 未確認」を必ず出すこと。**
  * @property {string} summary       // 最大200字
  * @property {string[]} ips
  * @property {string[]} intentTags  // ['抽選','予約'] など

@@ -558,6 +558,7 @@ export async function collectAll(config, opts = {}) {
       deliveryType: item.deliveryType || '',
       // 掲載日が情報源に書かれていたか。false なら publishedAt は取得時刻。
       publishedAtKnown: item.publishedAtKnown !== false,
+      applyStatusUnknown: item.applyStatusUnknown === true,
     });
   }
 

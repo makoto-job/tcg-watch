@@ -104,6 +104,9 @@ export function toFeedItem(rankedItem, opts = {}) {
     deadline: toIso(it.deadline) || null,
     // 受付中だと確認できているか（店の一覧由来は false）
     applyVerified: it.applyVerified === true,
+    // 情報源が受付中かを教えてくれない項目。表示側は「受付状況 未確認」と明示する。
+    // 例: 楽天ブックスの抽選API は終了済みの抽選も返し続ける。
+    applyStatusUnknown: it.applyStatusUnknown === true,
     // 商品ページではなく店の入口ページか（bot拒否等で商品ページを取得できない場合）
     destIsEntry: it.destIsEntry === true,
     // 遠方の実店舗を勧めないための判別材料

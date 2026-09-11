@@ -74,11 +74,12 @@
       "titlePattern": "",
       "datePattern": "",
       "titleFilter": "カードゲーム|カードダス|トレーディングカード|トレカ|カードコレクション|カードパック|TCG|マジック：ザ・ギャザリング|ポケモンカード|ワンピース|フュージョンワールド|遊戯王|デュエル・マスターズ|デジモンカード|バトルスピリッツ|アイカツ|ホロライブ|ガンダムカード|ブースターパック|スターターセット|スタートデッキ|拡張パック|デッキセット",
-      "note": "【これが楽天の本命】/event/game/card/entry/（抽選エントリーページ）は本文がJS描画だが、生HTMLの中に <ol data-api-url=\"...\"> としてページ自身が叩くJSON APIのURLがベタ書きされている。それが rdc-api-catalog-gateway-api.rakuten.co.jp/books/search-items。認証不要・公開エンドポイントで、`luckyDrawFlg=1` が『抽選対象商品』フラグ。ジャンル指定を外すと楽天ブックス全体の抽選対象商品が出る（2026-08-30時点で17件、うちTCGは14件）。実測で【抽選販売】初音ミク MTG Secret Lair / ポケカMEGA 30th CELEBRATION / DBフュージョンワールド CROSS FORCE / ワンピOP-17 などが取れた。robots.txt: books.rakuten.co.jp は /event/ を Disallow していない（Disallowは /mypage/ /cart系のみ）。APIホスト側は robots.txt 自体が無い（404 JSON）。dateKey は敢えて設定していない：抽選対象商品は商品登録が数か月前でも抽選受付は今、という事が多く、creation_time で足切りすると取りこぼすため。pubDate 空 → 親が現在時刻を入れる → 再掲は store.js の既投稿判定で防がれる。 ／ sales_start_time・sales_end_time は抽選受付期間ではないため未使用（実地確認）。",
+      "note": "2026-09-11 実測。★このAPIは「抽選対象の商品か」しか教えてくれない。受付中かは分からない。★ lucky_draw_flg=1 は抽選商品という印であって、受付中という意味ではない。実例: 18595282（ポケカ MEGA 30th CELEBRATION）は商品ページに 「抽選受付期間：2026/08/27(木) 10:00 〜 2026/08/30(日) 23:59」とあり8/30に終了済みだが、APIは返し続ける。sales_start_time/sales_end_time は受付期間ではない（この商品は 9/14〜9/18 と入っており実際の受付期間と一致しない。23件中20件が同じ値＝一括設定）。以前これを受付期間と誤解して「応募できる」と出し、利用者が期間外ページに飛ばされた。二度と使わないこと。入口ページ books.rakuten.co.jp/event/game/card/entry/ も当てにならず、ページ自身が「掲載商品は、タイミングにより抽選期間が終了している可能性がございます。」と明記していて、終了済みの18595282もそこに載っている。商品ページには受付期間が書いてあるが、素の取得ではbot対策で空が返る（回避はしない）。したがって applyStatusUnknown:true を立て、アプリ側で「受付状況 未確認」と明示する。消さないのは、楽天が実際に抽選をやっており、確認したい人の導線を断たないため。",
       "releaseTextKey": "release_date_text",
       "stockTextKey": "stock_status_text",
       "stockExclude": "ご注文できない|売り切れ|品切|販売終了|取扱い?終了|在庫なし",
-      "applyVerified": false
+      "applyVerified": false,
+      "applyStatusUnknown": true
     },
     {
       "id": "rakuten-books-tcg-new",
@@ -398,15 +399,15 @@
       "enabled": true,
       "type": "html",
       "charset": "utf-8",
-      "itemPattern": "<a href=\"(?:/products/detail\\.php\\?product_id=\\d+)\"\\s+title=\"[^\"]*\"\\s+class=\"thumbnail\">",
+      "itemPattern": "<div class=\"list_area[^>]*>([\\s\\S]*?)</a>",
       "linkPattern": "href=\"(/products/detail\\.php\\?product_id=\\d+)\"",
       "titlePattern": "title=\"([^\"]*)\"",
       "datePattern": "",
       "titleFilter": "ブースター|スターター|スタートデッキ|デッキ|パック|カードゲーム|カードセット|トレーディングカード|トレカ|TCG|MTG|マジック:ザ・ギャザリング|ボックス|BOX|拡張|ウエハース|カードダス",
       "titleExclude": "スリーブ|プレイマット|デッキケース|バインダー|ローダー|カードケース|ダイス|サプライ|フィギュア|ぬいぐるみ|色紙|チケット|サイン会|グループブレイク|福袋|ウォーハンマー|ボードゲーム",
       "maxItemsPerSite": 50,
-      "note": "ミントモール（MINT）の「カードゲーム【ボックス】」カテゴリ（category_id=8622）を orderby=date＝新着登録順で見る。実測で先頭50件のほぼ全てが「◆予約◆」付きの予約受付中BOX/デッキだった（MTG スター・トレック各種、ウルトラマンカードゲーム、デジモンBT-27、バトスピ×アイカツ、ヴァンガード、ヴァイス、Xross Stars、ゴジラ、Harry Potter 等）。disp_number=50 で1ページ50件・約1.5MB（既定100件だと2.4MB）。1件は <a href=\"/products/detail.php?product_id=NNN\" title=\"商品名\" class=\"thumbnail\"> の1タグに link と title が両方入っているので、itemPattern はこのタグ自身をマッチさせ（キャプチャ無し＝マッチ全体が断片）、そこから href と title を取る。【robots.txt】 https://www.mint-mall.net/robots.txt は `User-agent: *` に `Crawl-delay: 1180` のみで Disallow は0行。Disallow は無いがクロール間隔が約20分指定なので、このサイトへのリクエストは1実行あたりこの1本だけに限定している（mint-mall-lottery を enabled:false にしているのはこれも理由）。ページに日付が無いので pubDate は空。※ミントモールは 遊戯王 を取り扱っておらず、カテゴリツリーにも遊戯王は存在しない（スポーツカード主体のモール）。遊戯王の補強にはならない。",
-      "stockExcludePattern": "在庫なし|SOLD\\s*OUT|売り切れ|完売|販売終了|ご注文いただけ"
+      "note": "2026-09-11: itemPattern が <a class=\"thumbnail\"> の開始タグだけを切り出していたため、その直後にある <span class=\"soldout\">SOLD OUT</span> に届かず、★stockExcludePattern が一度も機能していなかった★。一覧50件のうち43件が売り切れだったが、全件そのまま出していた。商品ブロック <div class=\"list_area\"> 全体を切り出す形に修正。在庫の印は class=\"soldout\" が確実（「SOLD OUT」の文字列はページ内の別の場所にも474回出るため、それだけを手がかりにすると全件を売り切れと誤判定する）。なお charset は utf-8。商品ページ側は「只今品切れ中」と書く。",
+      "stockExcludePattern": "class=\"soldout"
     },
     {
       "id": "mint-mall-lottery",
@@ -963,8 +964,7 @@
       "titleFilter": "カードゲーム|トレーディングカード|トレカ|ポケモンカード|ポケカ|ワンピースカード|遊戯王|デュエル・マスターズ|デュエルマスターズ|デジモンカード|バトルスピリッツ|ヴァンガード|ヴァイスシュヴァルツ|ユニオンアリーナ|UNION ARENA|フュージョンワールド|カードダス|マジック:ザ・ギャザリング|MTG|ロルカナ|ブースターパック|拡張パック|強化拡張パック|スタートデッキ|スターターデッキ|プレミアムデッキセット|TCG",
       "titleExclude": "スリーブ|プレイマット|ケース|バインダー|ローダー|プロテクト|ダイス|ダメカン|サプライ|オリパ|福袋|フィギュア|ぬいぐるみ|タペストリー|アクリルスタンド|クリアファイル|カードリーダー|SDカード|メモリーカード|グラフィックカード|クレジットカード|ギフトカード|プリペイド",
       "maxItemsPerSite": 40,
-      "note": "【区画Oの発見／店の抽選ページはオンラインショップ本体とは別ドメインにある】ファミマの通販は famima.com ではなく famima-online.family.co.jp。shops.json に登録されていた famima.com は別サイトで、そちらを見ていたので「トップにTCG記載なし」と誤判定していた。ファミマオンラインは抽選対象商品のタイトル自体を「【抽選商品】…」で始める運用になっており、抽選かどうかがタイトルだけで分かる（実測: 【抽選商品】ポケモンカードゲーム MEGA 拡張パック 30th CELEBRATION / 【抽選商品】UNION ARENA ブースターパック ウマ娘 プリティーダービー【UA59BT】）。/search?category=hobby は生HTMLで20件がサーバ描画されており（JS描画ではない）、【抽選商品】が先頭に並ぶ。1件は <a class=\"c-result-card__contents\" href=\"/item?itemCode=…\"> … <p class=\"c-result-card__name …\">商品名</p>。category=game はゲームソフト、category=variety は雑貨で、TCGは hobby に入る。表示件数を増やすパラメータ（sort_3a / limit）は実測で効かず20件固定。【robots.txt】https://famima-online.family.co.jp/robots.txt は「User-agent: * / Allow: /」の2行のみ。Disallow も AIクローラ拒否も無い。Crawl-delay も無い。【日付】一覧に日付が無いので pubDate は空 → 親が現在時刻を入れ、再掲は store.js の既投稿判定で防がれる。【applyVerified を立てない理由】一覧には応募受付期間が出ていない。商品ページを開かないと受付中か分からないため、既定の false のままにしてある。【FamilyMart 45th記念カード】同じく【抽選商品】が付くがTCGではないクーポン付きカード。titleExclude ではなく titleFilter（TCG語）側で自然に落ちる。",
-      "stockExcludePattern": "在庫なし|SOLD\\s*OUT|売り切れ|完売|販売終了|ご注文いただけ"
+      "note": "【区画Oの発見／店の抽選ページはオンラインショップ本体とは別ドメインにある】ファミマの通販は famima.com ではなく famima-online.family.co.jp。shops.json に登録されていた famima.com は別サイトで、そちらを見ていたので「トップにTCG記載なし」と誤判定していた。ファミマオンラインは抽選対象商品のタイトル自体を「【抽選商品】…」で始める運用になっており、抽選かどうかがタイトルだけで分かる（実測: 【抽選商品】ポケモンカードゲーム MEGA 拡張パック 30th CELEBRATION / 【抽選商品】UNION ARENA ブースターパック ウマ娘 プリティーダービー【UA59BT】）。/search?category=hobby は生HTMLで20件がサーバ描画されており（JS描画ではない）、【抽選商品】が先頭に並ぶ。1件は <a class=\"c-result-card__contents\" href=\"/item?itemCode=…\"> … <p class=\"c-result-card__name …\">商品名</p>。category=game はゲームソフト、category=variety は雑貨で、TCGは hobby に入る。表示件数を増やすパラメータ（sort_3a / limit）は実測で効かず20件固定。【robots.txt】https://famima-online.family.co.jp/robots.txt は「User-agent: * / Allow: /」の2行のみ。Disallow も AIクローラ拒否も無い。Crawl-delay も無い。【日付】一覧に日付が無いので pubDate は空 → 親が現在時刻を入れ、再掲は store.js の既投稿判定で防がれる。【applyVerified を立てない理由】一覧には応募受付期間が出ていない。商品ページを開かないと受付中か分からないため、既定の false のままにしてある。【FamilyMart 45th記念カード】同じく【抽選商品】が付くがTCGではないクーポン付きカード。titleExclude ではなく titleFilter（TCG語）側で自然に落ちる。 【2026-09-11】itemPattern が一致せず取得0件（ページ構造が変わったとみられる）。効かない stockExcludePattern も削除した。★直すときの注意★ 商品ブロック全体を ( ) で切り出すこと。開始タグだけを切り出すと、その中にある在庫の印に届かず、除外が設定だけあって機能しない状態になる（ミントモールで実際に起きた）。test/stock-filter-guard.test.js がこの形の間違いを検出する。また上の【日付】のとおり一覧に日付が無いので、直す際は publishedAtKnown が false になることを確認し、受付期間も分からないので applyStatusUnknown:true を立てること。"
     },
     {
       "id": "yamashiroya-lottery-feed",
@@ -1021,8 +1021,7 @@
       "titleFilter": "カードゲーム|トレーディングカード|トレカ|ポケモンカード|ポケカ|ワンピースカード|遊戯王|デュエル・マスターズ|デュエルマスターズ|デジモンカード|バトルスピリッツ|ヴァンガード|ヴァイスシュヴァルツ|ユニオンアリーナ|UNION ARENA|フュージョンワールド|カードダス|マジック:ザ・ギャザリング|MTG|ロルカナ|ブースターパック|拡張パック|強化拡張パック|スタートデッキ|スターターデッキ|プレミアムデッキセット|TCG",
       "titleExclude": "スリーブ|プレイマット|ケース|バインダー|ローダー|プロテクト|ダイス|ダメカン|サプライ|オリパ|福袋|フィギュア|ぬいぐるみ|タペストリー|アクリルスタンド|クリアファイル|カードリーダー|SDカード|メモリーカード|グラフィックカード|クレジットカード|ギフトカード|プリペイド",
       "maxItemsPerSite": 30,
-      "note": "【区画Oの訂正／「エディオンのトップにTCG記載なし」は誤りだった】www.edion.com のトップに「トレーディングカード」の語は出ないが、通販側にはトレーディングカードのカテゴリが実在する（c_cd=001039031。配下に 001039031001 カード / 001039031002 カードサプライ）。実測20件中11件がTCG本体で、UNION ARENA / ガンダムカードゲーム / ポケモンカード / デジモンカード / デュエル・マスターズ / MTG / ディズニー・ロルカナ が並んだ。【取れるURLと取れないURL】同じ商品一覧でも item_list.html?c_cd=… は Cloudflare の「Just a moment...」で403になる。category002.html?c_cd=… は200・99KBで生HTMLに商品名が入る（JS描画ではない）。回避はせず、通る方だけを使っている。1件は <p class=\"item\"><a href=\"/detail.html?p_cd=…\">商品名</a></p>。【robots.txt】https://www.edion.com/robots.txt の Disallow は /member* /order* /catalogmall/ の3行のみ。category002.html は対象外。AIクローラ拒否は無し。Bingbot にだけ Crawl-delay:10。【抽選そのものは取れない】エディオンのポケカ抽選は edion-cp.com という別ドメインの、商品ごとに変わるURL（例 /pokeca031301 の形）で実施され、店頭ポスターのQRやSMSで配られる。edion-cp.com の robots.txt は「User-agent: * / Disallow:（全許可）」だがルート https://edion-cp.com/ は404で一覧ページが存在せず、個別URLを推測で当てるしかないので設定には入れていない。【日付・applyVerified】一覧に日付が無いので pubDate は空。並び順が新着順である確証が無い（実測では固定20件）ため、鮮度は保証しない。受付状況も分からないので applyVerified は false のまま。",
-      "stockExcludePattern": "在庫なし|SOLD\\s*OUT|売り切れ|完売|販売終了|ご注文いただけ"
+      "note": "【区画Oの訂正／「エディオンのトップにTCG記載なし」は誤りだった】www.edion.com のトップに「トレーディングカード」の語は出ないが、通販側にはトレーディングカードのカテゴリが実在する（c_cd=001039031。配下に 001039031001 カード / 001039031002 カードサプライ）。実測20件中11件がTCG本体で、UNION ARENA / ガンダムカードゲーム / ポケモンカード / デジモンカード / デュエル・マスターズ / MTG / ディズニー・ロルカナ が並んだ。【取れるURLと取れないURL】同じ商品一覧でも item_list.html?c_cd=… は Cloudflare の「Just a moment...」で403になる。category002.html?c_cd=… は200・99KBで生HTMLに商品名が入る（JS描画ではない）。回避はせず、通る方だけを使っている。1件は <p class=\"item\"><a href=\"/detail.html?p_cd=…\">商品名</a></p>。【robots.txt】https://www.edion.com/robots.txt の Disallow は /member* /order* /catalogmall/ の3行のみ。category002.html は対象外。AIクローラ拒否は無し。Bingbot にだけ Crawl-delay:10。【抽選そのものは取れない】エディオンのポケカ抽選は edion-cp.com という別ドメインの、商品ごとに変わるURL（例 /pokeca031301 の形）で実施され、店頭ポスターのQRやSMSで配られる。edion-cp.com の robots.txt は「User-agent: * / Disallow:（全許可）」だがルート https://edion-cp.com/ は404で一覧ページが存在せず、個別URLを推測で当てるしかないので設定には入れていない。【日付・applyVerified】一覧に日付が無いので pubDate は空。並び順が新着順である確証が無い（実測では固定20件）ため、鮮度は保証しない。受付状況も分からないので applyVerified は false のまま。 【2026-09-11】stockExcludePattern を削除した。この一覧は商品名と価格しか出さず、在庫や売り切れの表示が一切無い（実測20件、在庫らしき語ゼロ）。効かない除外設定を置いておくと「在庫チェック済み」と誤解するので消した。在庫で絞るには商品ページを読む必要があり、リクエストが20倍になるため今は見送る。"
     },
     {
       "id": "aeon-style-online",

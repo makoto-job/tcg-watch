@@ -1712,6 +1712,13 @@ body.is-locked { overflow: hidden; }
   border-style: dashed;
 }
 
+/* 受付中か分からない抽選。目立たせすぎず、しかし見落とさせない */
+.tag--unknown {
+  background: var(--warn-bg);
+  color: var(--warn-fg);
+  border: 1px dashed var(--warn-border);
+}
+
 /* 情報源が掲載日を持っていないもの。新しそうに見せない */
 .card__time--unknown {
   color: var(--text-mute);
