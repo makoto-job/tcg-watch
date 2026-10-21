@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-21T01:26:39.550Z",
+  "generatedAt": "2026-10-21T06:29:59.157Z",
   "ranking": {
     "date": "2026-10-21",
     "tweetUrl": null,
@@ -10,7 +10,7 @@
         "title": "【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】",
         "url": "https://books.rakuten.co.jp/rb/18737983",
         "sourceName": "楽天ブックス 抽選販売",
-        "publishedAt": "2026-10-21T01:26:39.550Z",
+        "publishedAt": "2026-10-21T06:29:59.157Z",
         "publishedAtKnown": true,
         "summary": "発売予定 2026年10月頃",
         "ips": [
@@ -39,16 +39,16 @@
         "otherShops": []
       },
       {
-        "id": "4516d5bfac935e9b",
-        "title": "【予約】[新品ボックス]鳴潮：対決 ブースターパック 第一弾(1BOX=12パック) [再入荷/26年10月下旬予定]",
-        "url": "https://www.c-labo-online.jp/product/416323",
+        "id": "11461be62f3c7b05",
+        "title": "【予約】[新品]デュエル・マスターズTCG ドキドキつよいデッキ 25の王道【DM26-SD1】 [再販/2611]",
+        "url": "https://www.c-labo-online.jp/product/415277",
         "sourceName": "カードラボ 新作予約",
-        "publishedAt": "2026-10-21T01:26:39.550Z",
+        "publishedAt": "2026-10-21T06:29:59.157Z",
         "publishedAtKnown": true,
         "summary": "",
         "ips": [
           "lottery",
-          "newtcg"
+          "duelmasters"
         ],
         "intentTags": [
           "予約",
@@ -60,7 +60,7 @@
         "rank": 2,
         "kind": "news",
         "tier": "shop",
-        "destUrl": "https://www.c-labo-online.jp/product/416323",
+        "destUrl": "https://www.c-labo-online.jp/product/415277",
         "destLabel": "カードラボ",
         "startsAt": null,
         "deadline": null,
@@ -76,7 +76,7 @@
         "title": "【予約商品】 2026年11月14日発売 ホロビート HB-BP01 拡張パック第一弾 1BOX（お1人様 12 BOXまで）",
         "url": "https://pao-onlineshop.com/view/item/000000142963",
         "sourceName": "通販のPAO 予約商品",
-        "publishedAt": "2026-10-21T01:26:39.550Z",
+        "publishedAt": "2026-10-21T06:29:59.157Z",
         "publishedAtKnown": true,
         "summary": "",
         "ips": [
@@ -112,7 +112,7 @@
       "title": "【抽選販売】初音ミク マジック：ザ・ギャザリング Secret Lair Miku Fan Merch Bundle【クレジットカード決済限定】",
       "url": "https://books.rakuten.co.jp/rb/18737983",
       "sourceName": "楽天ブックス 抽選販売",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "発売予定 2026年10月頃",
       "ips": [
@@ -141,16 +141,16 @@
       "otherShops": []
     },
     {
-      "id": "4516d5bfac935e9b",
-      "title": "【予約】[新品ボックス]鳴潮：対決 ブースターパック 第一弾(1BOX=12パック) [再入荷/26年10月下旬予定]",
-      "url": "https://www.c-labo-online.jp/product/416323",
+      "id": "11461be62f3c7b05",
+      "title": "【予約】[新品]デュエル・マスターズTCG ドキドキつよいデッキ 25の王道【DM26-SD1】 [再販/2611]",
+      "url": "https://www.c-labo-online.jp/product/415277",
       "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
         "lottery",
-        "newtcg"
+        "duelmasters"
       ],
       "intentTags": [
         "予約",
@@ -162,7 +162,7 @@
       "rank": 2,
       "kind": "news",
       "tier": "shop",
-      "destUrl": "https://www.c-labo-online.jp/product/416323",
+      "destUrl": "https://www.c-labo-online.jp/product/415277",
       "destLabel": "カードラボ",
       "startsAt": null,
       "deadline": null,
@@ -178,7 +178,7 @@
       "title": "【予約】[新品ボックス]DIVINE CROSS ディヴァインクロス ブースターパック 『LAST ORIGIN Vol.2』(1BOX=20パック) [再販/2611]",
       "url": "https://www.c-labo-online.jp/product/412933",
       "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -207,11 +207,44 @@
       "otherShops": []
     },
     {
+      "id": "ed647d3d1d8c3374",
+      "title": "【予約】[新品ボックス]デュエル・マスターズTCG キャラプレミアムパック ドラゴン娘になりたくないっ！ 文化祭だョ！全員集合!!ドラ娘100％パック【DM26-EX3】(1BOX=14パック) [再販/2611]",
+      "url": "https://www.c-labo-online.jp/product/415276",
+      "sourceName": "カードラボ 新作予約",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
+      "publishedAtKnown": true,
+      "summary": "",
+      "ips": [
+        "lottery",
+        "duelmasters"
+      ],
+      "intentTags": [
+        "予約",
+        "再販"
+      ],
+      "score": 86.1,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "news",
+      "tier": "shop",
+      "destUrl": "https://www.c-labo-online.jp/product/415276",
+      "destLabel": "カードラボ",
+      "startsAt": null,
+      "deadline": null,
+      "applyVerified": false,
+      "applyStatusUnknown": false,
+      "destIsEntry": false,
+      "prefecture": "",
+      "deliveryType": "",
+      "otherShops": []
+    },
+    {
       "id": "228c79312fd6eda7",
       "title": "【予約】[新品ボックス]DIVINE CROSS ディヴァインクロス ブースターパック 『LAST ORIGIN Vol.3』(1BOX=20パック) [再販/2611]",
       "url": "https://www.c-labo-online.jp/product/412932",
       "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -240,11 +273,11 @@
       "otherShops": []
     },
     {
-      "id": "1485198f32de17a1",
-      "title": "【予約】[新品]鳴潮：対決 スターターデッキ SD01 [再出荷分/26年10月上旬]",
-      "url": "https://www.c-labo-online.jp/product/408350",
-      "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "id": "40e530eac9ed90e5",
+      "title": "【予約商品】 2026年11月14日発売 ホロビート HB-BP01 拡張パック第一弾 1BOX（お1人様 12 BOXまで）",
+      "url": "https://pao-onlineshop.com/view/item/000000142963",
+      "sourceName": "通販のPAO 予約商品",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -253,16 +286,16 @@
       ],
       "intentTags": [
         "予約",
-        "再販"
+        "新弾"
       ],
       "score": 86.1,
       "thumbnail": null,
-      "isRanked": false,
-      "rank": null,
+      "isRanked": true,
+      "rank": 3,
       "kind": "news",
       "tier": "shop",
-      "destUrl": "https://www.c-labo-online.jp/product/408350",
-      "destLabel": "カードラボ",
+      "destUrl": "https://pao-onlineshop.com/view/item/000000142963",
+      "destLabel": "通販のPAO",
       "startsAt": null,
       "deadline": null,
       "applyVerified": false,
@@ -277,7 +310,7 @@
       "title": "【抽選販売】UNION ARENA ブースターパック シュタインズ・ゲート【UA57BT】",
       "url": "https://p-bandai.jp/item/item-1000260224",
       "sourceName": "プレミアムバンダイ カードダス",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": false,
       "summary": "",
       "ips": [
@@ -305,75 +338,11 @@
       "otherShops": []
     },
     {
-      "id": "d6d67831b2a0d7d0",
-      "title": "【抽選販売】ONE PIECEカードゲーム ブースターパック 世界最強の戦士【OP-17】【3次:2026年11月下旬発送分】",
-      "url": "https://p-bandai.jp/item/item-1000260015",
-      "sourceName": "プレミアムバンダイ カードダス",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
-      "publishedAtKnown": false,
-      "summary": "",
-      "ips": [
-        "lottery",
-        "onepiece"
-      ],
-      "intentTags": [
-        "抽選"
-      ],
-      "score": 84.5,
-      "thumbnail": null,
-      "isRanked": false,
-      "rank": null,
-      "kind": "news",
-      "tier": "official",
-      "destUrl": "https://p-bandai.jp/item/item-1000260015",
-      "destLabel": "プレミアムバンダイ",
-      "startsAt": null,
-      "deadline": null,
-      "applyVerified": false,
-      "applyStatusUnknown": false,
-      "destIsEntry": false,
-      "prefecture": "",
-      "deliveryType": "",
-      "otherShops": []
-    },
-    {
-      "id": "755911226445637e",
-      "title": "【抽選販売】ガンダムカードゲーム ブースターパックFreedom Acsension[GD05]【2026年11月発送分】",
-      "url": "https://p-bandai.jp/item/item-1000259155",
-      "sourceName": "プレミアムバンダイ カードダス",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
-      "publishedAtKnown": false,
-      "summary": "",
-      "ips": [
-        "lottery",
-        "gundam"
-      ],
-      "intentTags": [
-        "抽選"
-      ],
-      "score": 84.5,
-      "thumbnail": null,
-      "isRanked": false,
-      "rank": null,
-      "kind": "news",
-      "tier": "official",
-      "destUrl": "https://p-bandai.jp/item/item-1000259155",
-      "destLabel": "プレミアムバンダイ",
-      "startsAt": null,
-      "deadline": null,
-      "applyVerified": false,
-      "applyStatusUnknown": false,
-      "destIsEntry": false,
-      "prefecture": "",
-      "deliveryType": "",
-      "otherShops": []
-    },
-    {
       "id": "4e28db99374e0c1a",
       "title": "【抽選販売】ONE PIECEカードゲーム 4th Anniversary Set【2027年5月発送分】",
       "url": "https://p-bandai.jp/item/item-1000259604",
       "sourceName": "プレミアムバンダイ カードダス",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": false,
       "summary": "",
       "ips": [
@@ -401,11 +370,43 @@
       "otherShops": []
     },
     {
+      "id": "755911226445637e",
+      "title": "【抽選販売】ガンダムカードゲーム ブースターパックFreedom Acsension[GD05]【2026年11月発送分】",
+      "url": "https://p-bandai.jp/item/item-1000259155",
+      "sourceName": "プレミアムバンダイ カードダス",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
+      "publishedAtKnown": false,
+      "summary": "",
+      "ips": [
+        "lottery",
+        "gundam"
+      ],
+      "intentTags": [
+        "抽選"
+      ],
+      "score": 84.5,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "news",
+      "tier": "official",
+      "destUrl": "https://p-bandai.jp/item/item-1000259155",
+      "destLabel": "プレミアムバンダイ",
+      "startsAt": null,
+      "deadline": null,
+      "applyVerified": false,
+      "applyStatusUnknown": false,
+      "destIsEntry": false,
+      "prefecture": "",
+      "deliveryType": "",
+      "otherShops": []
+    },
+    {
       "id": "486d3d9ebb49e350",
       "title": "【予約】[新品]バトルスピリッツ コラボブースター 学園アイドルマスター 輝けるアイドル【26RCB03】(1BOX=16パック) [2702/27]",
       "url": "https://www.c-labo-online.jp/product/415270",
       "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -438,7 +439,7 @@
       "title": "【予約】[新品ボックス]バトルスピリッツ コラボブースター アイカツ！ 新たなる煌めき【26RCB02】(1BOX=16パック) [2612/26]",
       "url": "https://www.c-labo-online.jp/product/404543",
       "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -472,7 +473,7 @@
       "title": "【予約】[新品]バトルスピリッツ コラボスターター 学園アイドルマスター 始まりのステップ【26RSD13】 [2702/27]",
       "url": "https://www.c-labo-online.jp/product/415269",
       "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -505,7 +506,7 @@
       "title": "【予約】[新品]バトルスピリッツ コラボスターター アイカツ！ スタンダードステージ！【26RSD12】 [2612/26]",
       "url": "https://www.c-labo-online.jp/product/404542",
       "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -535,123 +536,28 @@
       "otherShops": []
     },
     {
-      "id": "ba9c7514a87f9ad9",
-      "title": "【予約】[新品ボックス]ヴァイスシュヴァルツロゼ ブースターパック『オーガスト』(1BOX=10パック) [2610/23]",
-      "url": "https://www.c-labo-online.jp/product/389606",
+      "id": "5dbbdfe4f15b248d",
+      "title": "【予約】[新品ボックス]シャドウバース エボルヴ コラボパック 「グランブルーファンタジー」(1BOX=12パック) [2611/27]",
+      "url": "https://www.c-labo-online.jp/product/403956",
       "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
         "lottery",
-        "weiss"
+        "newtcg"
       ],
       "intentTags": [
-        "予約"
+        "予約",
+        "コラボ"
       ],
-      "score": 81.3,
+      "score": 84.3,
       "thumbnail": null,
       "isRanked": false,
       "rank": null,
       "kind": "news",
       "tier": "shop",
-      "destUrl": "https://www.c-labo-online.jp/product/389606",
-      "destLabel": "カードラボ",
-      "startsAt": null,
-      "deadline": null,
-      "applyVerified": false,
-      "applyStatusUnknown": false,
-      "destIsEntry": false,
-      "prefecture": "",
-      "deliveryType": "",
-      "otherShops": []
-    },
-    {
-      "id": "5e5a785471f2174f",
-      "title": "【予約】[新品ボックス]デジモンカードゲーム エクストラブースター MALEVOLENT VII【EX-14】(1BOX=24パック) [2701/23]",
-      "url": "https://www.c-labo-online.jp/product/408616",
-      "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
-      "publishedAtKnown": true,
-      "summary": "",
-      "ips": [
-        "lottery",
-        "digimon"
-      ],
-      "intentTags": [
-        "予約"
-      ],
-      "score": 81.3,
-      "thumbnail": null,
-      "isRanked": false,
-      "rank": null,
-      "kind": "news",
-      "tier": "shop",
-      "destUrl": "https://www.c-labo-online.jp/product/408616",
-      "destLabel": "カードラボ",
-      "startsAt": null,
-      "deadline": null,
-      "applyVerified": false,
-      "applyStatusUnknown": false,
-      "destIsEntry": false,
-      "prefecture": "",
-      "deliveryType": "",
-      "otherShops": []
-    },
-    {
-      "id": "088b97d4dfb80973",
-      "title": "【予約】[新品]デュエル・マスターズTCG ドリーム英雄譚デッキ ボルメテウスの書【DM26-BD1】 [2611/21]",
-      "url": "https://www.c-labo-online.jp/product/408615",
-      "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
-      "publishedAtKnown": true,
-      "summary": "",
-      "ips": [
-        "lottery",
-        "duelmasters"
-      ],
-      "intentTags": [
-        "予約"
-      ],
-      "score": 81.3,
-      "thumbnail": null,
-      "isRanked": false,
-      "rank": null,
-      "kind": "news",
-      "tier": "shop",
-      "destUrl": "https://www.c-labo-online.jp/product/408615",
-      "destLabel": "カードラボ",
-      "startsAt": null,
-      "deadline": null,
-      "applyVerified": false,
-      "applyStatusUnknown": false,
-      "destIsEntry": false,
-      "prefecture": "",
-      "deliveryType": "",
-      "otherShops": []
-    },
-    {
-      "id": "157cffb8efacc943",
-      "title": "【予約】[新品ボックス]カードファイト!! ヴァンガード Divinez リリカルブースター リリカルモナステリオ 伝説のアイドル！【VG-DZ-LBT03】(1BOX=16パック) [2611/06]",
-      "url": "https://www.c-labo-online.jp/product/403957",
-      "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
-      "publishedAtKnown": true,
-      "summary": "",
-      "ips": [
-        "lottery",
-        "vanguard"
-      ],
-      "intentTags": [
-        "予約"
-      ],
-      "score": 81.3,
-      "thumbnail": null,
-      "isRanked": false,
-      "rank": null,
-      "kind": "news",
-      "tier": "shop",
-      "destUrl": "https://www.c-labo-online.jp/product/403957",
+      "destUrl": "https://www.c-labo-online.jp/product/403956",
       "destLabel": "カードラボ",
       "startsAt": null,
       "deadline": null,
@@ -667,7 +573,7 @@
       "title": "【予約】[新品ボックス]ヴァイスシュヴァルツロゼ ブースターパック『ネコぱら セカイコネクト/ラブプロジェクト』(1BOX=10パック) [2702/05]",
       "url": "https://www.c-labo-online.jp/product/413132",
       "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -695,11 +601,75 @@
       "otherShops": []
     },
     {
+      "id": "5e5a785471f2174f",
+      "title": "【予約】[新品ボックス]デジモンカードゲーム エクストラブースター MALEVOLENT VII【EX-14】(1BOX=24パック) [2701/23]",
+      "url": "https://www.c-labo-online.jp/product/408616",
+      "sourceName": "カードラボ 新作予約",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
+      "publishedAtKnown": true,
+      "summary": "",
+      "ips": [
+        "lottery",
+        "digimon"
+      ],
+      "intentTags": [
+        "予約"
+      ],
+      "score": 81.3,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "news",
+      "tier": "shop",
+      "destUrl": "https://www.c-labo-online.jp/product/408616",
+      "destLabel": "カードラボ",
+      "startsAt": null,
+      "deadline": null,
+      "applyVerified": false,
+      "applyStatusUnknown": false,
+      "destIsEntry": false,
+      "prefecture": "",
+      "deliveryType": "",
+      "otherShops": []
+    },
+    {
+      "id": "157cffb8efacc943",
+      "title": "【予約】[新品ボックス]カードファイト!! ヴァンガード Divinez リリカルブースター リリカルモナステリオ 伝説のアイドル！【VG-DZ-LBT03】(1BOX=16パック) [2611/06]",
+      "url": "https://www.c-labo-online.jp/product/403957",
+      "sourceName": "カードラボ 新作予約",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
+      "publishedAtKnown": true,
+      "summary": "",
+      "ips": [
+        "lottery",
+        "vanguard"
+      ],
+      "intentTags": [
+        "予約"
+      ],
+      "score": 81.3,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "news",
+      "tier": "shop",
+      "destUrl": "https://www.c-labo-online.jp/product/403957",
+      "destLabel": "カードラボ",
+      "startsAt": null,
+      "deadline": null,
+      "applyVerified": false,
+      "applyStatusUnknown": false,
+      "destIsEntry": false,
+      "prefecture": "",
+      "deliveryType": "",
+      "otherShops": []
+    },
+    {
       "id": "8562ea23884fe4d5",
       "title": "【予約】[新品ボックス]ヴァイスシュヴァルツ ブースターパック 『新日本プロレス×AEW：Forbidden Door』(1BOX=10パック) [2701/15]",
       "url": "https://www.c-labo-online.jp/product/412836",
       "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -731,7 +701,7 @@
       "title": "【予約】[新品]ヴァイスシュヴァルツ トライアルデッキ 『新日本プロレス：Forbidden Door』[2701/15]",
       "url": "https://www.c-labo-online.jp/product/412835",
       "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -759,11 +729,75 @@
       "otherShops": []
     },
     {
+      "id": "fab813cf87ca7d09",
+      "title": "【予約】[新品]ヴァイスシュヴァルツ トライアルデッキ 『AEW：Forbidden Door』[2701/15]",
+      "url": "https://www.c-labo-online.jp/product/412834",
+      "sourceName": "カードラボ 新作予約",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
+      "publishedAtKnown": true,
+      "summary": "",
+      "ips": [
+        "lottery",
+        "weiss"
+      ],
+      "intentTags": [
+        "予約"
+      ],
+      "score": 81.3,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "news",
+      "tier": "shop",
+      "destUrl": "https://www.c-labo-online.jp/product/412834",
+      "destLabel": "カードラボ",
+      "startsAt": null,
+      "deadline": null,
+      "applyVerified": false,
+      "applyStatusUnknown": false,
+      "destIsEntry": false,
+      "prefecture": "",
+      "deliveryType": "",
+      "otherShops": []
+    },
+    {
+      "id": "088b97d4dfb80973",
+      "title": "【予約】[新品]デュエル・マスターズTCG ドリーム英雄譚デッキ ボルメテウスの書【DM26-BD1】 [2611/21]",
+      "url": "https://www.c-labo-online.jp/product/408615",
+      "sourceName": "カードラボ 新作予約",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
+      "publishedAtKnown": true,
+      "summary": "",
+      "ips": [
+        "lottery",
+        "duelmasters"
+      ],
+      "intentTags": [
+        "予約"
+      ],
+      "score": 81.3,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "news",
+      "tier": "shop",
+      "destUrl": "https://www.c-labo-online.jp/product/408615",
+      "destLabel": "カードラボ",
+      "startsAt": null,
+      "deadline": null,
+      "applyVerified": false,
+      "applyStatusUnknown": false,
+      "destIsEntry": false,
+      "prefecture": "",
+      "deliveryType": "",
+      "otherShops": []
+    },
+    {
       "id": "e66ed788ae96ddb1",
       "title": "【予約】[新品ボックス]デジモンカードゲーム ブースターパック IGNITION OF X【BT-27】(1BOX=24パック) [2612/05]",
       "url": "https://www.c-labo-online.jp/product/404515",
       "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -795,7 +829,7 @@
       "title": "【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ルビウスドラモン【ST-25】 [2612/05]",
       "url": "https://www.c-labo-online.jp/product/403865",
       "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -827,7 +861,7 @@
       "title": "【予約】[新品]デジモンカードゲーム スタートデッキ DIGIMON ALYSION ユキナモン【ST-26】 [2612/05]",
       "url": "https://www.c-labo-online.jp/product/403864",
       "sourceName": "カードラボ 新作予約",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -859,7 +893,7 @@
       "title": "[新品ボックス]デュエル・マスターズTCG 王道W 第4弾 終淵 〜LOVE&ABYSS〜【DM25-RP4】(1BOX=30パック) [再販/2609]",
       "url": "https://www.c-labo-online.jp/product/403975",
       "sourceName": "カードラボ 新着",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -887,75 +921,11 @@
       "otherShops": []
     },
     {
-      "id": "2b6433583a95d657",
-      "title": "[新品ボックス]デュエル・マスターズTCG エピソード4 パンドラ・ウォーズ【DM25-EX4】(1BOX=16パック) [再販/2609]",
-      "url": "https://www.c-labo-online.jp/product/403974",
-      "sourceName": "カードラボ 新着",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
-      "publishedAtKnown": true,
-      "summary": "",
-      "ips": [
-        "lottery",
-        "duelmasters"
-      ],
-      "intentTags": [
-        "再販"
-      ],
-      "score": 79,
-      "thumbnail": null,
-      "isRanked": false,
-      "rank": null,
-      "kind": "news",
-      "tier": "shop",
-      "destUrl": "https://www.c-labo-online.jp/product/403974",
-      "destLabel": "カードラボ",
-      "startsAt": null,
-      "deadline": null,
-      "applyVerified": false,
-      "applyStatusUnknown": false,
-      "destIsEntry": false,
-      "prefecture": "",
-      "deliveryType": "",
-      "otherShops": []
-    },
-    {
-      "id": "62862cb08ab8d06c",
-      "title": "[新品ボックス]デュエル・マスターズTCG 逆札篇 第1弾 逆転神VS切札竜【DM26-RP1】(1BOX=30パック) [再販/2609]",
-      "url": "https://www.c-labo-online.jp/product/403973",
-      "sourceName": "カードラボ 新着",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
-      "publishedAtKnown": true,
-      "summary": "",
-      "ips": [
-        "lottery",
-        "duelmasters"
-      ],
-      "intentTags": [
-        "再販"
-      ],
-      "score": 79,
-      "thumbnail": null,
-      "isRanked": false,
-      "rank": null,
-      "kind": "news",
-      "tier": "shop",
-      "destUrl": "https://www.c-labo-online.jp/product/403973",
-      "destLabel": "カードラボ",
-      "startsAt": null,
-      "deadline": null,
-      "applyVerified": false,
-      "applyStatusUnknown": false,
-      "destIsEntry": false,
-      "prefecture": "",
-      "deliveryType": "",
-      "otherShops": []
-    },
-    {
       "id": "d9dc11772a8cdee7",
       "title": "[新品ボックス]カードファイト!! ヴァンガード Divinez ブースターパック 『冥淵葬空』【VG-DZ-BT12】(1BOX=16パック) [再販/2608]",
       "url": "https://www.c-labo-online.jp/product/400221",
       "sourceName": "カードラボ 新着",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -987,7 +957,7 @@
       "title": "[新品ボックス]カードファイト!! ヴァンガード Divinez ブースターパック 『赫月ノ使者』【VG-DZ-BT14】(1BOX=16パック) [再販/2608]",
       "url": "https://www.c-labo-online.jp/product/400220",
       "sourceName": "カードラボ 新着",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -1019,7 +989,7 @@
       "title": "アイカツ！アンコール 入学セット【2次:2027年3月発送分】",
       "url": "https://p-bandai.jp/item/item-1000259810",
       "sourceName": "プレミアムバンダイ カードダス",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": false,
       "summary": "",
       "ips": [
@@ -1049,7 +1019,7 @@
       "title": "ONE PIECEカードゲーム リミテッドカードスリーブ スタンダードパープルシルバー【PBの日記念販売】",
       "url": "https://p-bandai.jp/item/item-1000259732",
       "sourceName": "プレミアムバンダイ カードダス",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": false,
       "summary": "",
       "ips": [
@@ -1079,7 +1049,7 @@
       "title": "ONE PIECEカードゲーム リミテッドカードスリーブ -Standard Blue Gold-【PBの日記念販売】",
       "url": "https://p-bandai.jp/item/item-1000259728",
       "sourceName": "プレミアムバンダイ カードダス",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": false,
       "summary": "",
       "ips": [
@@ -1105,11 +1075,41 @@
       "otherShops": []
     },
     {
+      "id": "376d94a969e92475",
+      "title": "ONE PIECEカードゲーム リミテッドカードスリーブ プレミアムマットvol.3 ジンベエ【PBの日記念販売】",
+      "url": "https://p-bandai.jp/item/item-1000259727",
+      "sourceName": "プレミアムバンダイ カードダス",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
+      "publishedAtKnown": false,
+      "summary": "",
+      "ips": [
+        "lottery",
+        "onepiece"
+      ],
+      "intentTags": [],
+      "score": 64.5,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "news",
+      "tier": "official",
+      "destUrl": "https://p-bandai.jp/item/item-1000259727",
+      "destLabel": "プレミアムバンダイ",
+      "startsAt": null,
+      "deadline": null,
+      "applyVerified": false,
+      "applyStatusUnknown": false,
+      "destIsEntry": false,
+      "prefecture": "",
+      "deliveryType": "",
+      "otherShops": []
+    },
+    {
       "id": "2f4fa2a4fc3b0202",
       "title": "ガンダムカードゲーム プレミアムカードコレクション ガンダムアッセンブルセット -機動戦士Gundam GQuuuuuuX- [PC02A]",
       "url": "https://p-bandai.jp/item/item-1000245747",
       "sourceName": "プレミアムバンダイ カードダス",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": false,
       "summary": "",
       "ips": [
@@ -1139,7 +1139,7 @@
       "title": "30th CELEBRATION BOX",
       "url": "https://livepocket.jp/e/sx0cg",
       "sourceName": "ポケカ抽選図鑑（抽選まとめ）",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -1210,7 +1210,7 @@
       "title": "ストームエメラルダ",
       "url": "https://cloud-pass.jp/pr/397e632fce5d960c23e8e64fc1b469dc84ac62602de39b53f241921de23c4ff0",
       "sourceName": "ポケカ抽選図鑑（抽選まとめ）",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -1249,7 +1249,7 @@
       "title": "MEGAドリームex",
       "url": "https://x.com/tsutaya_card_tk/status/2112455676542988755",
       "sourceName": "ポケカ抽選図鑑（抽選まとめ）",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -1279,7 +1279,7 @@
       "title": "ブラックボルト・ホワイトフレアカードファイルセット",
       "url": "https://x.com/tsutaya_card_tk/status/2112455422234038488",
       "sourceName": "ポケカ抽選図鑑（抽選まとめ）",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -1309,7 +1309,7 @@
       "title": "インフェルノX",
       "url": "https://x.com/t_kinshi71624/status/2111749306017583539",
       "sourceName": "ポケカ抽選図鑑（抽選まとめ）",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -1339,7 +1339,7 @@
       "title": "プレミアムデッキセット エーフィ・ブラッキー",
       "url": "https://x.com/bookoff_kobuchi/status/2112110241869681082",
       "sourceName": "ポケカ抽選図鑑（抽選まとめ）",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -1369,7 +1369,7 @@
       "title": "30th CELEBRATION カードセット9種",
       "url": "https://x.com/westbeachgym/status/2108563082519912702",
       "sourceName": "ポケカ抽選図鑑（抽選まとめ）",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -1399,7 +1399,7 @@
       "title": "30th CELEBRATION カードセット 初代御三家 ヒトカゲ・ゼニガメ・フシギダネ",
       "url": "https://x.com/westbeachgym/status/2112505213886337446",
       "sourceName": "ポケカ抽選図鑑（抽選まとめ）",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -1429,7 +1429,7 @@
       "title": "テラスタルフェスex",
       "url": "https://x.com/ttchiratsuka/status/2109471461195047050",
       "sourceName": "ポケカ抽選図鑑（抽選まとめ）",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -1459,7 +1459,7 @@
       "title": "歴戦のボスGジャン",
       "url": "https://www.suntory.co.jp/softdrink/news/pr/article/2026/SBF1724.html",
       "sourceName": "ポケカ抽選図鑑（抽選まとめ）",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -1489,7 +1489,7 @@
       "title": "1025匹のポケモンから選べる！君に決めた！ボスジャン",
       "url": "https://mobile.suntory.co.jp/cpn/softdrink/boss/20260428",
       "sourceName": "ポケカ抽選図鑑（抽選まとめ）",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -1519,7 +1519,7 @@
       "title": "[書籍]遊☆戯☆王OCGストラクチャーズ 12 [同梱カード 遊☆戯☆王OCG ★「道化の一座 ハット」] [26年8月]",
       "url": "https://www.c-labo-online.jp/product/398305",
       "sourceName": "カードラボ 新着",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -1548,7 +1548,7 @@
       "title": "[新品ボックス]ホロライブ hololive OFFICIAL CARD GAME ブースターパック第9弾 ボリュームヴォルテックス(1BOX=12パック) [2609/19]",
       "url": "https://www.c-labo-online.jp/product/395319",
       "sourceName": "カードラボ 新着",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -1577,7 +1577,7 @@
       "title": "バンダイ ガンダムカードゲーム スタートデッキ SDガンダムジージェネレーション Generation Pulese[ST10] ｶﾞﾝﾀﾞﾑTCGｽﾀ-ﾄﾃﾞﾂｷST10",
       "url": "https://www.edion.com/detail.html?p_cd=00086070874",
       "sourceName": "エディオン トレーディングカード",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -1606,7 +1606,7 @@
       "title": "バンダイ ガンダムカードゲーム ブースターパック Freedom Ascension[GD05] ECｶﾞﾝﾀﾞﾑTCGﾌﾞ-ｽﾀ-GD05",
       "url": "https://www.edion.com/detail.html?p_cd=00086142250",
       "sourceName": "エディオン トレーディングカード",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
+      "publishedAt": "2026-10-21T06:29:59.157Z",
       "publishedAtKnown": true,
       "summary": "",
       "ips": [
@@ -1631,35 +1631,6 @@
       "otherShops": []
     },
     {
-      "id": "66969e37d9284a8b",
-      "title": "ブシロード hololive OFFICIAL CARD GAME ブースターパック「アヤカシヴァーミリオン」 ECﾎﾛﾗｲﾌﾞCARDﾌﾞ-ｽﾀ-ｱﾔｶｼ",
-      "url": "https://www.edion.com/detail.html?p_cd=00085100671",
-      "sourceName": "エディオン トレーディングカード",
-      "publishedAt": "2026-10-21T01:26:39.550Z",
-      "publishedAtKnown": true,
-      "summary": "",
-      "ips": [
-        "hololive"
-      ],
-      "intentTags": [],
-      "score": 55.3,
-      "thumbnail": null,
-      "isRanked": false,
-      "rank": null,
-      "kind": "news",
-      "tier": "shop",
-      "destUrl": "https://www.edion.com/detail.html?p_cd=00085100671",
-      "destLabel": "エディオン",
-      "startsAt": null,
-      "deadline": null,
-      "applyVerified": false,
-      "applyStatusUnknown": false,
-      "destIsEntry": false,
-      "prefecture": "",
-      "deliveryType": "",
-      "otherShops": []
-    },
-    {
       "id": "b31d351021870453",
       "title": "【フュージョンワールド情報】Vジャンプ1月特大号付録カード「孫悟飯：SH」のスキルを公開！",
       "url": "https://dragon-ball-official.com/news/01_4513.html",
@@ -1671,7 +1642,7 @@
         "dragonball"
       ],
       "intentTags": [],
-      "score": 49.68,
+      "score": 39.79,
       "thumbnail": null,
       "isRanked": false,
       "rank": null,
@@ -1703,7 +1674,7 @@
       "intentTags": [
         "発売"
       ],
-      "score": 30.11,
+      "score": 27.77,
       "thumbnail": null,
       "isRanked": false,
       "rank": null,
@@ -1713,6 +1684,35 @@
       "destLabel": null,
       "startsAt": null,
       "deadline": null,
+      "applyVerified": false,
+      "applyStatusUnknown": false,
+      "destIsEntry": false,
+      "prefecture": "",
+      "deliveryType": "",
+      "otherShops": []
+    },
+    {
+      "id": "70c263d178e5abbc",
+      "title": "「スペシャルデッキセットMEGA メガオーダイル・メガカイリュー・メガゲンガー」が11月13日（金）に発売！",
+      "url": "https://www.pokemon-card.com/products/mega/mg.html",
+      "sourceName": "ポケモンカード公式",
+      "publishedAt": "2026-10-15T15:00:00.000Z",
+      "publishedAtKnown": true,
+      "summary": "",
+      "ips": [
+        "pokemon"
+      ],
+      "intentTags": [],
+      "score": 24.14,
+      "thumbnail": null,
+      "isRanked": false,
+      "rank": null,
+      "kind": "official",
+      "tier": "official",
+      "destUrl": "https://livepocket.jp/e/3v6ni",
+      "destLabel": "竜星のPAO",
+      "startsAt": null,
+      "deadline": "2026-10-25T14:59:00.000Z",
       "applyVerified": false,
       "applyStatusUnknown": false,
       "destIsEntry": false,
